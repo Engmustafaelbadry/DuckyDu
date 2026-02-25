@@ -1,0 +1,14 @@
+# Add these lines to /boot/firmware/config.txt for 800x480 HDMI panel (landscape).
+# Keep existing lines; append only if not already present.
+
+hdmi_force_hotplug=1
+hdmi_group=2
+hdmi_mode=87
+hdmi_cvt=800 480 60 6 0 0 0
+
+# Touch controller (XPT2046/ADS7846 style). Pin and calibration values may vary.
+# Start with this, then tune using touch-calibration-notes.md:
+# dtoverlay=ads7846,penirq=25,swapxy=0,xmin=200,xmax=3900,ymin=200,ymax=3900
+
+# If your touch is rotated/mirrored, adjust:
+# swapxy=1 or invert min/max pairs.
