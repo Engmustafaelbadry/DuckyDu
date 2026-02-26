@@ -33,6 +33,7 @@ function SelectOsPage() {
       </aside>
 
       <section className="info-grid" aria-label="Info grid">
+        <h1 className="page-title info-title">SELECT OS</h1>
         <div className="info-logo-wrap">
           {logoAvailable ? (
             <img
@@ -51,7 +52,6 @@ function SelectOsPage() {
       </section>
 
       <section className="main-grid" aria-label="Main grid">
-        <h1 className="page-title">SELECT OS</h1>
         <div className="os-buttons">
           {osOptions.map((option) => (
             <button
