@@ -1,8 +1,8 @@
 :root {
   --bg: #000000;
-  --panel: #0d0d0d;
+  --panel: #000000;
   --ink: #ffffff;
-  --muted: #b8b8b8;
+  --muted: #ffffff;
   --line: #ffffff;
   --shadow: #3a3a3a;
   --accent: #ffffff;
@@ -51,7 +51,7 @@ body {
 .navigation-grid,
 .info-grid,
 .main-grid {
-  background: #080808;
+  background: #000000;
 }
 
 .navigation-grid {
@@ -65,17 +65,16 @@ body {
   width: 100%;
   min-height: 88px;
   border: 0;
-  background: #111111;
+  background: #000000;
   color: var(--ink);
   font-size: 38px;
   cursor: pointer;
-  box-shadow: 4px 4px 0 var(--shadow);
-  transition: transform 70ms steps(2, end), box-shadow 70ms steps(2, end);
+  box-shadow: none;
+  transition: transform 70ms steps(2, end);
 }
 
 .nav-icon-btn:active {
   transform: translate(3px, 3px);
-  box-shadow: 1px 1px 0 var(--shadow);
 }
 
 .info-grid {
@@ -137,7 +136,7 @@ body {
   width: 90%;
   min-height: 66px;
   border: 2px solid var(--line);
-  background: #111111;
+  background: #000000;
   color: var(--ink);
   font-family: inherit;
   font-size: 36px;
