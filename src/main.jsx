@@ -8,10 +8,15 @@ const navigationItems = [
   { id: "home", label: "Home", icon: "ti ti-home" },
   { id: "refresh", label: "Refresh", icon: "ti ti-refresh" },
   { id: "back", label: "Back", icon: "ti ti-arrow-back-up" },
-  { id: "cancel", label: "Cancel", icon: "ti ti-x" }
+  { id: "settings", label: "Settings", icon: "ti ti-settings" }
 ];
 
-const osOptions = ["Android", "iOS", "Harmony", "Other OS"];
+const osOptions = [
+  { label: "Android", icon: "ti ti-brand-android" },
+  { label: "iOS", icon: "ti ti-brand-apple" },
+  { label: "Harmony", icon: "ti ti-wave-sine" },
+  { label: "Other OS", icon: "ti ti-dots" }
+];
 
 function SelectOsPage() {
   const [selectedOs, setSelectedOs] = useState("");
@@ -55,11 +60,14 @@ function SelectOsPage() {
         <div className="os-buttons">
           {osOptions.map((option) => (
             <button
-              key={option}
-              className={`os-btn${selectedOs === option ? " is-selected" : ""}`}
-              onClick={() => setSelectedOs(option)}
+              key={option.label}
+              className={`os-btn${selectedOs === option.label ? " is-selected" : ""}`}
+              onClick={() => setSelectedOs(option.label)}
             >
-              {option}
+              <span className="os-btn-icon" aria-hidden="true">
+                <i className={option.icon} />
+              </span>
+              <span>{option.label}</span>
             </button>
           ))}
         </div>
