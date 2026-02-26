@@ -15,7 +15,7 @@ const osOptions = [
   { label: "Android", icon: "ti ti-brand-android" },
   { label: "iOS", icon: "ti ti-brand-apple" },
   { label: "Harmony", icon: "ti ti-wave-sine" },
-  { label: "Other OS", icon: "ti ti-dots" }
+  { label: "Other OS", icon: "ti ti-device-laptop" }
 ];
 
 function SelectOsPage() {
@@ -37,39 +37,45 @@ function SelectOsPage() {
         ))}
       </aside>
 
-      <section className="info-grid" aria-label="Info grid">
-        <h1 className="page-title info-title">SELECT OS</h1>
-        <div className="info-logo-wrap">
-          {logoAvailable ? (
-            <img
-              src="./Duckydu.png"
-              alt="DuckyDu logo"
-              className="info-logo"
-              onError={() => setLogoAvailable(false)}
-            />
-          ) : (
-            <div className="logo-fallback" aria-hidden="true">
-              DD
-            </div>
-          )}
+      <section className="content-panel" aria-label="App content">
+        <div className="content-header">
+          <div className="brand-glass">
+            {logoAvailable ? (
+              <img
+                src="./Duckydu.png"
+                alt="DuckyDu logo"
+                className="brand-logo"
+                onError={() => setLogoAvailable(false)}
+              />
+            ) : (
+              <div className="logo-fallback" aria-hidden="true">
+                DD
+              </div>
+            )}
+          </div>
+          <h1 className="page-title">SELECT OS</h1>
+          <p className="instructions-text">{instructionText}</p>
         </div>
-        <p className="instructions-text">{instructionText}</p>
-      </section>
 
-      <section className="main-grid" aria-label="Main grid">
-        <div className="os-buttons">
+        <div className="icon-grid" aria-label="Operating system options">
           {osOptions.map((option) => (
             <button
               key={option.label}
-              className={`os-btn${selectedOs === option.label ? " is-selected" : ""}`}
+              className={`icon-card${selectedOs === option.label ? " is-selected" : ""}`}
               onClick={() => setSelectedOs(option.label)}
             >
-              <span className="os-btn-icon" aria-hidden="true">
+              <span className="icon-glass" aria-hidden="true">
                 <i className={option.icon} />
               </span>
-              <span>{option.label}</span>
+              <span className="icon-label">{option.label}</span>
             </button>
           ))}
+        </div>
+
+        <div className="page-dots" aria-label="Pagination">
+          <span className="dot is-active" />
+          <span className="dot" />
+          <span className="dot" />
         </div>
       </section>
     </main>
