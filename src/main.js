@@ -1,16 +1,17 @@
 import "./style.css";
+import "@tabler/icons-webfont/dist/tabler-icons.min.css";
 
 const apps = [
-  { id: "backup", name: "Backup", code: "BK" },
-  { id: "cloud", name: "Cloud", code: "CL" },
-  { id: "apps", name: "App Install", code: "AP" },
-  { id: "repair", name: "Repair", code: "RP" },
-  { id: "flash", name: "Flash Tool", code: "FL" },
-  { id: "diagnostics", name: "Diagnostics", code: "DG" },
-  { id: "device-info", name: "Device Info", code: "DI" },
-  { id: "file-sync", name: "File Sync", code: "FS" },
-  { id: "network", name: "Network", code: "NW" },
-  { id: "power", name: "Power", code: "PW" }
+  { id: "backup", name: "Backup", icon: "ti ti-database-export" },
+  { id: "cloud", name: "Cloud", icon: "ti ti-cloud-up" },
+  { id: "apps", name: "App Install", icon: "ti ti-apps" },
+  { id: "repair", name: "Repair", icon: "ti ti-tool" },
+  { id: "flash", name: "Flash Tool", icon: "ti ti-bolt" },
+  { id: "diagnostics", name: "Diagnostics", icon: "ti ti-stethoscope" },
+  { id: "device-info", name: "Device Info", icon: "ti ti-device-mobile" },
+  { id: "file-sync", name: "File Sync", icon: "ti ti-files" },
+  { id: "network", name: "Network", icon: "ti ti-wifi" },
+  { id: "power", name: "Power", icon: "ti ti-power" }
 ];
 
 const appRoot = document.querySelector("#app");
@@ -44,7 +45,7 @@ function renderApps() {
     .map(
       (app) => `
       <button class="menu-item" data-app-id="${app.id}" aria-label="${app.name}">
-        <span class="menu-icon">${app.code}</span>
+        <span class="menu-icon"><i class="${app.icon}" aria-hidden="true"></i></span>
         <span class="menu-label">${app.name}</span>
       </button>
     `
