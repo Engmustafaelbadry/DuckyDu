@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 :root {
+  --kiosk-width: 800px;
+  --kiosk-height: 480px;
+  --kiosk-scale: 1;
+
   --background: hsl(0 0% 100%);
   --foreground: hsl(0 0% 4%);
   --muted: hsl(48 33% 96%);
@@ -53,16 +57,26 @@ body {
   display: grid;
   place-items: center;
   padding: 12px;
+  overflow: hidden;
+}
+
+.kiosk-viewport {
+  width: calc(var(--kiosk-width) * var(--kiosk-scale));
+  height: calc(var(--kiosk-height) * var(--kiosk-scale));
+  display: grid;
+  place-items: center;
 }
 
 .app-shell {
-  width: min(100vw, 820px);
-  height: min(100vh, 500px);
+  width: var(--kiosk-width);
+  height: var(--kiosk-height);
   border: 1px solid var(--border);
   border-radius: 18px;
   background: linear-gradient(180deg, hsl(0 0% 100%), hsl(48 70% 98%));
   box-shadow: 0 24px 80px hsl(48 80% 40% / 0.2);
   overflow: hidden;
+  transform: scale(var(--kiosk-scale));
+  transform-origin: center center;
 }
 
 .calibration-root {
@@ -261,9 +275,12 @@ body {
     padding: 0;
   }
 
-  .app-shell {
+  .kiosk-viewport {
     width: 100vw;
     height: 100vh;
+  }
+
+  .app-shell {
     border-radius: 0;
     border: 0;
   }

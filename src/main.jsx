@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import "./style.css";
 
-const CALIBRATION_MODE = true;
+const CALIBRATION_MODE = false;
 
 const actions = [
   { id: "settings", icon: Settings, label: "Settings", variant: "secondary" },
@@ -285,10 +285,12 @@ function App() {
 
   return (
     <main className="app-root">
-      <section className="app-shell">
-        <div className={`screen-layer phase-${transition.phase} dir-${transition.direction > 0 ? "next" : "back"}`}>
-          {screen}
-        </div>
+      <section className="kiosk-viewport">
+        <section className="app-shell">
+          <div className={`screen-layer phase-${transition.phase} dir-${transition.direction > 0 ? "next" : "back"}`}>
+            {screen}
+          </div>
+        </section>
       </section>
     </main>
   );
