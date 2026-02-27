@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
-import "@fontsource/jersey-10";
+import "@fontsource/manrope/400.css";
+import "@fontsource/manrope/500.css";
+import "@fontsource/manrope/600.css";
 import "@tabler/icons-webfont/dist/tabler-icons.min.css";
 import "./style.css";
 

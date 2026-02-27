@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@fontsource/jersey-10": "^5.2.8",
+    "@fontsource/manrope": "^5.2.8",
     "@tabler/icons-webfont": "^3.37.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
