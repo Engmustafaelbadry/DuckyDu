@@ -1,15 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { PixelIcon } from "@2hoch1/pixel-icon-library-react";
+import { Button } from "@/components/ui/pixelact-ui/button";
 import "font-misaki/misaki_gothic.css";
 import "./style.css";
 
 const quickActions = [
-  { id: "settings", icon: "cog-solid", label: "Settings" },
-  { id: "reboot", icon: "refresh-solid", label: "Reboot" },
-  { id: "shutdown", icon: "window-close-solid", label: "Shutdown" },
-  { id: "profile", icon: "user-solid", label: "Profile" },
-  { id: "language", icon: "translate-solid", label: "Language" }
+  { id: "settings", icon: "cog-solid", label: "Settings", variant: "secondary" },
+  { id: "reboot", icon: "refresh-solid", label: "Reboot", variant: "warning" },
+  { id: "shutdown", icon: "window-close-solid", label: "Shutdown", variant: "destructive" },
+  { id: "profile", icon: "user-solid", label: "Profile", variant: "secondary" },
+  { id: "language", icon: "translate-solid", label: "Language", variant: "secondary" }
 ];
 
 function PxIcon({ name, size = 18 }) {
@@ -20,10 +21,10 @@ function ScreenFrame({ title, subtitle, onBack, children }) {
   return (
     <section className="screen-frame" aria-label={title}>
       <header className="screen-header">
-        <button className="pxa-button pxa-back" onClick={onBack} aria-label="Go back">
+        <Button variant="secondary" size="sm" className="back-button" onClick={onBack}>
           <PxIcon name="arrow-left-solid" />
           Back
-        </button>
+        </Button>
         <div className="screen-heading">
           <h2>{title}</h2>
           {subtitle ? <p>{subtitle}</p> : null}
@@ -39,19 +40,18 @@ function HomeScreen({ onNavigate }) {
     <section className="home-screen" aria-label="DuckyDu Home">
       <div className="brand-block">
         <h1>DuckyDu</h1>
-        <p>Smart kiosk control panel</p>
       </div>
 
-      <button className="pxa-button pxa-main" onClick={() => onNavigate("work")}>
+      <Button size="lg" className="work-button" onClick={() => onNavigate("work")}>
         GET TO WORK
-      </button>
+      </Button>
 
       <div className="quick-grid" aria-label="Quick actions">
         {quickActions.map((item) => (
-          <button key={item.id} className="pxa-button pxa-tile" onClick={() => onNavigate(item.id)}>
-            <PxIcon name={item.icon} size={20} />
+          <Button key={item.id} variant={item.variant} className="tile-button" onClick={() => onNavigate(item.id)}>
+            <PxIcon name={item.icon} size={16} />
             {item.label}
-          </button>
+          </Button>
         ))}
       </div>
     </section>
@@ -61,19 +61,19 @@ function HomeScreen({ onNavigate }) {
 function WorkScreen({ onBack }) {
   return (
     <ScreenFrame title="Work Mode" subtitle="Select a flow to begin" onBack={onBack}>
-      <div className="pixel-grid">
-        <button className="pxa-card">
-          <PxIcon name="bolt-solid" size={20} />
+      <div className="card-grid">
+        <Button variant="secondary" className="card-button">
+          <PxIcon name="bolt-solid" />
           Quick Start
-        </button>
-        <button className="pxa-card">
-          <PxIcon name="analytics-solid" size={20} />
+        </Button>
+        <Button variant="secondary" className="card-button">
+          <PxIcon name="analytics-solid" />
           Diagnostics
-        </button>
-        <button className="pxa-card">
-          <PxIcon name="clock-solid" size={20} />
+        </Button>
+        <Button variant="secondary" className="card-button">
+          <PxIcon name="clock-solid" />
           Timed Routine
-        </button>
+        </Button>
       </div>
     </ScreenFrame>
   );
@@ -82,38 +82,27 @@ function WorkScreen({ onBack }) {
 function SettingsScreen({ onBack }) {
   return (
     <ScreenFrame title="Settings" subtitle="Display, sound, and device behavior" onBack={onBack}>
-      <div className="settings-list">
-        <div className="list-row">
-          <span>Display Brightness</span>
-          <span>80%</span>
-        </div>
-        <div className="list-row">
-          <span>Touch Sound</span>
-          <span>Enabled</span>
-        </div>
-        <div className="list-row">
-          <span>Animation Quality</span>
-          <span>High</span>
-        </div>
+      <div className="settings-grid">
+        <Button variant="secondary" className="setting-item">Display Brightness 80%</Button>
+        <Button variant="secondary" className="setting-item">Touch Sound Enabled</Button>
+        <Button variant="secondary" className="setting-item">Animation Quality High</Button>
       </div>
     </ScreenFrame>
   );
 }
 
 function PowerScreen({ mode, onBack }) {
-  const label = mode === "reboot" ? "Reboot Device" : "Shutdown Device";
-  const hint = mode === "reboot" ? "Restarts Raspberry Pi 5 now" : "Powers off Raspberry Pi 5 safely";
-
   return (
-    <ScreenFrame title={label} subtitle={hint} onBack={onBack}>
-      <div className="power-panel">
-        <p>Confirm action before proceeding.</p>
-        <div className="power-actions">
-          <button className="pxa-button pxa-main">{mode === "reboot" ? "Confirm Reboot" : "Confirm Shutdown"}</button>
-          <button className="pxa-button" onClick={onBack}>
-            Cancel
-          </button>
-        </div>
+    <ScreenFrame
+      title={mode === "reboot" ? "Reboot Device" : "Shutdown Device"}
+      subtitle="Confirm before running this action"
+      onBack={onBack}
+    >
+      <div className="power-grid">
+        <Button variant={mode === "reboot" ? "warning" : "destructive"} className="work-button">
+          {mode === "reboot" ? "Confirm Reboot" : "Confirm Shutdown"}
+        </Button>
+        <Button variant="secondary" onClick={onBack}>Cancel</Button>
       </div>
     </ScreenFrame>
   );
@@ -122,12 +111,9 @@ function PowerScreen({ mode, onBack }) {
 function ProfileScreen({ onBack }) {
   return (
     <ScreenFrame title="Profile" subtitle="Operator identity and status" onBack={onBack}>
-      <div className="profile-card">
-        <div className="avatar">DD</div>
-        <div>
-          <h3>DuckyDu Operator</h3>
-          <p>Connected and ready</p>
-        </div>
+      <div className="profile-box">
+        <span className="avatar-box">DD</span>
+        <span>DuckyDu Operator</span>
       </div>
     </ScreenFrame>
   );
@@ -136,11 +122,11 @@ function ProfileScreen({ onBack }) {
 function LanguageScreen({ onBack }) {
   return (
     <ScreenFrame title="Language" subtitle="Choose interface language" onBack={onBack}>
-      <div className="language-grid">
-        <button className="pxa-button pxa-card is-active">English</button>
-        <button className="pxa-button pxa-card lang-ja">日本語</button>
-        <button className="pxa-button pxa-card">Arabic</button>
-        <button className="pxa-button pxa-card">French</button>
+      <div className="card-grid">
+        <Button className="card-button">English</Button>
+        <Button variant="secondary" className="card-button lang-ja">日本語</Button>
+        <Button variant="secondary" className="card-button">Arabic</Button>
+        <Button variant="secondary" className="card-button">French</Button>
       </div>
     </ScreenFrame>
   );
@@ -157,28 +143,19 @@ function App() {
   const route = routeStack[routeStack.length - 1];
 
   function navigate(next) {
-    if (next === route || transition.phase !== "idle") return;
+    if (transition.phase !== "idle") return;
     setTransition({ phase: "out", next, direction: 1, action: "push" });
   }
 
   function goBack() {
     if (routeStack.length <= 1 || transition.phase !== "idle") return;
-    setTransition({
-      phase: "out",
-      next: routeStack[routeStack.length - 2],
-      direction: -1,
-      action: "pop"
-    });
+    setTransition({ phase: "out", next: routeStack[routeStack.length - 2], direction: -1, action: "pop" });
   }
 
   useEffect(() => {
     if (transition.phase === "out") {
       const timer = setTimeout(() => {
-        setRouteStack((prev) => {
-          if (transition.action === "push") return [...prev, transition.next];
-          if (prev.length <= 1) return prev;
-          return prev.slice(0, -1);
-        });
+        setRouteStack((prev) => (transition.action === "push" ? [...prev, transition.next] : prev.slice(0, -1)));
         setTransition((prev) => ({ ...prev, phase: "in" }));
       }, 180);
       return () => clearTimeout(timer);
@@ -224,7 +201,7 @@ function App() {
   }, [route]);
 
   return (
-    <main className="kiosk-root">
+    <main className="kiosk-root dark">
       <div className="kiosk-shell">
         <div className={`screen-layer phase-${transition.phase} dir-${transition.direction > 0 ? "next" : "back"}`}>
           {screen}
