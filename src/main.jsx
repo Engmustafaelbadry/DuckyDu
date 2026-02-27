@@ -1,97 +1,223 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
-import "@fontsource/manrope/400.css";
-import "@fontsource/manrope/500.css";
-import "@fontsource/manrope/600.css";
+import "@fontsource/montserrat/500.css";
+import "@fontsource/montserrat/700.css";
 import "@tabler/icons-webfont/dist/tabler-icons.min.css";
 import "./style.css";
 
-const navigationItems = [
-  { id: "home", label: "Home", icon: "ti ti-home" },
-  { id: "refresh", label: "Refresh", icon: "ti ti-refresh" },
-  { id: "back", label: "Back", icon: "ti ti-arrow-back-up" },
-  { id: "settings", label: "Settings", icon: "ti ti-settings" }
+const routeDepth = {
+  home: 0,
+  work: 1,
+  settings: 1,
+  reboot: 1,
+  shutdown: 1,
+  profile: 1,
+  language: 1
+};
+
+const quickActions = [
+  { id: "settings", icon: "ti ti-settings", label: "Settings" },
+  { id: "reboot", icon: "ti ti-rotate-clockwise-2", label: "Reboot" },
+  { id: "shutdown", icon: "ti ti-power", label: "Shutdown" },
+  { id: "profile", icon: "ti ti-user-circle", label: "Profile" },
+  { id: "language", icon: "ti ti-language", label: "Language" }
 ];
 
-const osOptions = [
-  { label: "Android", icon: "ti ti-brand-android" },
-  { label: "iOS", icon: "ti ti-brand-apple" },
-  { label: "Harmony", icon: "ti ti-wave-sine" },
-  { label: "Other OS", icon: "ti ti-device-laptop" }
-];
+function ScreenFrame({ title, subtitle, onBack, children }) {
+  return (
+    <section className="screen-frame" aria-label={title}>
+      <header className="screen-header">
+        <button className="pxa-button pxa-back" onClick={onBack} aria-label="Go back">
+          <i className="ti ti-arrow-left" aria-hidden="true" />
+          Back
+        </button>
+        <div className="screen-heading">
+          <h2>{title}</h2>
+          {subtitle ? <p>{subtitle}</p> : null}
+        </div>
+      </header>
+      <div className="screen-content">{children}</div>
+    </section>
+  );
+}
 
-function SelectOsPage() {
-  const testScreens = [1, 2, 3, 4];
-  const [selectedByScreen, setSelectedByScreen] = useState({});
-  const [logoAvailable, setLogoAvailable] = useState(true);
+function HomeScreen({ onNavigate }) {
+  return (
+    <section className="home-screen" aria-label="DuckyDu Home">
+      <div className="brand-block">
+        <h1>DuckyDu</h1>
+        <p>Smart kiosk control panel</p>
+      </div>
 
-  function getInstructionText(screenId) {
-    const selectedOs = selectedByScreen[screenId];
-    if (!selectedOs) return `Scroll test screen ${screenId}. Select OS and swipe to test refresh rate.`;
-    return `Screen ${screenId}: ${selectedOs} selected. Keep scrolling to stress-test animation smoothness.`;
-  }
+      <button className="pxa-button pxa-main" onClick={() => onNavigate("work")}>
+        GET TO WORK
+      </button>
 
-  function onSelectOs(screenId, label) {
-    setSelectedByScreen((prev) => ({ ...prev, [screenId]: label }));
-  }
+      <div className="quick-grid" aria-label="Quick actions">
+        {quickActions.map((item) => (
+          <button key={item.id} className="pxa-button pxa-tile" onClick={() => onNavigate(item.id)}>
+            <i className={item.icon} aria-hidden="true" />
+            {item.label}
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function WorkScreen({ onBack }) {
+  return (
+    <ScreenFrame title="Work Mode" subtitle="Select a flow to begin" onBack={onBack}>
+      <div className="pixel-grid">
+        <button className="pxa-card">
+          <i className="ti ti-bolt" aria-hidden="true" />
+          Quick Start
+        </button>
+        <button className="pxa-card">
+          <i className="ti ti-device-analytics" aria-hidden="true" />
+          Diagnostics
+        </button>
+        <button className="pxa-card">
+          <i className="ti ti-clock-play" aria-hidden="true" />
+          Timed Routine
+        </button>
+      </div>
+    </ScreenFrame>
+  );
+}
+
+function SettingsScreen({ onBack }) {
+  return (
+    <ScreenFrame title="Settings" subtitle="Display, sound, and device behavior" onBack={onBack}>
+      <div className="settings-list">
+        <div className="list-row">
+          <span>Display Brightness</span>
+          <span>80%</span>
+        </div>
+        <div className="list-row">
+          <span>Touch Sound</span>
+          <span>Enabled</span>
+        </div>
+        <div className="list-row">
+          <span>Animation Quality</span>
+          <span>High</span>
+        </div>
+      </div>
+    </ScreenFrame>
+  );
+}
+
+function PowerScreen({ mode, onBack }) {
+  const label = mode === "reboot" ? "Reboot Device" : "Shutdown Device";
+  const hint = mode === "reboot" ? "Restarts Raspberry Pi 5 now" : "Powers off Raspberry Pi 5 safely";
 
   return (
-    <div className="scroll-test-container" aria-label="Scroll animation test screens">
-      {testScreens.map((screenId) => (
-        <main className="device-shell" aria-label={`Select OS screen ${screenId}`} key={screenId}>
-          <aside className="navigation-grid" aria-label="Navigation grid">
-            {navigationItems.map((item) => (
-              <button key={item.id} className="nav-icon-btn" aria-label={item.label}>
-                <i className={item.icon} aria-hidden="true" />
-              </button>
-            ))}
-          </aside>
+    <ScreenFrame title={label} subtitle={hint} onBack={onBack}>
+      <div className="power-panel">
+        <p>Confirm action before proceeding.</p>
+        <div className="power-actions">
+          <button className="pxa-button pxa-main">{mode === "reboot" ? "Confirm Reboot" : "Confirm Shutdown"}</button>
+          <button className="pxa-button" onClick={onBack}>
+            Cancel
+          </button>
+        </div>
+      </div>
+    </ScreenFrame>
+  );
+}
 
-          <section className="content-panel" aria-label="App content">
-            <div className="content-header">
-              <div className="brand-glass">
-                {logoAvailable ? (
-                  <img
-                    src="./Duckydu.png"
-                    alt="DuckyDu logo"
-                    className="brand-logo"
-                    onError={() => setLogoAvailable(false)}
-                  />
-                ) : (
-                  <div className="logo-fallback" aria-hidden="true">
-                    DD
-                  </div>
-                )}
-              </div>
-              <h1 className="page-title">SELECT OS</h1>
-              <p className="instructions-text">{getInstructionText(screenId)}</p>
-            </div>
+function ProfileScreen({ onBack }) {
+  return (
+    <ScreenFrame title="Profile" subtitle="Operator identity and status" onBack={onBack}>
+      <div className="profile-card">
+        <div className="avatar">DD</div>
+        <div>
+          <h3>DuckyDu Operator</h3>
+          <p>Connected and ready</p>
+        </div>
+      </div>
+    </ScreenFrame>
+  );
+}
 
-            <div className="icon-grid" aria-label="Operating system options">
-              {osOptions.map((option) => (
-                <button
-                  key={option.label}
-                  className={`icon-card${selectedByScreen[screenId] === option.label ? " is-selected" : ""}`}
-                  onClick={() => onSelectOs(screenId, option.label)}
-                >
-                  <span className="icon-glass" aria-hidden="true">
-                    <i className={option.icon} />
-                  </span>
-                  <span className="icon-label">{option.label}</span>
-                </button>
-              ))}
-            </div>
+function LanguageScreen({ onBack }) {
+  return (
+    <ScreenFrame title="Language" subtitle="Choose interface language" onBack={onBack}>
+      <div className="language-grid">
+        <button className="pxa-button pxa-card is-active">English</button>
+        <button className="pxa-button pxa-card">Arabic</button>
+        <button className="pxa-button pxa-card">French</button>
+        <button className="pxa-button pxa-card">Spanish</button>
+      </div>
+    </ScreenFrame>
+  );
+}
 
-            <div className="page-dots" aria-label="Pagination">
-              {testScreens.map((dot) => (
-                <span key={dot} className={`dot${dot === screenId ? " is-active" : ""}`} />
-              ))}
-            </div>
-          </section>
-        </main>
-      ))}
+function MotionOverlay() {
+  return (
+    <div className="motion-overlay" aria-hidden="true">
+      <div className="motion-slot lottie-slot">Lottie Slot</div>
+      <div className="motion-slot ae-slot">AE Icon Slot</div>
     </div>
   );
 }
 
-createRoot(document.querySelector("#app")).render(<SelectOsPage />);
+function App() {
+  const [route, setRoute] = useState("home");
+  const [transition, setTransition] = useState({ phase: "idle", next: null, direction: 1 });
+
+  function navigate(next) {
+    if (next === route || transition.phase !== "idle") return;
+    const direction = (routeDepth[next] ?? 1) >= (routeDepth[route] ?? 1) ? 1 : -1;
+    setTransition({ phase: "out", next, direction });
+  }
+
+  useEffect(() => {
+    if (transition.phase === "out") {
+      const timer = setTimeout(() => {
+        setRoute(transition.next);
+        setTransition((prev) => ({ ...prev, phase: "in" }));
+      }, 170);
+      return () => clearTimeout(timer);
+    }
+
+    if (transition.phase === "in") {
+      const timer = setTimeout(() => {
+        setTransition({ phase: "idle", next: null, direction: 1 });
+      }, 260);
+      return () => clearTimeout(timer);
+    }
+  }, [transition]);
+
+  const screen = useMemo(() => {
+    switch (route) {
+      case "work":
+        return <WorkScreen onBack={() => navigate("home")} />;
+      case "settings":
+        return <SettingsScreen onBack={() => navigate("home")} />;
+      case "reboot":
+        return <PowerScreen mode="reboot" onBack={() => navigate("home")} />;
+      case "shutdown":
+        return <PowerScreen mode="shutdown" onBack={() => navigate("home")} />;
+      case "profile":
+        return <ProfileScreen onBack={() => navigate("home")} />;
+      case "language":
+        return <LanguageScreen onBack={() => navigate("home")} />;
+      default:
+        return <HomeScreen onNavigate={navigate} />;
+    }
+  }, [route]);
+
+  return (
+    <main className="kiosk-root">
+      <div className="kiosk-shell">
+        <MotionOverlay />
+        <div className={`screen-layer phase-${transition.phase} dir-${transition.direction > 0 ? "next" : "back"}`}>
+          {screen}
+        </div>
+      </div>
+    </main>
+  );
+}
+
+createRoot(document.querySelector("#app")).render(<App />);
