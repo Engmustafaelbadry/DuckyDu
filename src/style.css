@@ -44,8 +44,8 @@ body {
 }
 
 .device-shell {
-  width: min(100vw, 800px);
-  height: min(100vh, 480px);
+  width: min(100vw, 10.5cm);
+  height: min(100vh, 6.2cm);
   display: grid;
   grid-template-columns: 94px 1fr;
   gap: 14px;
