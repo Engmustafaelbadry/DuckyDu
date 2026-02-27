@@ -36,7 +36,7 @@ function ScreenFrame({ title, subtitle, onBack, children }) {
     <section className="screen-frame">
       <header className="screen-header">
         <Button variant="outline" size="sm" onClick={onBack}>
-          <ArrowLeft size={16} />
+          <ArrowLeft size={16} className="icon-yellow" />
           Back
         </Button>
         <div>
@@ -54,7 +54,7 @@ function HomeScreen({ onNavigate }) {
     <section className="home-screen">
       <Card className="hero-card">
         <CardHeader className="hero-header">
-          <Badge className="hero-badge"><Sparkles size={12} />DuckyDu</Badge>
+          <Badge className="hero-badge"><Sparkles size={12} className="icon-yellow" />DuckyDu</Badge>
           <CardTitle>Smart Kiosk Panel</CardTitle>
         </CardHeader>
         <CardContent className="hero-content">
@@ -71,7 +71,7 @@ function HomeScreen({ onNavigate }) {
                   className="action-button"
                   onClick={() => onNavigate(action.id)}
                 >
-                  <Icon size={16} />
+                  <Icon size={16} className="icon-yellow" />
                   {action.label}
                 </Button>
               );
@@ -89,15 +89,15 @@ function WorkScreen({ onBack }) {
       <div className="grid-2">
         <Card>
           <CardHeader><CardTitle>Quick Start</CardTitle></CardHeader>
-          <CardContent><Button className="w-full"><Sparkles size={16} />Start Routine</Button></CardContent>
+          <CardContent><Button className="w-full"><Sparkles size={16} className="icon-yellow" />Start Routine</Button></CardContent>
         </Card>
         <Card>
           <CardHeader><CardTitle>Diagnostics</CardTitle></CardHeader>
-          <CardContent><Button variant="secondary" className="w-full"><Activity size={16} />Run Check</Button></CardContent>
+          <CardContent><Button variant="secondary" className="w-full"><Activity size={16} className="icon-yellow" />Run Check</Button></CardContent>
         </Card>
         <Card>
           <CardHeader><CardTitle>Scheduler</CardTitle></CardHeader>
-          <CardContent><Button variant="secondary" className="w-full"><Timer size={16} />Start Timer</Button></CardContent>
+          <CardContent><Button variant="secondary" className="w-full"><Timer size={16} className="icon-yellow" />Start Timer</Button></CardContent>
         </Card>
         <Card>
           <CardHeader><CardTitle>Status</CardTitle></CardHeader>
@@ -130,7 +130,7 @@ function SettingsScreen({ onBack }) {
             </SelectContent>
           </Select>
           <label className="row"><span>Touch sound</span><Checkbox defaultChecked /></label>
-          <label className="row"><span>System volume</span><Volume2 size={16} /></label>
+          <label className="row"><span>System volume</span><Volume2 size={16} className="icon-yellow" /></label>
           <Accordion type="single" collapsible>
             <AccordionItem value="advanced">
               <AccordionTrigger>Advanced</AccordionTrigger>
@@ -156,7 +156,7 @@ function PowerScreen({ mode, onBack }) {
         <CardHeader><CardTitle>{reboot ? "Restart system now?" : "Power off safely?"}</CardTitle></CardHeader>
         <CardContent className="stack">
           <Button variant={reboot ? "secondary" : "destructive"} className="w-full">
-            {reboot ? <RotateCcw size={16} /> : <Power size={16} />}
+            {reboot ? <RotateCcw size={16} className="icon-yellow" /> : <Power size={16} className="icon-yellow" />}
             {reboot ? "Confirm Reboot" : "Confirm Shutdown"}
           </Button>
           <Button variant="outline" className="w-full" onClick={onBack}>Cancel</Button>
@@ -187,7 +187,7 @@ function LanguageScreen({ onBack }) {
     <ScreenFrame title="Language" subtitle="Locale and language selection" onBack={onBack}>
       <Card className="full-height">
         <CardContent className="stack">
-          <div className="row"><Globe2 size={16} /><span>Language</span></div>
+          <div className="row"><Globe2 size={16} className="icon-yellow" /><span>Language</span></div>
           <Select defaultValue="en">
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -268,7 +268,7 @@ function App() {
   }, [route]);
 
   return (
-    <main className="app-root dark">
+    <main className="app-root">
       <section className="app-shell">
         <div className={`screen-layer phase-${transition.phase} dir-${transition.direction > 0 ? "next" : "back"}`}>
           {screen}

@@ -3,25 +3,25 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(224 28% 7%);
-  --foreground: hsl(220 25% 96%);
-  --muted: hsl(223 24% 14%);
-  --muted-foreground: hsl(218 15% 72%);
-  --popover: hsl(223 26% 11%);
-  --popover-foreground: hsl(220 25% 96%);
-  --card: hsl(223 26% 11%);
-  --card-foreground: hsl(220 25% 96%);
-  --border: hsl(223 18% 20%);
-  --input: hsl(223 18% 20%);
-  --primary: hsl(262 83% 65%);
-  --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(191 91% 45%);
-  --secondary-foreground: hsl(224 28% 7%);
-  --accent: hsl(310 78% 58%);
-  --accent-foreground: hsl(0 0% 100%);
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(0 0% 4%);
+  --muted: hsl(48 33% 96%);
+  --muted-foreground: hsl(0 0% 28%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(0 0% 4%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(0 0% 4%);
+  --border: hsl(48 14% 82%);
+  --input: hsl(48 20% 88%);
+  --primary: hsl(48 100% 52%);
+  --primary-foreground: hsl(0 0% 4%);
+  --secondary: hsl(50 100% 88%);
+  --secondary-foreground: hsl(0 0% 4%);
+  --accent: hsl(48 100% 90%);
+  --accent-foreground: hsl(0 0% 4%);
   --destructive: hsl(0 74% 55%);
   --destructive-foreground: hsl(0 0% 100%);
-  --ring: hsl(262 83% 65%);
+  --ring: hsl(48 100% 52%);
   --radius: 12px;
 }
 
@@ -40,8 +40,8 @@ body {
   margin: 0;
   color: var(--foreground);
   background:
-    radial-gradient(1200px 500px at 20% -20%, hsl(262 83% 65% / 0.25), transparent 60%),
-    radial-gradient(900px 500px at 95% 5%, hsl(191 91% 45% / 0.2), transparent 60%),
+    radial-gradient(1000px 460px at 15% -10%, hsl(48 100% 70% / 0.35), transparent 62%),
+    radial-gradient(800px 420px at 100% 0%, hsl(48 100% 80% / 0.22), transparent 58%),
     var(--background);
   font-family: "Inter", "Segoe UI", sans-serif;
   overflow: hidden;
@@ -60,8 +60,8 @@ body {
   height: min(100vh, 500px);
   border: 1px solid var(--border);
   border-radius: 18px;
-  background: linear-gradient(180deg, hsl(223 26% 12%), hsl(223 26% 9%));
-  box-shadow: 0 24px 80px hsl(224 40% 2% / 0.6);
+  background: linear-gradient(180deg, hsl(0 0% 100%), hsl(48 70% 98%));
+  box-shadow: 0 24px 80px hsl(48 80% 40% / 0.2);
   overflow: hidden;
 }
 
@@ -79,8 +79,8 @@ body {
 
 .hero-card {
   height: 100%;
-  border-color: hsl(223 20% 22%);
-  background: linear-gradient(160deg, hsl(223 24% 13%), hsl(223 24% 10%));
+  border-color: var(--border);
+  background: linear-gradient(160deg, hsl(0 0% 100%), hsl(48 85% 97%));
 }
 
 .hero-header {
@@ -93,6 +93,10 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+
+.icon-yellow {
+  color: hsl(48 100% 45%);
 }
 
 .hero-content {
