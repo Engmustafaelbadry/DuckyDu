@@ -23,6 +23,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import "./style.css";
 
+const CALIBRATION_MODE = true;
+
 const actions = [
   { id: "settings", icon: Settings, label: "Settings", variant: "secondary" },
   { id: "reboot", icon: RotateCcw, label: "Reboot", variant: "outline" },
@@ -208,6 +210,20 @@ function LanguageScreen({ onBack }) {
 }
 
 function App() {
+  if (CALIBRATION_MODE) {
+    return (
+      <main className="app-root calibration-root">
+        <section className="app-shell calibration-shell">
+          <div className="calibration-panel">
+            <p>Calibration Square</p>
+            <div className="calibration-square" />
+            <p>Size: 300px x 300px</p>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
   const [routeStack, setRouteStack] = useState(["home"]);
   const [transition, setTransition] = useState({ phase: "idle", next: null, direction: 1, action: "push" });
   const route = routeStack[routeStack.length - 1];
