@@ -1,3 +1,19 @@
+@font-face {
+  font-family: "Kongtext";
+  font-style: normal;
+  font-weight: 400;
+  src:
+    url("/fonts/kongtext/kongtext.woff") format("woff"),
+    url("/fonts/kongtext/kongtext.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Misaki";
+  font-style: normal;
+  font-weight: 400;
+  src: url("/fonts/misaki_gothic.ttf") format("truetype");
+}
+
 :root {
   color-scheme: dark;
   --background: #000000;
@@ -30,10 +46,11 @@ body {
   overflow: hidden;
   background: var(--background);
   color: var(--foreground);
-  font-family: "Montserrat", sans-serif;
+  font-family: "Kongtext", "Misaki", "misaki_gothic", monospace;
   touch-action: manipulation;
   user-select: none;
   -webkit-user-select: none;
+  image-rendering: pixelated;
 }
 
 .kiosk-root {
@@ -42,10 +59,7 @@ body {
   display: grid;
   place-items: center;
   padding: 10px;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 14px 14px;
+  background: #000000;
 }
 
 .kiosk-shell {
@@ -66,19 +80,19 @@ body {
 }
 
 .screen-layer.phase-out.dir-next {
-  animation: slide-out-left 170ms ease forwards;
+  animation: slide-out-left 180ms steps(6, end) forwards;
 }
 
 .screen-layer.phase-out.dir-back {
-  animation: slide-out-right 170ms ease forwards;
+  animation: slide-out-right 180ms steps(6, end) forwards;
 }
 
 .screen-layer.phase-in.dir-next {
-  animation: slide-in-right 260ms ease forwards;
+  animation: slide-in-right 220ms steps(7, end) forwards;
 }
 
 .screen-layer.phase-in.dir-back {
-  animation: slide-in-left 260ms ease forwards;
+  animation: slide-in-left 220ms steps(7, end) forwards;
 }
 
 .home-screen,
@@ -161,10 +175,6 @@ body {
   text-transform: uppercase;
 }
 
-.pxa-tile i {
-  font-size: 1.4rem;
-}
-
 .screen-frame {
   display: grid;
   grid-template-rows: auto 1fr;
@@ -222,13 +232,13 @@ body {
   text-transform: uppercase;
 }
 
-.pxa-card i {
-  font-size: 1.4rem;
-}
-
 .pxa-card.is-active {
   background: var(--secondary);
   color: var(--primary-foreground);
+}
+
+.lang-ja {
+  font-family: "Misaki", "misaki_gothic", monospace;
 }
 
 .settings-list {
@@ -297,79 +307,47 @@ body {
   font-size: 0.85rem;
 }
 
-.motion-overlay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.motion-slot {
-  position: absolute;
-  border: 1px dashed rgba(255, 255, 255, 0.22);
-  border-radius: 8px;
-  padding: 4px 8px;
-  font-size: 0.66rem;
-  color: rgba(255, 255, 255, 0.55);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  animation: float-slot 2.8s ease-in-out infinite;
-}
-
-.lottie-slot {
-  top: 10px;
-  right: 12px;
-}
-
-.ae-slot {
-  bottom: 12px;
-  left: 12px;
-  animation-delay: 0.35s;
+.pxa-back svg,
+.pxa-tile svg,
+.pxa-card svg {
+  width: 18px;
+  height: 18px;
+  shape-rendering: crispEdges;
 }
 
 @keyframes slide-out-left {
   to {
     opacity: 0;
-    transform: translateX(-16%) scale(0.96);
+    transform: translateX(-128px);
   }
 }
 
 @keyframes slide-out-right {
   to {
     opacity: 0;
-    transform: translateX(16%) scale(0.96);
+    transform: translateX(128px);
   }
 }
 
 @keyframes slide-in-right {
   from {
     opacity: 0;
-    transform: translateX(16%) scale(0.96);
+    transform: translateX(128px);
   }
   to {
     opacity: 1;
-    transform: translateX(0) scale(1);
+    transform: translateX(0);
   }
 }
 
 @keyframes slide-in-left {
   from {
     opacity: 0;
-    transform: translateX(-16%) scale(0.96);
+    transform: translateX(-128px);
   }
   to {
     opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-}
-
-@keyframes float-slot {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6px);
+    transform: translateX(0);
   }
 }
 

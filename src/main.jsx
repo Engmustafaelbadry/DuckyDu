@@ -1,34 +1,27 @@
 import { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
-import "@fontsource/montserrat/500.css";
-import "@fontsource/montserrat/700.css";
-import "@tabler/icons-webfont/dist/tabler-icons.min.css";
+import { PixelIcon } from "@2hoch1/pixel-icon-library-react";
+import "font-misaki/misaki_gothic.css";
 import "./style.css";
 
-const routeDepth = {
-  home: 0,
-  work: 1,
-  settings: 1,
-  reboot: 1,
-  shutdown: 1,
-  profile: 1,
-  language: 1
-};
-
 const quickActions = [
-  { id: "settings", icon: "ti ti-settings", label: "Settings" },
-  { id: "reboot", icon: "ti ti-rotate-clockwise-2", label: "Reboot" },
-  { id: "shutdown", icon: "ti ti-power", label: "Shutdown" },
-  { id: "profile", icon: "ti ti-user-circle", label: "Profile" },
-  { id: "language", icon: "ti ti-language", label: "Language" }
+  { id: "settings", icon: "cog-solid", label: "Settings" },
+  { id: "reboot", icon: "refresh-solid", label: "Reboot" },
+  { id: "shutdown", icon: "window-close-solid", label: "Shutdown" },
+  { id: "profile", icon: "user-solid", label: "Profile" },
+  { id: "language", icon: "translate-solid", label: "Language" }
 ];
+
+function PxIcon({ name, size = 18 }) {
+  return <PixelIcon name={name} size={size} color="currentColor" aria-hidden="true" />;
+}
 
 function ScreenFrame({ title, subtitle, onBack, children }) {
   return (
     <section className="screen-frame" aria-label={title}>
       <header className="screen-header">
         <button className="pxa-button pxa-back" onClick={onBack} aria-label="Go back">
-          <i className="ti ti-arrow-left" aria-hidden="true" />
+          <PxIcon name="arrow-left-solid" />
           Back
         </button>
         <div className="screen-heading">
@@ -56,7 +49,7 @@ function HomeScreen({ onNavigate }) {
       <div className="quick-grid" aria-label="Quick actions">
         {quickActions.map((item) => (
           <button key={item.id} className="pxa-button pxa-tile" onClick={() => onNavigate(item.id)}>
-            <i className={item.icon} aria-hidden="true" />
+            <PxIcon name={item.icon} size={20} />
             {item.label}
           </button>
         ))}
@@ -70,15 +63,15 @@ function WorkScreen({ onBack }) {
     <ScreenFrame title="Work Mode" subtitle="Select a flow to begin" onBack={onBack}>
       <div className="pixel-grid">
         <button className="pxa-card">
-          <i className="ti ti-bolt" aria-hidden="true" />
+          <PxIcon name="bolt-solid" size={20} />
           Quick Start
         </button>
         <button className="pxa-card">
-          <i className="ti ti-device-analytics" aria-hidden="true" />
+          <PxIcon name="analytics-solid" size={20} />
           Diagnostics
         </button>
         <button className="pxa-card">
-          <i className="ti ti-clock-play" aria-hidden="true" />
+          <PxIcon name="clock-solid" size={20} />
           Timed Routine
         </button>
       </div>
@@ -145,64 +138,86 @@ function LanguageScreen({ onBack }) {
     <ScreenFrame title="Language" subtitle="Choose interface language" onBack={onBack}>
       <div className="language-grid">
         <button className="pxa-button pxa-card is-active">English</button>
+        <button className="pxa-button pxa-card lang-ja">日本語</button>
         <button className="pxa-button pxa-card">Arabic</button>
         <button className="pxa-button pxa-card">French</button>
-        <button className="pxa-button pxa-card">Spanish</button>
       </div>
     </ScreenFrame>
   );
 }
 
-function MotionOverlay() {
-  return (
-    <div className="motion-overlay" aria-hidden="true">
-      <div className="motion-slot lottie-slot">Lottie Slot</div>
-      <div className="motion-slot ae-slot">AE Icon Slot</div>
-    </div>
-  );
-}
-
 function App() {
-  const [route, setRoute] = useState("home");
-  const [transition, setTransition] = useState({ phase: "idle", next: null, direction: 1 });
+  const [routeStack, setRouteStack] = useState(["home"]);
+  const [transition, setTransition] = useState({
+    phase: "idle",
+    next: null,
+    direction: 1,
+    action: "push"
+  });
+  const route = routeStack[routeStack.length - 1];
 
   function navigate(next) {
     if (next === route || transition.phase !== "idle") return;
-    const direction = (routeDepth[next] ?? 1) >= (routeDepth[route] ?? 1) ? 1 : -1;
-    setTransition({ phase: "out", next, direction });
+    setTransition({ phase: "out", next, direction: 1, action: "push" });
+  }
+
+  function goBack() {
+    if (routeStack.length <= 1 || transition.phase !== "idle") return;
+    setTransition({
+      phase: "out",
+      next: routeStack[routeStack.length - 2],
+      direction: -1,
+      action: "pop"
+    });
   }
 
   useEffect(() => {
     if (transition.phase === "out") {
       const timer = setTimeout(() => {
-        setRoute(transition.next);
+        setRouteStack((prev) => {
+          if (transition.action === "push") return [...prev, transition.next];
+          if (prev.length <= 1) return prev;
+          return prev.slice(0, -1);
+        });
         setTransition((prev) => ({ ...prev, phase: "in" }));
-      }, 170);
+      }, 180);
       return () => clearTimeout(timer);
     }
 
     if (transition.phase === "in") {
       const timer = setTimeout(() => {
-        setTransition({ phase: "idle", next: null, direction: 1 });
-      }, 260);
+        setTransition({ phase: "idle", next: null, direction: 1, action: "push" });
+      }, 220);
       return () => clearTimeout(timer);
     }
   }, [transition]);
 
+  useEffect(() => {
+    function onKeyDown(event) {
+      if (event.key === "Escape" || event.key === "Backspace") {
+        event.preventDefault();
+        goBack();
+      }
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [routeStack, transition.phase]);
+
   const screen = useMemo(() => {
     switch (route) {
       case "work":
-        return <WorkScreen onBack={() => navigate("home")} />;
+        return <WorkScreen onBack={goBack} />;
       case "settings":
-        return <SettingsScreen onBack={() => navigate("home")} />;
+        return <SettingsScreen onBack={goBack} />;
       case "reboot":
-        return <PowerScreen mode="reboot" onBack={() => navigate("home")} />;
+        return <PowerScreen mode="reboot" onBack={goBack} />;
       case "shutdown":
-        return <PowerScreen mode="shutdown" onBack={() => navigate("home")} />;
+        return <PowerScreen mode="shutdown" onBack={goBack} />;
       case "profile":
-        return <ProfileScreen onBack={() => navigate("home")} />;
+        return <ProfileScreen onBack={goBack} />;
       case "language":
-        return <LanguageScreen onBack={() => navigate("home")} />;
+        return <LanguageScreen onBack={goBack} />;
       default:
         return <HomeScreen onNavigate={navigate} />;
     }
@@ -211,7 +226,6 @@ function App() {
   return (
     <main className="kiosk-root">
       <div className="kiosk-shell">
-        <MotionOverlay />
         <div className={`screen-layer phase-${transition.phase} dir-${transition.direction > 0 ? "next" : "back"}`}>
           {screen}
         </div>
