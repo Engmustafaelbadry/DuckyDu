@@ -1028,7 +1028,7 @@ body {
 .unlock-back-btn {
   min-width: 180px;
   height: 52px;
-  font-size: 18px;
+  font-size: 14px;
 }
 
 @keyframes blink-live {
