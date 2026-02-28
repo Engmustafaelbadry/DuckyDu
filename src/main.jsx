@@ -59,7 +59,7 @@ const DEVICE_GROUPS = [
       { label: "Decrypt Security", icon: "grid-3x3-sharp", source: "art", tone: "lime" },
       { label: "Decrypt Biometrics", icon: "ai-scan-sharp", source: "art", tone: "teal" },
       { label: "Decrypt Apps Security", icon: "blocks-sharp", source: "art", tone: "indigo" },
-      { label: "Show Passwords", icon: "__stars__", source: "custom", tone: "gray" }
+      { label: "Show Passwords", icon: "lock-solid", source: "pixel", tone: "gray" }
     ]
   },
   {
@@ -169,12 +169,6 @@ function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
   const prevGroupName = hasPrev ? DEVICE_GROUPS[pageIndex - 1].name : "";
   const nextGroupName = hasNext ? DEVICE_GROUPS[pageIndex + 1].name : "";
 
-  const starIcon = {
-    width: pixelIcons.width,
-    height: pixelIcons.height,
-    ...pixelIcons.icons["star-solid"]
-  };
-
   return (
     <main className="select-os-root">
       <section className="layout-shell">
@@ -196,15 +190,7 @@ function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
               return (
                 <Card key={item.label} className={`device-card tone-${item.tone}`}>
                   <CardContent className="device-card-content">
-                    {item.icon === "__stars__" ? (
-                      <div className="password-stars">
-                        <Icon icon={starIcon} className="password-star-icon" />
-                        <Icon icon={starIcon} className="password-star-icon" />
-                        <Icon icon={starIcon} className="password-star-icon" />
-                      </div>
-                    ) : (
-                      <Icon icon={itemIcon} className="device-card-icon" />
-                    )}
+                    <Icon icon={itemIcon} className="device-card-icon" />
                     <p>{item.label}</p>
                   </CardContent>
                 </Card>

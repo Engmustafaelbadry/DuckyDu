@@ -721,7 +721,7 @@ body {
   width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 12px;
   align-items: center;
 }
 
@@ -735,7 +735,9 @@ body {
   justify-content: space-between;
   gap: 10px;
   padding: 12px 14px;
-  width: 220px;
+  width: 100%;
+  min-width: 0;
+  height: 46px;
   cursor: pointer;
   clip-path: polygon(
     0 calc(var(--pixel-step) * 2),
@@ -763,6 +765,9 @@ body {
 
 .next-group-btn span {
   font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .nav-btn-left {
@@ -774,8 +779,8 @@ body {
 }
 
 .group-nav-placeholder {
-  width: 220px;
-  height: 42px;
+  width: 100%;
+  height: 46px;
 }
 
 .next-group-icon {
@@ -785,18 +790,6 @@ body {
 
 .prev-group-icon {
   transform: rotate(180deg);
-}
-
-.password-stars {
-  display: inline-flex;
-  gap: 4px;
-}
-
-.password-star-icon {
-  width: 20px;
-  height: 20px;
-  color: currentColor;
-  fill: currentColor;
 }
 
 .device-pagination {
