@@ -236,7 +236,9 @@ function SelectOsScreen() {
                   <div className="connect-waiting">
                     {usbConnected ? (
                       <div className="connected-details">
-                        <p className="connect-state is-connected">Connected</p>
+                        <p className="connect-state-label">
+                          Status: <span className="connect-state is-connected">Connected</span>
+                        </p>
                         <p className="device-info-line">Product Name: {usbDeviceInfo.productName}</p>
                         <p className="device-info-line">Manufacturer: {usbDeviceInfo.manufacturer}</p>
                         <Button className="access-device-btn">Access Device</Button>
