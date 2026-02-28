@@ -235,15 +235,18 @@ body {
 }
 
 .os-other .os-card-content {
-  grid-auto-flow: column;
-  grid-template-columns: auto 1fr;
-  justify-content: start;
-  align-items: center;
-  gap: 12px;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
 }
 
 .os-other .os-text {
-  text-align: left;
+  text-align: center;
+}
+
+.pixel-icon-small {
+  width: 34px;
+  height: 34px;
 }
 
 .cancel-btn {
@@ -253,6 +256,10 @@ body {
   box-shadow: none !important;
   margin: 0 !important;
   font-size: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   clip-path: polygon(
     10px 0,
     calc(100% - 10px) 0,
@@ -267,6 +274,11 @@ body {
 
 .cancel-btn::after {
   display: none !important;
+}
+
+.cancel-icon {
+  width: 20px;
+  height: 20px;
 }
 
 @keyframes blink-live {

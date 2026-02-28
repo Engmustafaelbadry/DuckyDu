@@ -1,52 +1,54 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Icon } from "@iconify/react";
 import {
-  Apple,
   ArrowLeftSolid,
-  CogSolid,
   Code,
-  HomeSolid,
-  RobotSolid
 } from "@2hoch1/pixel-icon-library-react/icons";
-import pixelarticons from "@iconify-json/pixelarticons/icons.json";
+import pixelIcons from "@iconify-json/pixel/icons.json";
 import { Button } from "@/components/ui/pixelact-ui/button";
 import { Card, CardContent } from "@/components/ui/pixelact-ui/card";
+import { VerticalMenu } from "@/components/VerticalMenu";
 import "./style.css";
 
-const iconDefaults = {
-  width: pixelarticons.width,
-  height: pixelarticons.height
+const osIconDefaults = {
+  width: pixelIcons.width,
+  height: pixelIcons.height
 };
 
-const wifiIcon = {
-  ...iconDefaults,
-  ...pixelarticons.icons.wifi
+const androidOsIcon = {
+  ...osIconDefaults,
+  ...pixelIcons.icons.android
 };
 
-const cloudIcon = {
-  ...iconDefaults,
-  ...pixelarticons.icons.cloud
-};
-
-const batteryIcon = {
-  ...iconDefaults,
-  ...pixelarticons.icons["battery-medium"]
+const iosOsIcon = {
+  ...osIconDefaults,
+  ...pixelIcons.icons.ios
 };
 
 const iconMap = {
-  android: RobotSolid,
-  ios: Apple,
-  other: Code
+  android: { type: "iconify", icon: androidOsIcon },
+  ios: { type: "iconify", icon: iosOsIcon },
+  other: { type: "component", icon: Code }
 };
 
 function OsCard({ id, label, selected, onSelect }) {
-  const Icon = iconMap[id];
+  const iconConfig = iconMap[id];
+  const iconClassName = `pixel-icon${id === "other" ? " pixel-icon-small" : ""}`;
+  const ComponentIcon = iconConfig.type === "component" ? iconConfig.icon : null;
+
+  const iconElement =
+    iconConfig.type === "iconify" ? (
+      <Icon icon={iconConfig.icon} className={iconClassName} />
+    ) : (
+      <ComponentIcon className={iconClassName} />
+    );
+
   return (
     <button className={`os-card-btn${selected ? " is-selected" : ""}`} onClick={() => onSelect(id)} aria-pressed={selected}>
       <Card className={`os-card os-${id}${id !== "other" ? " os-main" : ""}`}>
         <CardContent className="os-card-content">
-          <Icon className="pixel-icon" />
+          {iconElement}
           <div className="os-text">
             <h2>{label}</h2>
           </div>
@@ -58,42 +60,11 @@ function OsCard({ id, label, selected, onSelect }) {
 
 function SelectOsScreen() {
   const [selected, setSelected] = useState("android");
-  const [clock, setClock] = useState(() =>
-    new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false })
-  );
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setClock(new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   return (
     <main className="select-os-root">
       <section className="layout-shell">
-        <aside className="side-menu">
-          <div className="side-status">
-            <div className="clock-vertical">{clock}</div>
-            <div className="status-stack">
-              <Icon icon={batteryIcon} className="menu-icon battery-vertical" />
-              <Icon icon={wifiIcon} className="menu-icon" />
-              <Icon icon={cloudIcon} className="menu-icon status-cloud" />
-              <span className="live-dot" />
-            </div>
-          </div>
-          <div className="side-nav">
-            <button className="menu-btn" aria-label="Home">
-              <HomeSolid className="menu-icon" />
-            </button>
-            <button className="menu-btn" aria-label="Back">
-              <ArrowLeftSolid className="menu-icon" />
-            </button>
-            <button className="menu-btn" aria-label="Settings">
-              <CogSolid className="menu-icon" />
-            </button>
-          </div>
-        </aside>
+        <VerticalMenu />
 
         <section className="select-os-screen">
           <div className="row-main">
@@ -104,6 +75,7 @@ function SelectOsScreen() {
           <OsCard id="other" label="Other OS" selected={selected === "other"} onSelect={setSelected} />
 
           <Button variant="destructive" className="cancel-btn">
+            <ArrowLeftSolid className="cancel-icon" />
             Cancel
           </Button>
         </section>
