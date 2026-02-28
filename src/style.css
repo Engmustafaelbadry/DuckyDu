@@ -275,6 +275,14 @@ body {
   margin-top: -20px;
 }
 
+.focus-slot .os-ios .pixel-icon-compact {
+  margin-top: -8px;
+}
+
+.focus-slot .os-other .pixel-icon-compact {
+  margin-top: -8px;
+}
+
 .focus-slot .os-card-content {
   display: flex;
   justify-content: center;
