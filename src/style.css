@@ -975,26 +975,18 @@ body {
   background: #171717;
   box-shadow: var(--pixel-box-shadow);
   clip-path: polygon(
-    0 calc(var(--pixel-step) * 2),
-    var(--pixel-step) calc(var(--pixel-step) * 2),
+    0 var(--pixel-step),
     var(--pixel-step) var(--pixel-step),
-    calc(var(--pixel-step) * 2) var(--pixel-step),
-    calc(var(--pixel-step) * 2) 0,
-    calc(100% - (var(--pixel-step) * 2)) 0,
-    calc(100% - (var(--pixel-step) * 2)) var(--pixel-step),
+    var(--pixel-step) 0,
+    calc(100% - var(--pixel-step)) 0,
     calc(100% - var(--pixel-step)) var(--pixel-step),
-    calc(100% - var(--pixel-step)) calc(var(--pixel-step) * 2),
-    100% calc(var(--pixel-step) * 2),
-    100% calc(100% - (var(--pixel-step) * 2)),
-    calc(100% - var(--pixel-step)) calc(100% - (var(--pixel-step) * 2)),
+    100% var(--pixel-step),
+    100% calc(100% - var(--pixel-step)),
     calc(100% - var(--pixel-step)) calc(100% - var(--pixel-step)),
-    calc(100% - (var(--pixel-step) * 2)) calc(100% - var(--pixel-step)),
-    calc(100% - (var(--pixel-step) * 2)) 100%,
-    calc(var(--pixel-step) * 2) 100%,
-    calc(var(--pixel-step) * 2) calc(100% - var(--pixel-step)),
+    calc(100% - var(--pixel-step)) 100%,
+    var(--pixel-step) 100%,
     var(--pixel-step) calc(100% - var(--pixel-step)),
-    var(--pixel-step) calc(100% - (var(--pixel-step) * 2)),
-    0 calc(100% - (var(--pixel-step) * 2))
+    0 calc(100% - var(--pixel-step))
   );
   overflow: hidden;
 }
@@ -1031,6 +1023,12 @@ body {
   margin: 0;
   color: #ffffff;
   font-size: 14px;
+}
+
+.unlock-back-btn {
+  min-width: 180px;
+  height: 52px;
+  font-size: 18px;
 }
 
 @keyframes blink-live {

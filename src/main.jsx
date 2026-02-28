@@ -102,25 +102,35 @@ const USB_STATUS_URLS = [
 
 const UNLOCK_LOG_LINES = [
   "Initializing secure channel...",
-  "Detecting device lock state...",
-  "Validating USB transport...",
-  "Requesting authentication context...",
-  "Preparing unlock workflow...",
-  "Syncing credential pipeline...",
-  "Checking device security flags...",
-  "Loading biometric policy profile...",
-  "Switching to passcode unlock mode...",
-  "Verifying trusted session key...",
-  "Applying unlock sequence step 1...",
-  "Applying unlock sequence step 2...",
-  "Applying unlock sequence step 3...",
-  "Confirming lockscreen response...",
-  "Refreshing device state cache...",
-  "Running final security checks...",
-  "Confirming unlock transition...",
-  "Stabilizing post-unlock channel...",
-  "Persisting session status...",
-  "Finalizing operation..."
+  "Binding device session context...",
+  "Verifying USB data transport...",
+  "Reading lockscreen service status...",
+  "Enumerating authentication endpoints...",
+  "Loading secure unlock module...",
+  "Checking credential policy rules...",
+  "Validating trusted host signature...",
+  "Synchronizing unlock pipeline...",
+  "Requesting lockscreen focus token...",
+  "Switching interaction mode to passcode...",
+  "Preparing keypad event channel...",
+  "Sending unlock event packet 01...",
+  "Sending unlock event packet 02...",
+  "Sending unlock event packet 03...",
+  "Sending unlock event packet 04...",
+  "Sending unlock event packet 05...",
+  "Sending unlock event packet 06...",
+  "Awaiting lockscreen acknowledgment...",
+  "Verifying credential checksum...",
+  "Checking anti-replay protection...",
+  "Applying unlock state transition...",
+  "Validating home-screen readiness...",
+  "Refreshing application process map...",
+  "Updating security handshake state...",
+  "Confirming unlock result code...",
+  "Persisting trusted session channel...",
+  "Stabilizing post-unlock transport...",
+  "Revalidating device access scope...",
+  "Finalizing unlock operation..."
 ];
 
 function parseUsbDeviceInfo(matches) {
@@ -187,6 +197,7 @@ function OsCard({ id, label, selected, onSelect, className = "", compact = false
 function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
   const [pageIndex, setPageIndex] = useState(0);
   const [activeTask, setActiveTask] = useState(null);
+  const [activeTaskTitle, setActiveTaskTitle] = useState("");
   const [visibleLines, setVisibleLines] = useState(0);
   const [progress, setProgress] = useState(0);
   const [taskPhase, setTaskPhase] = useState("idle");
@@ -237,10 +248,25 @@ function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
     ...pixelarticons.icons["checkbox-on-sharp"]
   };
 
+  const startTask = (item) => {
+    if (!item.action) {
+      return;
+    }
+    setActiveTask(item.action);
+    setActiveTaskTitle(item.label);
+  };
+
+  const closeTask = () => {
+    setActiveTask(null);
+    setActiveTaskTitle("");
+    setTaskPhase("idle");
+    setVisibleLines(0);
+    setProgress(0);
+  };
+
   const handleMenuBack = () => {
     if (activeTask) {
-      setActiveTask(null);
-      setTaskPhase("idle");
+      closeTask();
       return;
     }
     onBack();
@@ -253,7 +279,7 @@ function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
 
         <section className="device-screen">
           <header className="device-header">
-            <h2>{currentGroup.name}</h2>
+            <h2>{activeTask ? activeTaskTitle : currentGroup.name}</h2>
             <div className="device-product-label">Device: {productName || "Unknown"}</div>
           </header>
 
@@ -263,7 +289,7 @@ function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
                 {taskPhase === "running" ? (
                   <>
                     <div className="unlock-log-list">
-                      {UNLOCK_LOG_LINES.slice(0, visibleLines).map((line) => (
+                      {UNLOCK_LOG_LINES.slice(Math.max(0, visibleLines - 12), visibleLines).map((line, idx) => (
                         <p key={line}>{line}</p>
                       ))}
                     </div>
@@ -278,7 +304,9 @@ function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
                   <div className="unlock-success">
                     <Icon icon={successIcon} className="unlock-success-icon" />
                     <h3>Unlocked</h3>
-                    <p>Success</p>
+                    <Button className="unlock-back-btn" onClick={closeTask}>
+                      Back
+                    </Button>
                   </div>
                 )}
               </CardContent>
@@ -293,7 +321,7 @@ function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
                       : { ...statusIconDefaults, ...pixelarticons.icons[item.icon] };
 
                   return (
-                    <button key={item.label} className="device-card-btn" onClick={() => item.action && setActiveTask(item.action)}>
+                    <button key={item.label} className="device-card-btn" onClick={() => startTask(item)}>
                       <Card className={`device-card tone-${item.tone}`}>
                         <CardContent className="device-card-content">
                           <Icon icon={itemIcon} className="device-card-icon" />
