@@ -1,22 +1,23 @@
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
-import { PixelIcon } from "@2hoch1/pixel-icon-library-react";
+import { Android, Apple, Code } from "@2hoch1/pixel-icon-library-react/icons";
 import { Button } from "@/components/ui/pixelact-ui/button";
 import { Card, CardContent } from "@/components/ui/pixelact-ui/card";
 import "./style.css";
 
 const iconMap = {
-  android: "android",
-  ios: "apple",
-  other: "code"
+  android: Android,
+  ios: Apple,
+  other: Code
 };
 
 function OsCard({ id, label, selected, onSelect }) {
+  const Icon = iconMap[id];
   return (
     <button className={`os-card-btn${selected ? " is-selected" : ""}`} onClick={() => onSelect(id)} aria-pressed={selected}>
       <Card className={`os-card os-${id}`}>
         <CardContent className="os-card-content">
-          <PixelIcon name={iconMap[id]} size={56} className="pixel-icon" />
+          <Icon className="pixel-icon" />
           <div className="os-text">
             <h2>{label}</h2>
           </div>
