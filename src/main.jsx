@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Icon } from "@iconify/react";
 import {
@@ -48,6 +48,11 @@ const iconMap = {
   other: { type: "component", icon: Code }
 };
 
+const USB_STATUS_URLS = [
+  "http://127.0.0.1:17373/usb/mobile-status",
+  "http://localhost:17373/usb/mobile-status"
+];
+
 function OsCard({ id, label, selected, onSelect, className = "", compact = false }) {
   const iconConfig = iconMap[id];
   const iconClassName = `pixel-icon${id === "other" ? " pixel-icon-small" : ""}${compact ? " pixel-icon-compact" : ""}`;
@@ -81,13 +86,69 @@ function OsCard({ id, label, selected, onSelect, className = "", compact = false
 function SelectOsScreen() {
   const [selected, setSelected] = useState("android");
   const [connectMode, setConnectMode] = useState(false);
+  const [connectStage, setConnectStage] = useState("choose");
+  const [usbConnected, setUsbConnected] = useState(false);
+  const [usbBridgeOnline, setUsbBridgeOnline] = useState(true);
+
+  useEffect(() => {
+    if (connectStage !== "cable_wait") {
+      setUsbConnected(false);
+      setUsbBridgeOnline(true);
+      return;
+    }
+
+    let isActive = true;
+
+    const pollUsbStatus = async () => {
+      let reachable = false;
+
+      for (const url of USB_STATUS_URLS) {
+        try {
+          const response = await fetch(url, { cache: "no-store" });
+          if (!response.ok) {
+            continue;
+          }
+
+          const data = await response.json();
+          reachable = true;
+
+          if (isActive) {
+            setUsbConnected(Boolean(data.connected));
+            setUsbBridgeOnline(true);
+          }
+          break;
+        } catch {
+          // Try next URL
+        }
+      }
+
+      if (!reachable && isActive) {
+        setUsbConnected(false);
+        setUsbBridgeOnline(false);
+      }
+    };
+
+    pollUsbStatus();
+    const timer = setInterval(pollUsbStatus, 1200);
+
+    return () => {
+      isActive = false;
+      clearInterval(timer);
+    };
+  }, [connectStage]);
 
   const handleCardSelect = (id) => {
     setSelected(id);
     setConnectMode(true);
+    setConnectStage("choose");
   };
 
   const handleBottomAction = () => {
+    if (connectStage === "cable_wait") {
+      setConnectStage("choose");
+      return;
+    }
+
     if (connectMode) {
       setConnectMode(false);
       return;
@@ -123,25 +184,43 @@ function SelectOsScreen() {
           {connectMode ? (
             <Card className="connect-panel is-visible">
               <CardContent className="connect-panel-content">
-                <h3 className="connect-via-title">Connect via</h3>
+                {connectStage === "choose" ? (
+                  <>
+                    <h3 className="connect-via-title">Connect via</h3>
 
-                <div className="connect-option">
-                  <Icon icon={connectCableIcon} className="connect-method-icon" />
-                  <h4>Cable</h4>
-                </div>
+                    <button className="connect-option" onClick={() => setConnectStage("cable_wait")} aria-label="Connect via Cable">
+                      <Icon icon={connectCableIcon} className="connect-method-icon" />
+                      <h4>Cable</h4>
+                    </button>
 
-                <div className="connect-option">
-                  <Icon icon={connectWirelessIcon} className="connect-method-icon" />
-                  <h4>Wireless</h4>
-                </div>
+                    <div className="connect-option">
+                      <Icon icon={connectWirelessIcon} className="connect-method-icon" />
+                      <h4>Wireless</h4>
+                    </div>
+                  </>
+                ) : (
+                  <div className="connect-waiting">
+                    <p>Please connect device through Cable.</p>
+                    <Icon icon={connectCableIcon} className="wait-cable-lib-icon" aria-hidden="true" />
+                    <p className={`connect-state${usbConnected ? " is-connected" : ""}`}>
+                      {usbConnected ? "Connected" : "Waiting..."}
+                    </p>
+                    {!usbBridgeOnline ? <p className="connect-state-note">USB bridge offline</p> : null}
+                    <Button variant="destructive" className="panel-cancel-btn" onClick={() => setConnectStage("choose")}>
+                      Cancel
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ) : null}
 
-          <Button variant="destructive" className="cancel-btn" onClick={handleBottomAction}>
-            <ArrowLeftSolid className="cancel-icon" />
-            Back
-          </Button>
+          {connectStage !== "cable_wait" ? (
+            <Button variant="destructive" className="cancel-btn" onClick={handleBottomAction}>
+              <ArrowLeftSolid className="cancel-icon" />
+              Back
+            </Button>
+          ) : null}
         </section>
       </section>
     </main>

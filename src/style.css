@@ -367,6 +367,9 @@ body {
   border: 0 !important;
   border-radius: 0 !important;
   box-shadow: var(--pixel-box-shadow) !important;
+  margin: 0 !important;
+  justify-self: stretch;
+  align-self: stretch;
   overflow: hidden;
   clip-path: polygon(
     0 calc(var(--pixel-step) * 2),
@@ -417,6 +420,50 @@ body {
   padding: 10px;
 }
 
+.connect-waiting {
+  width: 100%;
+  height: 100%;
+  grid-column: 1 / -1;
+  grid-row: 1 / -1;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 14px;
+  padding: 10px;
+}
+
+.connect-waiting p {
+  margin: 0;
+  text-align: center;
+  color: #ffffff;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.wait-cable-lib-icon {
+  width: 56px;
+  height: 56px;
+  color: #ffffff;
+  fill: currentColor;
+  animation: cable-icon-bounce 900ms steps(2, end) infinite;
+}
+
+.connect-state {
+  margin: 0;
+  font-size: 14px;
+  color: #ffffff;
+}
+
+.connect-state.is-connected {
+  color: #2dff73;
+}
+
+.connect-state-note {
+  margin: 0;
+  font-size: 10px;
+  color: #b7b7b7;
+}
+
 .connect-via-title {
   grid-column: 1 / -1;
   margin: 0 0 6px;
@@ -437,6 +484,7 @@ body {
   align-content: center;
   gap: 10px;
   padding: 14px 10px;
+  cursor: pointer;
   clip-path: polygon(
     0 calc(var(--pixel-step) * 2),
     var(--pixel-step) calc(var(--pixel-step) * 2),
@@ -459,6 +507,11 @@ body {
     var(--pixel-step) calc(100% - (var(--pixel-step) * 2)),
     0 calc(100% - (var(--pixel-step) * 2))
   );
+}
+
+.connect-option:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
 }
 
 .connect-option h4 {
@@ -515,6 +568,10 @@ body {
   height: 20px;
 }
 
+.panel-cancel-btn {
+  min-width: 128px;
+}
+
 @keyframes blink-live {
   0%,
   100% {
@@ -523,5 +580,18 @@ body {
 
   50% {
     opacity: 0.2;
+  }
+}
+
+@keyframes cable-icon-bounce {
+  0%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  50% {
+    opacity: 0.4;
+    transform: translateY(-2px);
   }
 }
