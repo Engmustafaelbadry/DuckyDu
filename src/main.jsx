@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./style.css";
 
-const TARGET_WIDTH = 800;
-const TARGET_HEIGHT = 480;
+const TARGET_WIDTH = 780;
+const TARGET_HEIGHT = 460;
 
 function App() {
   const [metrics, setMetrics] = useState({
@@ -37,6 +37,8 @@ function App() {
 
   const missingX = TARGET_WIDTH - metrics.innerWidth;
   const missingY = TARGET_HEIGHT - metrics.innerHeight;
+  const scaleX = metrics.innerWidth / TARGET_WIDTH;
+  const scaleY = metrics.innerHeight / TARGET_HEIGHT;
 
   return (
     <main className="calib-root">
@@ -55,6 +57,8 @@ function App() {
         <p>Device Pixel Ratio: {metrics.dpr}</p>
         <p>Missing X for 800 width: {missingX > 0 ? `${missingX}px` : `0px (extra ${Math.abs(missingX)}px)`}</p>
         <p>Missing Y for 480 height: {missingY > 0 ? `${missingY}px` : `0px (extra ${Math.abs(missingY)}px)`}</p>
+        <p>Recommended kiosk width/height: {metrics.innerWidth}px x {metrics.innerHeight}px</p>
+        <p>Scale from 780x460: X {scaleX.toFixed(4)} / Y {scaleY.toFixed(4)}</p>
         <p className="hint">Take a photo of this screen and share the numbers.</p>
       </section>
     </main>

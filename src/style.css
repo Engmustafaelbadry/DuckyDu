@@ -21,6 +21,8 @@
 :root {
   --font-en: "Kongtext", monospace;
   --font-ja: "Misaki", monospace;
+  --kiosk-width: 780px;
+  --kiosk-height: 460px;
 }
 
 * {
@@ -80,8 +82,8 @@ body {
 
 .target-frame {
   position: absolute;
-  width: 800px;
-  height: 480px;
+  width: var(--kiosk-width);
+  height: var(--kiosk-height);
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
