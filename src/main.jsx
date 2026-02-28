@@ -73,6 +73,17 @@ function parseUsbDeviceInfo(matches) {
   return { manufacturer, productName };
 }
 
+function normalizeUsbDeviceInfo(payload) {
+  if (payload && (payload.productName || payload.manufacturer)) {
+    return {
+      manufacturer: payload.manufacturer || "Unknown",
+      productName: payload.productName || "Unknown"
+    };
+  }
+
+  return parseUsbDeviceInfo(payload?.matches);
+}
+
 function OsCard({ id, label, selected, onSelect, className = "", compact = false }) {
   const iconConfig = iconMap[id];
   const iconClassName = `pixel-icon${id === "other" ? " pixel-icon-small" : ""}${compact ? " pixel-icon-compact" : ""}`;
@@ -137,7 +148,7 @@ function SelectOsScreen() {
           if (isActive) {
             setUsbConnected(Boolean(data.connected));
             setUsbBridgeOnline(true);
-            setUsbDeviceInfo(parseUsbDeviceInfo(data.matches));
+            setUsbDeviceInfo(normalizeUsbDeviceInfo(data));
           }
           break;
         } catch {
