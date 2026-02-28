@@ -122,6 +122,9 @@ File: `src/style.css`
 - Pixel-step corner style (`--pixel-step`) with stepped `clip-path` corners.
 - Pixel shadow framing (`--pixel-box-shadow`) on cards/buttons.
 - No page scrolling behavior for card groups.
+- **Hard UI rule:** never allow screen/page expansion that introduces scrolling.
+  - For progressive logs (like Unlock Device), content must stay inside fixed-height containers.
+  - Extra lines are clipped/contained; viewport must remain static with no scrollbars.
 - Device cards tuned to fit fixed 3x3 grid.
 - Prev/Next group buttons aligned left/right with equal width.
 
