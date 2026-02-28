@@ -52,38 +52,39 @@ const DEVICE_GROUPS = [
   {
     name: "Decrypt Data",
     items: [
-      { label: "Unlock Device", icon: "unlock", tone: "green" },
-      { label: "Unlock Safe Folder", icon: "folder-plus-sharp", tone: "blue" },
-      { label: "Access Hidden Files", icon: "hidden", tone: "purple" },
-      { label: "Access Root Files", icon: "shield-sharp", tone: "amber" },
-      { label: "Decrypt Security", icon: "shield", tone: "lime" },
-      { label: "Decrypt Biometrics", icon: "ai-user-circle", tone: "teal" },
-      { label: "Decrypt Apps Security", icon: "blocks-sharp", tone: "indigo" }
+      { label: "Unlock Device", icon: "unlock", source: "art", tone: "green" },
+      { label: "Unlock Safe Folder", icon: "lock-alt", source: "pixel", tone: "blue" },
+      { label: "Access Hidden Files", icon: "hidden", source: "art", tone: "purple" },
+      { label: "Access Root Files", icon: "terminal-sharp", source: "art", tone: "amber" },
+      { label: "Decrypt Security", icon: "unlock-alt", source: "pixel", tone: "lime" },
+      { label: "Decrypt Biometrics", icon: "ai-scan-sharp", source: "art", tone: "teal" },
+      { label: "Decrypt Apps Security", icon: "blocks-sharp", source: "art", tone: "indigo" },
+      { label: "Show Passwords", icon: "__stars__", source: "custom", tone: "gray" }
     ]
   },
   {
     name: "Data Management",
     items: [
-      { label: "Backup Data", icon: "database", tone: "cyan" },
-      { label: "Delete All Data", icon: "delete-sharp", tone: "red" },
-      { label: "Hard Reset", icon: "reload-sharp", tone: "orange" },
-      { label: "Upload Data To Cloud", icon: "cloud-upload", tone: "indigo" }
+      { label: "Backup Data", icon: "database", source: "art", tone: "cyan" },
+      { label: "Delete All Data", icon: "delete-sharp", source: "art", tone: "red" },
+      { label: "Hard Reset", icon: "reload-sharp", source: "art", tone: "orange" },
+      { label: "Upload Data To Cloud", icon: "cloud-upload", source: "art", tone: "indigo" }
     ]
   },
   {
     name: "Device Management",
     items: [
-      { label: "Device Cloud Mirror", icon: "cloud-server", tone: "teal" },
-      { label: "Install Permissions", icon: "shield", tone: "lime" }
+      { label: "Device Cloud Mirror", icon: "cloud-server", source: "art", tone: "teal" },
+      { label: "Install Permissions", icon: "shield", source: "art", tone: "lime" }
     ]
   },
   {
     name: "Delete Encryption",
     items: [
-      { label: "Wipe All data", icon: "delete", tone: "red" },
-      { label: "Hard Reset", icon: "reload-sharp", tone: "orange" },
-      { label: "Delete G Account", icon: "user-x-sharp", tone: "magenta" },
-      { label: "Remove Login Credientals", icon: "user-minus-sharp", tone: "gray" }
+      { label: "Wipe All data", icon: "delete", source: "art", tone: "red" },
+      { label: "Hard Reset", icon: "reload-sharp", source: "art", tone: "orange" },
+      { label: "Delete G Account", icon: "user-x-sharp", source: "art", tone: "magenta" },
+      { label: "Remove Login Credientals", icon: "user-minus-sharp", source: "art", tone: "gray" }
     ]
   }
 ];
@@ -163,8 +164,16 @@ function OsCard({ id, label, selected, onSelect, className = "", compact = false
 function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
   const [pageIndex, setPageIndex] = useState(0);
   const currentGroup = DEVICE_GROUPS[pageIndex];
+  const hasPrev = pageIndex > 0;
   const hasNext = pageIndex < DEVICE_GROUPS.length - 1;
+  const prevGroupName = hasPrev ? DEVICE_GROUPS[pageIndex - 1].name : "";
   const nextGroupName = hasNext ? DEVICE_GROUPS[pageIndex + 1].name : "";
+
+  const starIcon = {
+    width: pixelIcons.width,
+    height: pixelIcons.height,
+    ...pixelIcons.icons["star-solid"]
+  };
 
   return (
     <main className="select-os-root">
@@ -179,15 +188,23 @@ function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
 
           <div className="device-cards-grid">
             {currentGroup.items.map((item) => {
-              const itemIcon = {
-                ...statusIconDefaults,
-                ...pixelarticons.icons[item.icon]
-              };
+              const itemIcon =
+                item.source === "pixel"
+                  ? { width: pixelIcons.width, height: pixelIcons.height, ...pixelIcons.icons[item.icon] }
+                  : { ...statusIconDefaults, ...pixelarticons.icons[item.icon] };
 
               return (
                 <Card key={item.label} className={`device-card tone-${item.tone}`}>
                   <CardContent className="device-card-content">
-                    <Icon icon={itemIcon} className="device-card-icon" />
+                    {item.icon === "__stars__" ? (
+                      <div className="password-stars">
+                        <Icon icon={starIcon} className="password-star-icon" />
+                        <Icon icon={starIcon} className="password-star-icon" />
+                        <Icon icon={starIcon} className="password-star-icon" />
+                      </div>
+                    ) : (
+                      <Icon icon={itemIcon} className="device-card-icon" />
+                    )}
                     <p>{item.label}</p>
                   </CardContent>
                 </Card>
@@ -196,14 +213,21 @@ function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
           </div>
 
           <footer className="device-footer">
-            {hasNext ? (
-              <button className="next-group-btn" onClick={() => setPageIndex((idx) => idx + 1)}>
-                <span>{nextGroupName}</span>
-                <Icon icon={arrowRightIcon} className="next-group-icon" />
-              </button>
-            ) : (
-              <div />
-            )}
+            <div className="group-nav-buttons">
+              {hasPrev ? (
+                <button className="next-group-btn prev-group-btn" onClick={() => setPageIndex((idx) => idx - 1)}>
+                  <Icon icon={arrowRightIcon} className="next-group-icon prev-group-icon" />
+                  <span>{prevGroupName}</span>
+                </button>
+              ) : null}
+
+              {hasNext ? (
+                <button className="next-group-btn" onClick={() => setPageIndex((idx) => idx + 1)}>
+                  <span>{nextGroupName}</span>
+                  <Icon icon={arrowRightIcon} className="next-group-icon" />
+                </button>
+              ) : null}
+            </div>
 
             <div className="device-pagination">
               {DEVICE_GROUPS.map((group, idx) => (

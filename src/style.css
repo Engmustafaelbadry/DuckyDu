@@ -661,6 +661,28 @@ body {
   height: 100%;
   margin: 0 !important;
   box-shadow: var(--pixel-box-shadow) !important;
+  clip-path: polygon(
+    0 calc(var(--pixel-step) * 2),
+    var(--pixel-step) calc(var(--pixel-step) * 2),
+    var(--pixel-step) var(--pixel-step),
+    calc(var(--pixel-step) * 2) var(--pixel-step),
+    calc(var(--pixel-step) * 2) 0,
+    calc(100% - (var(--pixel-step) * 2)) 0,
+    calc(100% - (var(--pixel-step) * 2)) var(--pixel-step),
+    calc(100% - var(--pixel-step)) var(--pixel-step),
+    calc(100% - var(--pixel-step)) calc(var(--pixel-step) * 2),
+    100% calc(var(--pixel-step) * 2),
+    100% calc(100% - (var(--pixel-step) * 2)),
+    calc(100% - var(--pixel-step)) calc(100% - (var(--pixel-step) * 2)),
+    calc(100% - var(--pixel-step)) calc(100% - var(--pixel-step)),
+    calc(100% - (var(--pixel-step) * 2)) calc(100% - var(--pixel-step)),
+    calc(100% - (var(--pixel-step) * 2)) 100%,
+    calc(var(--pixel-step) * 2) 100%,
+    calc(var(--pixel-step) * 2) calc(100% - var(--pixel-step)),
+    var(--pixel-step) calc(100% - var(--pixel-step)),
+    var(--pixel-step) calc(100% - (var(--pixel-step) * 2)),
+    0 calc(100% - (var(--pixel-step) * 2))
+  );
 }
 
 .device-card-content {
@@ -693,6 +715,12 @@ body {
   grid-template-columns: 1fr auto;
   align-items: center;
   gap: 10px;
+}
+
+.group-nav-buttons {
+  display: inline-flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .next-group-btn {
@@ -736,6 +764,22 @@ body {
 .next-group-icon {
   width: 18px;
   height: 18px;
+}
+
+.prev-group-icon {
+  transform: rotate(180deg);
+}
+
+.password-stars {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.password-star-icon {
+  width: 16px;
+  height: 16px;
+  color: currentColor;
+  fill: currentColor;
 }
 
 .device-pagination {
