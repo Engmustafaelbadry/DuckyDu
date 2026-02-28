@@ -40,6 +40,8 @@ apt-get install -y --no-install-recommends \
   openbox \
   unclutter \
   x11-xserver-utils \
+  python3 \
+  usbutils \
   "${CHROMIUM_PKG}"
 
 SCRIPT_SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -72,6 +74,7 @@ chown -R "${APP_USER}:${APP_USER}" "${KIOSK_DIR}"
 
 echo "Installing kiosk launcher..."
 install -m 0755 "${SCRIPT_SOURCE_DIR}/start-kiosk.sh" /usr/local/bin/start-kiosk.sh
+install -m 0755 "${SCRIPT_SOURCE_DIR}/usb_status_bridge.py" /usr/local/bin/usb-status-bridge
 
 echo "Installing systemd service..."
 install -m 0644 "${SCRIPT_SOURCE_DIR}/raspi-kiosk.service" /etc/systemd/system/raspi-kiosk.service

@@ -12,6 +12,14 @@ unclutter -idle 0.1 -root &
 
 URL="file:///opt/raspi-launcher/index.html"
 
+if command -v pkill >/dev/null 2>&1; then
+  pkill -f "usb_status_bridge.py" >/dev/null 2>&1 || true
+fi
+
+if [[ -x /usr/local/bin/usb-status-bridge ]]; then
+  /usr/local/bin/usb-status-bridge >/tmp/usb-status-bridge.log 2>&1 &
+fi
+
 CHROMIUM_BIN="chromium"
 if command -v chromium-browser >/dev/null 2>&1; then
   CHROMIUM_BIN="chromium-browser"
