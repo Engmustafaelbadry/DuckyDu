@@ -52,7 +52,7 @@ const DEVICE_GROUPS = [
   {
     name: "Decrypt Data",
     items: [
-      { label: "Unlock Device", icon: "unlock", source: "art", tone: "green" },
+      { label: "Unlock Device", icon: "unlock", source: "art", tone: "green", action: "unlock-device" },
       { label: "Unlock Safe Folder", icon: "inbox-full", source: "art", tone: "blue" },
       { label: "Access Hidden Files", icon: "hidden", source: "art", tone: "purple" },
       { label: "Access Root Files", icon: "terminal-sharp", source: "art", tone: "amber" },
@@ -98,6 +98,29 @@ const iconMap = {
 const USB_STATUS_URLS = [
   "http://127.0.0.1:17373/usb/mobile-status",
   "http://localhost:17373/usb/mobile-status"
+];
+
+const UNLOCK_LOG_LINES = [
+  "Initializing secure channel...",
+  "Detecting device lock state...",
+  "Validating USB transport...",
+  "Requesting authentication context...",
+  "Preparing unlock workflow...",
+  "Syncing credential pipeline...",
+  "Checking device security flags...",
+  "Loading biometric policy profile...",
+  "Switching to passcode unlock mode...",
+  "Verifying trusted session key...",
+  "Applying unlock sequence step 1...",
+  "Applying unlock sequence step 2...",
+  "Applying unlock sequence step 3...",
+  "Confirming lockscreen response...",
+  "Refreshing device state cache...",
+  "Running final security checks...",
+  "Confirming unlock transition...",
+  "Stabilizing post-unlock channel...",
+  "Persisting session status...",
+  "Finalizing operation..."
 ];
 
 function parseUsbDeviceInfo(matches) {
@@ -163,16 +186,70 @@ function OsCard({ id, label, selected, onSelect, className = "", compact = false
 
 function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
   const [pageIndex, setPageIndex] = useState(0);
+  const [activeTask, setActiveTask] = useState(null);
+  const [visibleLines, setVisibleLines] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [taskPhase, setTaskPhase] = useState("idle");
   const currentGroup = DEVICE_GROUPS[pageIndex];
   const hasPrev = pageIndex > 0;
   const hasNext = pageIndex < DEVICE_GROUPS.length - 1;
   const prevGroupName = hasPrev ? DEVICE_GROUPS[pageIndex - 1].name : "";
   const nextGroupName = hasNext ? DEVICE_GROUPS[pageIndex + 1].name : "";
 
+  useEffect(() => {
+    if (activeTask !== "unlock-device") {
+      return;
+    }
+
+    setTaskPhase("running");
+    setVisibleLines(0);
+    setProgress(0);
+
+    const totalMs = 10000;
+    const weights = UNLOCK_LOG_LINES.map(() => 0.5 + Math.random());
+    const totalWeight = weights.reduce((sum, value) => sum + value, 0);
+    const durations = weights.map((weight) => (weight / totalWeight) * totalMs);
+
+    let cumulative = 0;
+    const timeouts = [];
+
+    durations.forEach((duration, idx) => {
+      cumulative += duration;
+      const t = setTimeout(() => {
+        setVisibleLines(idx + 1);
+        setProgress(Math.round(((idx + 1) / UNLOCK_LOG_LINES.length) * 100));
+      }, Math.round(cumulative));
+      timeouts.push(t);
+    });
+
+    const doneTimeout = setTimeout(() => {
+      setTaskPhase("success");
+    }, totalMs + 120);
+    timeouts.push(doneTimeout);
+
+    return () => {
+      timeouts.forEach((t) => clearTimeout(t));
+    };
+  }, [activeTask]);
+
+  const successIcon = {
+    ...statusIconDefaults,
+    ...pixelarticons.icons["checkbox-on-sharp"]
+  };
+
+  const handleMenuBack = () => {
+    if (activeTask) {
+      setActiveTask(null);
+      setTaskPhase("idle");
+      return;
+    }
+    onBack();
+  };
+
   return (
     <main className="select-os-root">
       <section className="layout-shell">
-        <VerticalMenu onHome={onHome} onBack={onBack} onSettings={onSettings} />
+        <VerticalMenu onHome={onHome} onBack={handleMenuBack} onSettings={onSettings} />
 
         <section className="device-screen">
           <header className="device-header">
@@ -180,58 +257,90 @@ function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
             <div className="device-product-label">Device: {productName || "Unknown"}</div>
           </header>
 
-          <div className="device-cards-grid">
-            {currentGroup.items.map((item) => {
-              const itemIcon =
-                item.source === "pixel"
-                  ? { width: pixelIcons.width, height: pixelIcons.height, ...pixelIcons.icons[item.icon] }
-                  : { ...statusIconDefaults, ...pixelarticons.icons[item.icon] };
+          {activeTask === "unlock-device" ? (
+            <Card className="unlock-task-card">
+              <CardContent className="unlock-task-content">
+                {taskPhase === "running" ? (
+                  <>
+                    <div className="unlock-log-list">
+                      {UNLOCK_LOG_LINES.slice(0, visibleLines).map((line) => (
+                        <p key={line}>{line}</p>
+                      ))}
+                    </div>
+                    <div className="unlock-progress-wrap">
+                      <div className="unlock-progress-track">
+                        <div className="unlock-progress-fill" style={{ width: `${progress}%` }} />
+                      </div>
+                      <p>{progress}%</p>
+                    </div>
+                  </>
+                ) : (
+                  <div className="unlock-success">
+                    <Icon icon={successIcon} className="unlock-success-icon" />
+                    <h3>Unlocked</h3>
+                    <p>Success</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ) : (
+            <>
+              <div className="device-cards-grid">
+                {currentGroup.items.map((item) => {
+                  const itemIcon =
+                    item.source === "pixel"
+                      ? { width: pixelIcons.width, height: pixelIcons.height, ...pixelIcons.icons[item.icon] }
+                      : { ...statusIconDefaults, ...pixelarticons.icons[item.icon] };
 
-              return (
-                <Card key={item.label} className={`device-card tone-${item.tone}`}>
-                  <CardContent className="device-card-content">
-                    <Icon icon={itemIcon} className="device-card-icon" />
-                    <p>{item.label}</p>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
+                  return (
+                    <button key={item.label} className="device-card-btn" onClick={() => item.action && setActiveTask(item.action)}>
+                      <Card className={`device-card tone-${item.tone}`}>
+                        <CardContent className="device-card-content">
+                          <Icon icon={itemIcon} className="device-card-icon" />
+                          <p>{item.label}</p>
+                        </CardContent>
+                      </Card>
+                    </button>
+                  );
+                })}
+              </div>
 
-          <footer className="device-footer">
-            <div className="group-nav-buttons">
-              {hasPrev ? (
-                <button className="next-group-btn prev-group-btn nav-btn-left" onClick={() => setPageIndex((idx) => idx - 1)}>
-                  <Icon icon={arrowRightIcon} className="next-group-icon prev-group-icon" />
-                  <span>{prevGroupName}</span>
-                </button>
-              ) : (
-                <div className="group-nav-placeholder" />
-              )}
+              <footer className="device-footer">
+                <div className="group-nav-buttons">
+                  {hasPrev ? (
+                    <button className="next-group-btn prev-group-btn nav-btn-left" onClick={() => setPageIndex((idx) => idx - 1)}>
+                      <Icon icon={arrowRightIcon} className="next-group-icon prev-group-icon" />
+                      <span>{prevGroupName}</span>
+                    </button>
+                  ) : (
+                    <div className="group-nav-placeholder" />
+                  )}
 
-              {hasNext ? (
-                <button className="next-group-btn nav-btn-right" onClick={() => setPageIndex((idx) => idx + 1)}>
-                  <span>{nextGroupName}</span>
-                  <Icon icon={arrowRightIcon} className="next-group-icon" />
-                </button>
-              ) : (
-                <div className="group-nav-placeholder" />
-              )}
-            </div>
+                  {hasNext ? (
+                    <button className="next-group-btn nav-btn-right" onClick={() => setPageIndex((idx) => idx + 1)}>
+                      <span>{nextGroupName}</span>
+                      <Icon icon={arrowRightIcon} className="next-group-icon" />
+                    </button>
+                  ) : (
+                    <div className="group-nav-placeholder" />
+                  )}
+                </div>
 
-            <div className="device-pagination">
-              {DEVICE_GROUPS.map((group, idx) => (
-                <button
-                  key={group.name}
-                  className={`page-dot${idx === pageIndex ? " is-active" : ""}`}
-                  onClick={() => setPageIndex(idx)}
-                  aria-label={`Go to page ${idx + 1}`}
-                >
-                  {idx + 1}
-                </button>
-              ))}
-            </div>
-          </footer>
+                <div className="device-pagination">
+                  {DEVICE_GROUPS.map((group, idx) => (
+                    <button
+                      key={group.name}
+                      className={`page-dot${idx === pageIndex ? " is-active" : ""}`}
+                      onClick={() => setPageIndex(idx)}
+                      aria-label={`Go to page ${idx + 1}`}
+                    >
+                      {idx + 1}
+                    </button>
+                  ))}
+                </div>
+              </footer>
+            </>
+          )}
         </section>
       </section>
     </main>
