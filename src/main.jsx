@@ -1,68 +1,50 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createRoot } from "react-dom/client";
+import { PixelIcon } from "@2hoch1/pixel-icon-library-react";
+import { Button } from "@/components/ui/pixelact-ui/button";
+import { Card, CardContent } from "@/components/ui/pixelact-ui/card";
 import "./style.css";
 
-const TARGET_WIDTH = 780;
-const TARGET_HEIGHT = 460;
+const iconMap = {
+  android: "android",
+  ios: "apple",
+  other: "code"
+};
 
-function App() {
-  const [metrics, setMetrics] = useState({
-    innerWidth: window.innerWidth,
-    innerHeight: window.innerHeight,
-    outerWidth: window.outerWidth,
-    outerHeight: window.outerHeight,
-    dpr: window.devicePixelRatio
-  });
+function OsCard({ id, label, selected, onSelect }) {
+  return (
+    <button className={`os-card-btn${selected ? " is-selected" : ""}`} onClick={() => onSelect(id)} aria-pressed={selected}>
+      <Card className={`os-card os-${id}`}>
+        <CardContent className="os-card-content">
+          <PixelIcon name={iconMap[id]} size={56} className="pixel-icon" />
+          <div className="os-text">
+            <h2>{label}</h2>
+          </div>
+        </CardContent>
+      </Card>
+    </button>
+  );
+}
 
-  useEffect(() => {
-    function updateMetrics() {
-      setMetrics({
-        innerWidth: window.innerWidth,
-        innerHeight: window.innerHeight,
-        outerWidth: window.outerWidth,
-        outerHeight: window.outerHeight,
-        dpr: window.devicePixelRatio
-      });
-    }
-
-    window.addEventListener("resize", updateMetrics);
-    window.addEventListener("orientationchange", updateMetrics);
-    updateMetrics();
-
-    return () => {
-      window.removeEventListener("resize", updateMetrics);
-      window.removeEventListener("orientationchange", updateMetrics);
-    };
-  }, []);
-
-  const missingX = TARGET_WIDTH - metrics.innerWidth;
-  const missingY = TARGET_HEIGHT - metrics.innerHeight;
-  const scaleX = metrics.innerWidth / TARGET_WIDTH;
-  const scaleY = metrics.innerHeight / TARGET_HEIGHT;
+function SelectOsScreen() {
+  const [selected, setSelected] = useState("android");
 
   return (
-    <main className="calib-root">
-      <div className="viewport-border" />
-      <div className="crosshair crosshair-x" />
-      <div className="crosshair crosshair-y" />
+    <main className="select-os-root">
+      <section className="select-os-screen">
+        <div className="row-main">
+          <OsCard id="android" label="Android" selected={selected === "android"} onSelect={setSelected} />
+          <OsCard id="ios" label="iOS" selected={selected === "ios"} onSelect={setSelected} />
+        </div>
 
-      <div className="target-frame">
-        <div className="target-label">{TARGET_WIDTH} x {TARGET_HEIGHT} target</div>
-      </div>
+        <OsCard id="other" label="Other OS" selected={selected === "other"} onSelect={setSelected} />
 
-      <section className="panel">
-        <h1>Screen Calibration</h1>
-        <p>Inner (real canvas): {metrics.innerWidth} x {metrics.innerHeight}</p>
-        <p>Outer (window): {metrics.outerWidth} x {metrics.outerHeight}</p>
-        <p>Device Pixel Ratio: {metrics.dpr}</p>
-        <p>Missing X for 800 width: {missingX > 0 ? `${missingX}px` : `0px (extra ${Math.abs(missingX)}px)`}</p>
-        <p>Missing Y for 480 height: {missingY > 0 ? `${missingY}px` : `0px (extra ${Math.abs(missingY)}px)`}</p>
-        <p>Recommended kiosk width/height: {metrics.innerWidth}px x {metrics.innerHeight}px</p>
-        <p>Scale from 780x460: X {scaleX.toFixed(4)} / Y {scaleY.toFixed(4)}</p>
-        <p className="hint">Take a photo of this screen and share the numbers.</p>
+        <Button variant="destructive" className="cancel-btn">
+          Cancel
+        </Button>
       </section>
     </main>
   );
 }
 
-createRoot(document.querySelector("#app")).render(<App />);
+createRoot(document.querySelector("#app")).render(<SelectOsScreen />);
