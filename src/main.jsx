@@ -83,7 +83,7 @@ const DEVICE_GROUPS = [
     items: [
       { label: "Wipe All data", icon: "delete", source: "art", tone: "red" },
       { label: "Hard Reset", icon: "reload-sharp", source: "art", tone: "orange" },
-      { label: "Delete G Account", icon: "user-x-sharp", source: "art", tone: "magenta" },
+      { label: "Delete Google Account", icon: "google", source: "art", tone: "magenta" },
       { label: "Remove Login Credientals", icon: "user-minus-sharp", source: "art", tone: "gray" }
     ]
   }
