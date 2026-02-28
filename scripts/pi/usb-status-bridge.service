@@ -1,0 +1,15 @@
+[Unit]
+Description=USB Mobile Status Bridge
+After=network.target
+
+[Service]
+Type=simple
+User=__APP_USER__
+Group=__APP_USER__
+Environment=HOME=/home/__APP_USER__
+ExecStart=/usr/local/bin/usb-status-bridge
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
