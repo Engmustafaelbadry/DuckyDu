@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { Icon } from "@iconify/react";
 import {
   ArrowLeftSolid,
-  Code,
+  Code
 } from "@2hoch1/pixel-icon-library-react/icons";
 import pixelIcons from "@iconify-json/pixel/icons.json";
 import pixelarticons from "@iconify-json/pixelarticons/icons.json";
@@ -42,6 +42,48 @@ const connectWirelessIcon = {
   ...statusIconDefaults,
   ...pixelarticons.icons.wifi
 };
+
+const arrowRightIcon = {
+  ...statusIconDefaults,
+  ...pixelarticons.icons["arrow-right"]
+};
+
+const DEVICE_GROUPS = [
+  {
+    name: "Decrypt Data",
+    items: [
+      { label: "Unlock Device", icon: "unlock", tone: "green" },
+      { label: "Unlock Safe Folder", icon: "folder-plus-sharp", tone: "blue" },
+      { label: "Access Hidden Files", icon: "hidden", tone: "purple" },
+      { label: "Access Root Files", icon: "shield-sharp", tone: "amber" }
+    ]
+  },
+  {
+    name: "Data Management",
+    items: [
+      { label: "Backup Data", icon: "database", tone: "cyan" },
+      { label: "Delete All Data", icon: "delete-sharp", tone: "red" },
+      { label: "Hard Reset", icon: "reload-sharp", tone: "orange" },
+      { label: "Upload Data To Cloud", icon: "cloud-upload", tone: "indigo" }
+    ]
+  },
+  {
+    name: "Device Management",
+    items: [
+      { label: "Device Cloud Mirror", icon: "cloud-server", tone: "teal" },
+      { label: "Install Permissions", icon: "shield", tone: "lime" }
+    ]
+  },
+  {
+    name: "Delete Encryption",
+    items: [
+      { label: "Wipe All Data", icon: "delete", tone: "red" },
+      { label: "Hard Reset", icon: "reload-sharp", tone: "orange" },
+      { label: "Delete G Account", icon: "user-x-sharp", tone: "magenta" },
+      { label: "Remove Login Credientals", icon: "user-minus-sharp", tone: "gray" }
+    ]
+  }
+];
 
 const iconMap = {
   android: { type: "iconify", icon: androidOsIcon },
@@ -115,7 +157,71 @@ function OsCard({ id, label, selected, onSelect, className = "", compact = false
   );
 }
 
+function DeviceManagementScreen() {
+  const [pageIndex, setPageIndex] = useState(0);
+  const currentGroup = DEVICE_GROUPS[pageIndex];
+  const hasNext = pageIndex < DEVICE_GROUPS.length - 1;
+  const nextGroupName = hasNext ? DEVICE_GROUPS[pageIndex + 1].name : "";
+
+  return (
+    <main className="select-os-root">
+      <section className="layout-shell">
+        <VerticalMenu />
+
+        <section className="device-screen">
+          <header className="device-header">
+            <h2>{currentGroup.name}</h2>
+          </header>
+
+          <div className="device-cards-grid">
+            {currentGroup.items.map((item) => {
+              const itemIcon = {
+                ...statusIconDefaults,
+                ...pixelarticons.icons[item.icon]
+              };
+
+              return (
+                <Card key={item.label} className={`device-card tone-${item.tone}`}>
+                  <CardContent className="device-card-content">
+                    <Icon icon={itemIcon} className="device-card-icon" />
+                    <p>{item.label}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          <footer className="device-footer">
+            {hasNext ? (
+              <button className="next-group-btn" onClick={() => setPageIndex((idx) => idx + 1)}>
+                <span>{nextGroupName}</span>
+                <Icon icon={arrowRightIcon} className="next-group-icon" />
+              </button>
+            ) : (
+              <div />
+            )}
+
+            <div className="device-pagination">
+              {DEVICE_GROUPS.map((group, idx) => (
+                <button
+                  key={group.name}
+                  className={`page-dot${idx === pageIndex ? " is-active" : ""}`}
+                  onClick={() => setPageIndex(idx)}
+                  aria-label={`Go to page ${idx + 1}`}
+                >
+                  {idx + 1}
+                </button>
+              ))}
+            </div>
+          </footer>
+        </section>
+      </section>
+    </main>
+  );
+}
+
 function SelectOsScreen() {
+  const [screen, setScreen] = useState("select");
   const [selected, setSelected] = useState("android");
   const [connectMode, setConnectMode] = useState(false);
   const [connectStage, setConnectStage] = useState("choose");
@@ -204,6 +310,10 @@ function SelectOsScreen() {
     }
   };
 
+  if (screen === "device-management") {
+    return <DeviceManagementScreen />;
+  }
+
   return (
     <main className="select-os-root">
       <section className="layout-shell">
@@ -258,7 +368,9 @@ function SelectOsScreen() {
                         <p className="device-info-line">Manufacturer: {usbDeviceInfo.manufacturer}</p>
                         <div className="access-device-slot">
                           {accessReady ? (
-                            <Button className="access-device-btn">Access Device</Button>
+                            <Button className="access-device-btn" onClick={() => setScreen("device-management")}>
+                              Access Device
+                            </Button>
                           ) : (
                             <Spinner className="access-spinner" />
                           )}
