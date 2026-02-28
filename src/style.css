@@ -464,6 +464,27 @@ body {
   color: #b7b7b7;
 }
 
+.connected-details {
+  width: 100%;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+}
+
+.device-info-line {
+  margin: 0;
+  text-align: center;
+  color: #ffffff;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.access-device-btn {
+  min-width: 200px;
+  margin-top: 8px;
+}
+
 .connect-via-title {
   grid-column: 1 / -1;
   margin: 0 0 6px;

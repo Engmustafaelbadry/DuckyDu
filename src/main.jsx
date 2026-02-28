@@ -53,6 +53,31 @@ const USB_STATUS_URLS = [
   "http://localhost:17373/usb/mobile-status"
 ];
 
+function parseUsbDeviceInfo(matches) {
+  if (!Array.isArray(matches) || matches.length === 0) {
+    return { manufacturer: "Unknown", productName: "Unknown" };
+  }
+
+  const first = String(matches[0]);
+  const idMarker = first.match(/\bID\s+[0-9a-f]{4}:[0-9a-f]{4}\s+(.+)$/i);
+  const descriptor = idMarker?.[1]?.trim() || "";
+
+  if (!descriptor) {
+    return { manufacturer: "Unknown", productName: "Unknown" };
+  }
+
+  const parts = descriptor.split(/\s+/);
+  let manufacturer = descriptor;
+  let productName = "Unknown";
+
+  if (parts.length >= 2) {
+    manufacturer = parts.slice(0, 2).join(" ");
+    productName = parts.slice(2).join(" ").trim() || "Unknown";
+  }
+
+  return { manufacturer, productName };
+}
+
 function OsCard({ id, label, selected, onSelect, className = "", compact = false }) {
   const iconConfig = iconMap[id];
   const iconClassName = `pixel-icon${id === "other" ? " pixel-icon-small" : ""}${compact ? " pixel-icon-compact" : ""}`;
@@ -89,11 +114,13 @@ function SelectOsScreen() {
   const [connectStage, setConnectStage] = useState("choose");
   const [usbConnected, setUsbConnected] = useState(false);
   const [usbBridgeOnline, setUsbBridgeOnline] = useState(true);
+  const [usbDeviceInfo, setUsbDeviceInfo] = useState({ manufacturer: "Unknown", productName: "Unknown" });
 
   useEffect(() => {
     if (connectStage !== "cable_wait") {
       setUsbConnected(false);
       setUsbBridgeOnline(true);
+      setUsbDeviceInfo({ manufacturer: "Unknown", productName: "Unknown" });
       return;
     }
 
@@ -115,6 +142,7 @@ function SelectOsScreen() {
           if (isActive) {
             setUsbConnected(Boolean(data.connected));
             setUsbBridgeOnline(true);
+            setUsbDeviceInfo(parseUsbDeviceInfo(data.matches));
           }
           break;
         } catch {
@@ -200,11 +228,20 @@ function SelectOsScreen() {
                   </>
                 ) : (
                   <div className="connect-waiting">
-                    <p>Please connect device through Cable.</p>
-                    <Icon icon={connectCableIcon} className="wait-cable-lib-icon" aria-hidden="true" />
-                    <p className={`connect-state${usbConnected ? " is-connected" : ""}`}>
-                      {usbConnected ? "Connected" : "Waiting..."}
-                    </p>
+                    {usbConnected ? (
+                      <div className="connected-details">
+                        <p className="connect-state is-connected">Connected</p>
+                        <p className="device-info-line">Product Name: {usbDeviceInfo.productName}</p>
+                        <p className="device-info-line">Manufacturer: {usbDeviceInfo.manufacturer}</p>
+                        <Button className="access-device-btn">Access Device</Button>
+                      </div>
+                    ) : (
+                      <>
+                        <p>Please connect device through Cable.</p>
+                        <Icon icon={connectCableIcon} className="wait-cable-lib-icon" aria-hidden="true" />
+                        <p className="connect-state">Waiting...</p>
+                      </>
+                    )}
                     {!usbBridgeOnline ? <p className="connect-state-note">USB bridge offline</p> : null}
                     <Button variant="destructive" className="panel-cancel-btn" onClick={() => setConnectStage("choose")}>
                       Cancel
