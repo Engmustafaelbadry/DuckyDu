@@ -67,13 +67,8 @@ function parseUsbDeviceInfo(matches) {
   }
 
   const parts = descriptor.split(/\s+/);
-  let manufacturer = descriptor;
-  let productName = "Unknown";
-
-  if (parts.length >= 2) {
-    manufacturer = parts.slice(0, 2).join(" ");
-    productName = parts.slice(2).join(" ").trim() || "Unknown";
-  }
+  const manufacturer = parts.length >= 2 ? parts.slice(0, 2).join(" ") : parts[0] || "Unknown";
+  const productName = descriptor;
 
   return { manufacturer, productName };
 }

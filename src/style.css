@@ -450,7 +450,7 @@ body {
 
 .connect-state {
   margin: 0;
-  font-size: 14px;
+  font-size: 20px;
   color: #ffffff;
 }
 
@@ -481,8 +481,10 @@ body {
 }
 
 .access-device-btn {
-  min-width: 200px;
-  margin-top: 8px;
+  min-width: 250px;
+  height: 54px;
+  margin-top: 10px;
+  font-size: 16px;
 }
 
 .connect-via-title {
