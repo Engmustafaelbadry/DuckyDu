@@ -141,8 +141,13 @@ body {
   height: 100%;
   padding: 8px;
   display: grid;
-  grid-template-rows: 1.35fr 0.65fr auto;
+  grid-template-rows: 1.35fr 0.65fr 0fr auto;
   gap: 16px;
+}
+
+.select-os-screen.is-connect-mode {
+  grid-template-rows: auto 1fr auto;
+  gap: 2px;
 }
 
 .row-main {
@@ -150,16 +155,31 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+  transition: all 220ms steps(12, end);
+}
+
+.focus-slot {
+  height: 82px;
+}
+
+.focus-slot .os-card {
+  height: 82px;
 }
 
 .os-card-btn {
   width: 100%;
   min-width: 0;
   min-height: 0;
+  max-height: 100%;
   border: 0;
   padding: 0;
   background: transparent;
   cursor: pointer;
+  overflow: hidden;
+  transition:
+    transform 220ms steps(12, end),
+    opacity 220ms steps(12, end),
+    max-height 220ms steps(12, end);
 }
 
 .os-card {
@@ -247,6 +267,117 @@ body {
 .pixel-icon-small {
   width: 34px;
   height: 34px;
+}
+
+.pixel-icon-compact {
+  width: 40px;
+  height: 40px;
+  margin-top: -20px;
+}
+
+.focus-slot .os-card-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+}
+
+.focus-slot .os-text {
+  text-align: left;
+}
+
+.focus-slot .os-text h2 {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.is-hidden {
+  opacity: 0;
+  transform: scale(0.88);
+  max-height: 0;
+  pointer-events: none;
+}
+
+.connect-panel {
+  width: 100%;
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(12px) scale(0.96);
+  pointer-events: none;
+  transition:
+    opacity 220ms steps(12, end),
+    transform 220ms steps(12, end);
+}
+
+.connect-panel.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.connect-panel-content {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr 1fr;
+  align-items: stretch;
+  row-gap: 18px;
+  column-gap: 14px;
+  padding: 10px;
+}
+
+.connect-via-title {
+  grid-column: 1 / -1;
+  margin: 0 0 6px;
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.2;
+  color: #ffffff;
+}
+
+.connect-option {
+  width: 100%;
+  background: #000000;
+  border: 2px solid #ffffff;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  padding: 14px 10px;
+  clip-path: polygon(
+    6px 0,
+    calc(100% - 6px) 0,
+    100% 6px,
+    100% calc(100% - 6px),
+    calc(100% - 6px) 100%,
+    6px 100%,
+    0 calc(100% - 6px),
+    0 6px
+  );
+}
+
+.connect-option h4 {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.2;
+  text-align: center;
+  color: #ffffff;
+}
+
+.connect-method-icon {
+  width: 56px;
+  height: 56px;
+  color: #ffffff;
+  fill: currentColor;
 }
 
 .cancel-btn {
