@@ -31,6 +31,7 @@
   --destructive: oklch(62% 0.24 25.94);
   --destructive-foreground: oklch(98.5% 0 0);
   --radius: 0;
+  --pixel-step: 4px;
 }
 
 * {
@@ -141,13 +142,52 @@ body {
   height: 100%;
   padding: 8px;
   display: grid;
-  grid-template-rows: 1.35fr 0.65fr 0fr auto;
-  gap: 16px;
+  grid-template-rows: 0fr 1fr auto;
+  gap: 10px;
 }
 
 .select-os-screen.is-connect-mode {
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto 0fr 1fr auto;
   gap: 2px;
+}
+
+.focus-slot-wrap {
+  min-height: 0;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(8px) scale(0.96);
+  pointer-events: none;
+  overflow: hidden;
+  transition:
+    max-height 220ms steps(12, end),
+    opacity 220ms steps(12, end),
+    transform 220ms steps(12, end);
+}
+
+.focus-slot-wrap.is-visible {
+  max-height: 90px;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.os-selection-group {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: 1.6fr 0.4fr;
+  gap: 10px;
+  transition:
+    opacity 220ms steps(12, end),
+    transform 220ms steps(12, end),
+    max-height 220ms steps(12, end);
+}
+
+.os-selection-group.is-hidden {
+  opacity: 0;
+  transform: scale(0.94);
+  max-height: 0;
+  pointer-events: none;
+  overflow: hidden;
 }
 
 .row-main {
@@ -187,23 +227,34 @@ body {
   height: 100%;
   border: 0 !important;
   border-radius: 0 !important;
-  box-shadow: none !important;
+  box-shadow: var(--pixel-box-shadow) !important;
   margin: 0 !important;
   overflow: hidden;
-}
-
-.os-main {
   clip-path: polygon(
-    10px 0,
-    calc(100% - 10px) 0,
-    100% 10px,
-    100% calc(100% - 10px),
-    calc(100% - 10px) 100%,
-    10px 100%,
-    0 calc(100% - 10px),
-    0 10px
+    0 calc(var(--pixel-step) * 2),
+    var(--pixel-step) calc(var(--pixel-step) * 2),
+    var(--pixel-step) var(--pixel-step),
+    calc(var(--pixel-step) * 2) var(--pixel-step),
+    calc(var(--pixel-step) * 2) 0,
+    calc(100% - (var(--pixel-step) * 2)) 0,
+    calc(100% - (var(--pixel-step) * 2)) var(--pixel-step),
+    calc(100% - var(--pixel-step)) var(--pixel-step),
+    calc(100% - var(--pixel-step)) calc(var(--pixel-step) * 2),
+    100% calc(var(--pixel-step) * 2),
+    100% calc(100% - (var(--pixel-step) * 2)),
+    calc(100% - var(--pixel-step)) calc(100% - (var(--pixel-step) * 2)),
+    calc(100% - var(--pixel-step)) calc(100% - var(--pixel-step)),
+    calc(100% - (var(--pixel-step) * 2)) calc(100% - var(--pixel-step)),
+    calc(100% - (var(--pixel-step) * 2)) 100%,
+    calc(var(--pixel-step) * 2) 100%,
+    calc(var(--pixel-step) * 2) calc(100% - var(--pixel-step)),
+    var(--pixel-step) calc(100% - var(--pixel-step)),
+    var(--pixel-step) calc(100% - (var(--pixel-step) * 2)),
+    0 calc(100% - (var(--pixel-step) * 2))
   );
 }
+
+.os-main {}
 
 .os-card-content {
   width: 100%;
@@ -249,19 +300,20 @@ body {
 }
 
 .os-other {
-  background: #000000 !important;
+  background: #171717 !important;
   color: #ffffff !important;
   border: 2px solid #2b2b2b !important;
 }
 
 .os-other .os-card-content {
-  place-items: center;
-  align-content: center;
-  gap: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
 }
 
 .os-other .os-text {
-  text-align: center;
+  text-align: left;
 }
 
 .pixel-icon-small {
@@ -314,8 +366,30 @@ body {
   color: #ffffff !important;
   border: 0 !important;
   border-radius: 0 !important;
-  box-shadow: none !important;
+  box-shadow: var(--pixel-box-shadow) !important;
   overflow: hidden;
+  clip-path: polygon(
+    0 calc(var(--pixel-step) * 2),
+    var(--pixel-step) calc(var(--pixel-step) * 2),
+    var(--pixel-step) var(--pixel-step),
+    calc(var(--pixel-step) * 2) var(--pixel-step),
+    calc(var(--pixel-step) * 2) 0,
+    calc(100% - (var(--pixel-step) * 2)) 0,
+    calc(100% - (var(--pixel-step) * 2)) var(--pixel-step),
+    calc(100% - var(--pixel-step)) var(--pixel-step),
+    calc(100% - var(--pixel-step)) calc(var(--pixel-step) * 2),
+    100% calc(var(--pixel-step) * 2),
+    100% calc(100% - (var(--pixel-step) * 2)),
+    calc(100% - var(--pixel-step)) calc(100% - (var(--pixel-step) * 2)),
+    calc(100% - var(--pixel-step)) calc(100% - var(--pixel-step)),
+    calc(100% - (var(--pixel-step) * 2)) calc(100% - var(--pixel-step)),
+    calc(100% - (var(--pixel-step) * 2)) 100%,
+    calc(var(--pixel-step) * 2) 100%,
+    calc(var(--pixel-step) * 2) calc(100% - var(--pixel-step)),
+    var(--pixel-step) calc(100% - var(--pixel-step)),
+    var(--pixel-step) calc(100% - (var(--pixel-step) * 2)),
+    0 calc(100% - (var(--pixel-step) * 2))
+  );
   opacity: 0;
   transform: translateY(12px) scale(0.96);
   pointer-events: none;
@@ -354,22 +428,36 @@ body {
 
 .connect-option {
   width: 100%;
-  background: #000000;
+  background: #171717;
   border: 2px solid #ffffff;
+  border-radius: 0;
+  box-shadow: var(--pixel-box-shadow);
   display: grid;
   place-items: center;
   align-content: center;
   gap: 10px;
   padding: 14px 10px;
   clip-path: polygon(
-    6px 0,
-    calc(100% - 6px) 0,
-    100% 6px,
-    100% calc(100% - 6px),
-    calc(100% - 6px) 100%,
-    6px 100%,
-    0 calc(100% - 6px),
-    0 6px
+    0 calc(var(--pixel-step) * 2),
+    var(--pixel-step) calc(var(--pixel-step) * 2),
+    var(--pixel-step) var(--pixel-step),
+    calc(var(--pixel-step) * 2) var(--pixel-step),
+    calc(var(--pixel-step) * 2) 0,
+    calc(100% - (var(--pixel-step) * 2)) 0,
+    calc(100% - (var(--pixel-step) * 2)) var(--pixel-step),
+    calc(100% - var(--pixel-step)) var(--pixel-step),
+    calc(100% - var(--pixel-step)) calc(var(--pixel-step) * 2),
+    100% calc(var(--pixel-step) * 2),
+    100% calc(100% - (var(--pixel-step) * 2)),
+    calc(100% - var(--pixel-step)) calc(100% - (var(--pixel-step) * 2)),
+    calc(100% - var(--pixel-step)) calc(100% - var(--pixel-step)),
+    calc(100% - (var(--pixel-step) * 2)) calc(100% - var(--pixel-step)),
+    calc(100% - (var(--pixel-step) * 2)) 100%,
+    calc(var(--pixel-step) * 2) 100%,
+    calc(var(--pixel-step) * 2) calc(100% - var(--pixel-step)),
+    var(--pixel-step) calc(100% - var(--pixel-step)),
+    var(--pixel-step) calc(100% - (var(--pixel-step) * 2)),
+    0 calc(100% - (var(--pixel-step) * 2))
   );
 }
 
@@ -392,7 +480,6 @@ body {
   width: 100%;
   height: 56px;
   border-radius: 0 !important;
-  box-shadow: none !important;
   margin: 0 !important;
   font-size: 18px;
   display: inline-flex;
@@ -400,19 +487,27 @@ body {
   justify-content: center;
   gap: 10px;
   clip-path: polygon(
-    10px 0,
-    calc(100% - 10px) 0,
-    100% 10px,
-    100% calc(100% - 10px),
-    calc(100% - 10px) 100%,
-    10px 100%,
-    0 calc(100% - 10px),
-    0 10px
+    0 calc(var(--pixel-step) * 2),
+    var(--pixel-step) calc(var(--pixel-step) * 2),
+    var(--pixel-step) var(--pixel-step),
+    calc(var(--pixel-step) * 2) var(--pixel-step),
+    calc(var(--pixel-step) * 2) 0,
+    calc(100% - (var(--pixel-step) * 2)) 0,
+    calc(100% - (var(--pixel-step) * 2)) var(--pixel-step),
+    calc(100% - var(--pixel-step)) var(--pixel-step),
+    calc(100% - var(--pixel-step)) calc(var(--pixel-step) * 2),
+    100% calc(var(--pixel-step) * 2),
+    100% calc(100% - (var(--pixel-step) * 2)),
+    calc(100% - var(--pixel-step)) calc(100% - (var(--pixel-step) * 2)),
+    calc(100% - var(--pixel-step)) calc(100% - var(--pixel-step)),
+    calc(100% - (var(--pixel-step) * 2)) calc(100% - var(--pixel-step)),
+    calc(100% - (var(--pixel-step) * 2)) 100%,
+    calc(var(--pixel-step) * 2) 100%,
+    calc(var(--pixel-step) * 2) calc(100% - var(--pixel-step)),
+    var(--pixel-step) calc(100% - var(--pixel-step)),
+    var(--pixel-step) calc(100% - (var(--pixel-step) * 2)),
+    0 calc(100% - (var(--pixel-step) * 2))
   );
-}
-
-.cancel-btn::after {
-  display: none !important;
 }
 
 .cancel-icon {

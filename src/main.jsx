@@ -100,7 +100,7 @@ function SelectOsScreen() {
         <VerticalMenu />
 
         <section className={`select-os-screen${connectMode ? " is-connect-mode" : ""}`}>
-          {connectMode ? (
+          <div className={`focus-slot-wrap${connectMode ? " is-visible" : ""}`}>
             <OsCard
               id={selected}
               label={selected === "android" ? "Android" : selected === "ios" ? "iOS" : "Other OS"}
@@ -109,36 +109,38 @@ function SelectOsScreen() {
               className="focus-slot"
               compact={true}
             />
-          ) : (
-            <>
-              <div className="row-main">
-                <OsCard id="android" label="Android" selected={selected === "android"} onSelect={handleCardSelect} />
-                <OsCard id="ios" label="iOS" selected={selected === "ios"} onSelect={handleCardSelect} />
-              </div>
+          </div>
 
-              <OsCard id="other" label="Other OS" selected={selected === "other"} onSelect={handleCardSelect} />
-            </>
-          )}
+          <div className={`os-selection-group${connectMode ? " is-hidden" : ""}`}>
+            <div className="row-main">
+              <OsCard id="android" label="Android" selected={selected === "android"} onSelect={handleCardSelect} />
+              <OsCard id="ios" label="iOS" selected={selected === "ios"} onSelect={handleCardSelect} />
+            </div>
 
-          <Card className={`connect-panel${connectMode ? " is-visible" : ""}`}>
-            <CardContent className="connect-panel-content">
-              <h3 className="connect-via-title">Connect via</h3>
+            <OsCard id="other" label="Other OS" selected={selected === "other"} onSelect={handleCardSelect} />
+          </div>
 
-              <div className="connect-option">
-                <Icon icon={connectCableIcon} className="connect-method-icon" />
-                <h4>Cable</h4>
-              </div>
+          {connectMode ? (
+            <Card className="connect-panel is-visible">
+              <CardContent className="connect-panel-content">
+                <h3 className="connect-via-title">Connect via</h3>
 
-              <div className="connect-option">
-                <Icon icon={connectWirelessIcon} className="connect-method-icon" />
-                <h4>Wireless</h4>
-              </div>
-            </CardContent>
-          </Card>
+                <div className="connect-option">
+                  <Icon icon={connectCableIcon} className="connect-method-icon" />
+                  <h4>Cable</h4>
+                </div>
+
+                <div className="connect-option">
+                  <Icon icon={connectWirelessIcon} className="connect-method-icon" />
+                  <h4>Wireless</h4>
+                </div>
+              </CardContent>
+            </Card>
+          ) : null}
 
           <Button variant="destructive" className="cancel-btn" onClick={handleBottomAction}>
             <ArrowLeftSolid className="cancel-icon" />
-            {connectMode ? "Back" : "Cancel"}
+            Back
           </Button>
         </section>
       </section>
