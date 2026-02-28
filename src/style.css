@@ -718,9 +718,11 @@ body {
 }
 
 .group-nav-buttons {
-  display: inline-flex;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
-  flex-wrap: wrap;
+  align-items: center;
 }
 
 .next-group-btn {
@@ -730,8 +732,10 @@ body {
   box-shadow: var(--pixel-box-shadow);
   display: inline-flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
   padding: 12px 14px;
+  width: 220px;
   cursor: pointer;
   clip-path: polygon(
     0 calc(var(--pixel-step) * 2),
@@ -761,6 +765,19 @@ body {
   font-size: 11px;
 }
 
+.nav-btn-left {
+  justify-self: start;
+}
+
+.nav-btn-right {
+  justify-self: end;
+}
+
+.group-nav-placeholder {
+  width: 220px;
+  height: 42px;
+}
+
 .next-group-icon {
   width: 18px;
   height: 18px;
@@ -772,12 +789,12 @@ body {
 
 .password-stars {
   display: inline-flex;
-  gap: 2px;
+  gap: 4px;
 }
 
 .password-star-icon {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   color: currentColor;
   fill: currentColor;
 }

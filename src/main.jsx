@@ -53,10 +53,10 @@ const DEVICE_GROUPS = [
     name: "Decrypt Data",
     items: [
       { label: "Unlock Device", icon: "unlock", source: "art", tone: "green" },
-      { label: "Unlock Safe Folder", icon: "lock-alt", source: "pixel", tone: "blue" },
+      { label: "Unlock Safe Folder", icon: "inbox-full", source: "art", tone: "blue" },
       { label: "Access Hidden Files", icon: "hidden", source: "art", tone: "purple" },
       { label: "Access Root Files", icon: "terminal-sharp", source: "art", tone: "amber" },
-      { label: "Decrypt Security", icon: "unlock-alt", source: "pixel", tone: "lime" },
+      { label: "Decrypt Security", icon: "grid-3x3-sharp", source: "art", tone: "lime" },
       { label: "Decrypt Biometrics", icon: "ai-scan-sharp", source: "art", tone: "teal" },
       { label: "Decrypt Apps Security", icon: "blocks-sharp", source: "art", tone: "indigo" },
       { label: "Show Passwords", icon: "__stars__", source: "custom", tone: "gray" }
@@ -215,18 +215,22 @@ function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
           <footer className="device-footer">
             <div className="group-nav-buttons">
               {hasPrev ? (
-                <button className="next-group-btn prev-group-btn" onClick={() => setPageIndex((idx) => idx - 1)}>
+                <button className="next-group-btn prev-group-btn nav-btn-left" onClick={() => setPageIndex((idx) => idx - 1)}>
                   <Icon icon={arrowRightIcon} className="next-group-icon prev-group-icon" />
                   <span>{prevGroupName}</span>
                 </button>
-              ) : null}
+              ) : (
+                <div className="group-nav-placeholder" />
+              )}
 
               {hasNext ? (
-                <button className="next-group-btn" onClick={() => setPageIndex((idx) => idx + 1)}>
+                <button className="next-group-btn nav-btn-right" onClick={() => setPageIndex((idx) => idx + 1)}>
                   <span>{nextGroupName}</span>
                   <Icon icon={arrowRightIcon} className="next-group-icon" />
                 </button>
-              ) : null}
+              ) : (
+                <div className="group-nav-placeholder" />
+              )}
             </div>
 
             <div className="device-pagination">
