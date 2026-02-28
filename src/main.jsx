@@ -55,7 +55,10 @@ const DEVICE_GROUPS = [
       { label: "Unlock Device", icon: "unlock", tone: "green" },
       { label: "Unlock Safe Folder", icon: "folder-plus-sharp", tone: "blue" },
       { label: "Access Hidden Files", icon: "hidden", tone: "purple" },
-      { label: "Access Root Files", icon: "shield-sharp", tone: "amber" }
+      { label: "Access Root Files", icon: "shield-sharp", tone: "amber" },
+      { label: "Decrypt Security", icon: "shield", tone: "lime" },
+      { label: "Decrypt Biometrics", icon: "ai-user-circle", tone: "teal" },
+      { label: "Decrypt Apps Security", icon: "blocks-sharp", tone: "indigo" }
     ]
   },
   {
@@ -77,7 +80,7 @@ const DEVICE_GROUPS = [
   {
     name: "Delete Encryption",
     items: [
-      { label: "Wipe All Data", icon: "delete", tone: "red" },
+      { label: "Wipe All data", icon: "delete", tone: "red" },
       { label: "Hard Reset", icon: "reload-sharp", tone: "orange" },
       { label: "Delete G Account", icon: "user-x-sharp", tone: "magenta" },
       { label: "Remove Login Credientals", icon: "user-minus-sharp", tone: "gray" }
@@ -157,7 +160,7 @@ function OsCard({ id, label, selected, onSelect, className = "", compact = false
   );
 }
 
-function DeviceManagementScreen() {
+function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
   const [pageIndex, setPageIndex] = useState(0);
   const currentGroup = DEVICE_GROUPS[pageIndex];
   const hasNext = pageIndex < DEVICE_GROUPS.length - 1;
@@ -166,11 +169,12 @@ function DeviceManagementScreen() {
   return (
     <main className="select-os-root">
       <section className="layout-shell">
-        <VerticalMenu />
+        <VerticalMenu onHome={onHome} onBack={onBack} onSettings={onSettings} />
 
         <section className="device-screen">
           <header className="device-header">
             <h2>{currentGroup.name}</h2>
+            <div className="device-product-label">Device: {productName || "Unknown"}</div>
           </header>
 
           <div className="device-cards-grid">
@@ -220,8 +224,28 @@ function DeviceManagementScreen() {
   );
 }
 
-function SelectOsScreen() {
+function SettingsScreen({ onHome, onBack, onSettings }) {
+  return (
+    <main className="select-os-root">
+      <section className="layout-shell">
+        <VerticalMenu onHome={onHome} onBack={onBack} onSettings={onSettings} />
+
+        <section className="settings-screen">
+          <Card className="settings-card">
+            <CardContent className="settings-card-content">
+              <h2>Settings</h2>
+              <p>Settings page placeholder. We will fill this page later.</p>
+            </CardContent>
+          </Card>
+        </section>
+      </section>
+    </main>
+  );
+}
+
+function App() {
   const [screen, setScreen] = useState("select");
+  const [lastScreenBeforeSettings, setLastScreenBeforeSettings] = useState("select");
   const [selected, setSelected] = useState("android");
   const [connectMode, setConnectMode] = useState(false);
   const [connectStage, setConnectStage] = useState("choose");
@@ -298,7 +322,31 @@ function SelectOsScreen() {
     setConnectStage("choose");
   };
 
-  const handleBottomAction = () => {
+  const handleSettingsOpen = () => {
+    setLastScreenBeforeSettings(screen);
+    setScreen("settings");
+  };
+
+  const handleHome = () => {
+    setScreen("select");
+    setConnectMode(false);
+    setConnectStage("choose");
+    setAccessReady(false);
+  };
+
+  const handleBack = () => {
+    if (screen === "settings") {
+      setScreen(lastScreenBeforeSettings);
+      return;
+    }
+
+    if (screen === "device-management") {
+      setScreen("select");
+      setConnectMode(true);
+      setConnectStage("cable_wait");
+      return;
+    }
+
     if (connectStage === "cable_wait") {
       setConnectStage("choose");
       return;
@@ -306,18 +354,28 @@ function SelectOsScreen() {
 
     if (connectMode) {
       setConnectMode(false);
-      return;
     }
   };
 
+  if (screen === "settings") {
+    return <SettingsScreen onHome={handleHome} onBack={handleBack} onSettings={handleSettingsOpen} />;
+  }
+
   if (screen === "device-management") {
-    return <DeviceManagementScreen />;
+    return (
+      <DeviceManagementScreen
+        productName={usbDeviceInfo.productName}
+        onHome={handleHome}
+        onBack={handleBack}
+        onSettings={handleSettingsOpen}
+      />
+    );
   }
 
   return (
     <main className="select-os-root">
       <section className="layout-shell">
-        <VerticalMenu />
+        <VerticalMenu onHome={handleHome} onBack={handleBack} onSettings={handleSettingsOpen} />
 
         <section className={`select-os-screen${connectMode ? " is-connect-mode" : ""}`}>
           <div className={`focus-slot-wrap${connectMode ? " is-visible" : ""}`}>
@@ -394,7 +452,7 @@ function SelectOsScreen() {
           ) : null}
 
           {connectStage !== "cable_wait" ? (
-            <Button variant="destructive" className="cancel-btn" onClick={handleBottomAction}>
+            <Button variant="destructive" className="cancel-btn" onClick={handleBack}>
               <ArrowLeftSolid className="cancel-icon" />
               Back
             </Button>
@@ -405,4 +463,4 @@ function SelectOsScreen() {
   );
 }
 
-createRoot(document.querySelector("#app")).render(<SelectOsScreen />);
+createRoot(document.querySelector("#app")).render(<App />);

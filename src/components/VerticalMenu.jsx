@@ -27,7 +27,7 @@ const batteryIcon = {
   ...pixelarticons.icons["battery-medium"]
 };
 
-export function VerticalMenu() {
+export function VerticalMenu({ onHome, onBack, onSettings }) {
   const [clock, setClock] = useState(() =>
     new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false })
   );
@@ -51,14 +51,15 @@ export function VerticalMenu() {
           <span className="live-dot" />
         </div>
       </div>
+
       <div className="side-nav">
-        <button className="menu-btn" aria-label="Home">
+        <button className="menu-btn" aria-label="Home" onClick={onHome}>
           <HomeSolid className="menu-icon" />
         </button>
-        <button className="menu-btn" aria-label="Back">
+        <button className="menu-btn" aria-label="Back" onClick={onBack}>
           <ArrowLeftSolid className="menu-icon" />
         </button>
-        <button className="menu-btn" aria-label="Settings">
+        <button className="menu-btn" aria-label="Settings" onClick={onSettings}>
           <CogSolid className="menu-icon" />
         </button>
       </div>

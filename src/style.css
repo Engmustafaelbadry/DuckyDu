@@ -631,11 +631,28 @@ body {
   color: #ffffff;
 }
 
+.device-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.device-product-label {
+  max-width: 52%;
+  text-align: right;
+  font-size: 11px;
+  line-height: 1.3;
+  color: #2dff73;
+}
+
 .device-cards-grid {
   min-height: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .device-card {
@@ -799,6 +816,42 @@ body {
 .tone-gray {
   background: #d2d2d2 !important;
   color: #000000 !important;
+}
+
+.settings-screen {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 8px;
+}
+
+.settings-card {
+  width: 100%;
+  height: 100%;
+  margin: 0 !important;
+}
+
+.settings-card-content {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.settings-card-content h2 {
+  margin: 0;
+  color: #ffffff;
+}
+
+.settings-card-content p {
+  margin: 0;
+  color: #d2d2d2;
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 @keyframes blink-live {
