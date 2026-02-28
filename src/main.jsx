@@ -9,6 +9,7 @@ import pixelIcons from "@iconify-json/pixel/icons.json";
 import pixelarticons from "@iconify-json/pixelarticons/icons.json";
 import { Button } from "@/components/ui/pixelact-ui/button";
 import { Card, CardContent } from "@/components/ui/pixelact-ui/card";
+import { Spinner } from "@/components/ui/pixelact-ui/spinner";
 import { VerticalMenu } from "@/components/VerticalMenu";
 import "./style.css";
 
@@ -121,6 +122,7 @@ function SelectOsScreen() {
   const [usbConnected, setUsbConnected] = useState(false);
   const [usbBridgeOnline, setUsbBridgeOnline] = useState(true);
   const [usbDeviceInfo, setUsbDeviceInfo] = useState({ manufacturer: "Unknown", productName: "Unknown" });
+  const [accessReady, setAccessReady] = useState(false);
 
   useEffect(() => {
     if (connectStage !== "cable_wait") {
@@ -170,6 +172,19 @@ function SelectOsScreen() {
       clearInterval(timer);
     };
   }, [connectStage]);
+
+  useEffect(() => {
+    if (!usbConnected || connectStage !== "cable_wait") {
+      setAccessReady(false);
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setAccessReady(true);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [usbConnected, connectStage]);
 
   const handleCardSelect = (id) => {
     setSelected(id);
@@ -241,7 +256,13 @@ function SelectOsScreen() {
                         </p>
                         <p className="device-info-line">Product Name: {usbDeviceInfo.productName}</p>
                         <p className="device-info-line">Manufacturer: {usbDeviceInfo.manufacturer}</p>
-                        <Button className="access-device-btn">Access Device</Button>
+                        <div className="access-device-slot">
+                          {accessReady ? (
+                            <Button className="access-device-btn">Access Device</Button>
+                          ) : (
+                            <Spinner className="access-spinner" />
+                          )}
+                        </div>
                       </div>
                     ) : (
                       <>

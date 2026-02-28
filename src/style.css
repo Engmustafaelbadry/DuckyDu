@@ -490,8 +490,22 @@ body {
 .access-device-btn {
   min-width: 300px;
   height: 64px;
-  margin-top: 10px;
+  margin-top: 0;
   font-size: 20px;
+}
+
+.access-device-slot {
+  width: 300px;
+  height: 64px;
+  margin-top: 10px;
+  display: grid;
+  place-items: center;
+}
+
+.access-spinner {
+  width: 42px;
+  height: 42px;
+  color: #ffffff;
 }
 
 .connect-via-title {
