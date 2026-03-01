@@ -86,11 +86,6 @@ const launchLanguageIcon = {
   ...pixelarticons.icons.globe
 };
 
-const selectLottiePlaceholderIcon = {
-  ...statusIconDefaults,
-  ...pixelarticons.icons.earth
-};
-
 const DEVICE_GROUPS = [
   {
     name: "Decrypt Data",
@@ -1124,39 +1119,45 @@ function App() {
         <VerticalMenu onHome={handleHome} onBack={handleBack} onSettings={handleSettingsOpen} />
 
         <section className={`select-os-screen${connectMode ? " is-connect-mode" : ""}`}>
-          <div className={`focus-slot-wrap${connectMode ? " is-visible" : ""}`}>
-            <OsCard
-              id={selected}
-              label={selected === "android" ? "Android" : selected === "ios" ? "iOS" : "Other OS"}
-              selected={true}
-              onSelect={handleCardSelect}
-              className="focus-slot"
-              compact={true}
-            />
-          </div>
+          {connectMode ? (
+            <div className="focus-slot-wrap is-visible">
+              <OsCard
+                id={selected}
+                label={selected === "android" ? "Android" : selected === "ios" ? "iOS" : "Other OS"}
+                selected={true}
+                onSelect={handleCardSelect}
+                className="focus-slot"
+                compact={true}
+              />
+            </div>
+          ) : null}
 
           {!connectMode ? (
-            <div className="select-main-layout">
-              <Card className="select-lottie-card">
-                <CardContent className="select-lottie-content">
-                  <Icon icon={selectLottiePlaceholderIcon} className="select-lottie-icon" />
-                  <p>Lottie Slot</p>
-                  <span>Left 1/3 Animation Area</span>
-                </CardContent>
-              </Card>
+            <>
+              <header className="select-os-header">
+                <h2>Select OS</h2>
+              </header>
 
-              <div className="select-right-grid">
-                <OsCard id="android" label="Android" selected={selected === "android"} onSelect={handleCardSelect} className="select-os-card-main" />
-                <OsCard id="ios" label="iOS" selected={selected === "ios"} onSelect={handleCardSelect} className="select-os-card-main" />
-                <div className="select-small-row">
-                  <OsCard id="other" label="Other OS" selected={selected === "other"} onSelect={handleCardSelect} className="select-os-card-small" />
-                  <Button variant="destructive" className="select-back-small" onClick={handleBack}>
-                    <ArrowLeftSolid className="cancel-icon" />
-                    Back
-                  </Button>
+              <div className="select-main-layout">
+                <Card className="select-lottie-card">
+                  <CardContent className="select-lottie-content">
+                    <img src="/assets/samurai.png" alt="Samurai" className="select-lottie-samurai" />
+                  </CardContent>
+                </Card>
+
+                <div className="select-right-grid">
+                  <OsCard id="android" label="Android" selected={selected === "android"} onSelect={handleCardSelect} className="select-os-card-main" />
+                  <OsCard id="ios" label="iOS" selected={selected === "ios"} onSelect={handleCardSelect} className="select-os-card-main" />
+                  <div className="select-small-row">
+                    <OsCard id="other" label="Other OS" selected={selected === "other"} onSelect={handleCardSelect} className="select-os-card-small" />
+                    <Button variant="destructive" className="select-back-small" onClick={handleBack}>
+                      <ArrowLeftSolid className="cancel-icon" />
+                      Back
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </>
           ) : null}
 
           {connectMode ? (
