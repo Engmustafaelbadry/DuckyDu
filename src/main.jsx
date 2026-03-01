@@ -443,7 +443,7 @@ function DeviceLoadingScreen({ productName, onHome, onBack, onSettings, onDone }
 
     const doneTimer = setTimeout(() => {
       onDone();
-    }, 3200);
+    }, 4000);
 
     return () => {
       clearInterval(lineTimer);
@@ -459,8 +459,8 @@ function DeviceLoadingScreen({ productName, onHome, onBack, onSettings, onDone }
         <section className="device-loading-screen">
           <Card className="device-loading-card">
             <CardContent className="device-loading-content">
-              <h2>Connecting Device Features</h2>
-              <p className="device-loading-product">Device: {productName || "Unknown"}</p>
+              <h2>Connecting Device</h2>
+              <p className="device-loading-product">Device Name: {productName || "Unknown"}</p>
               <Spinner className="device-loading-spinner" />
               <div className="device-loading-lines">
                 {loadingLines.slice(0, visibleCount).map((line) => (

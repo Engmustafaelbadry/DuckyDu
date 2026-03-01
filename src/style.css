@@ -912,7 +912,8 @@ body {
   height: 100%;
   display: grid;
   grid-template-rows: auto auto auto 1fr;
-  align-content: start;
+  align-content: center;
+  justify-items: center;
   gap: 12px;
   padding: 14px;
   overflow: hidden;
@@ -923,6 +924,7 @@ body {
   color: #ffffff;
   font-size: 18px;
   line-height: 1.2;
+  text-align: center;
 }
 
 .device-loading-product {
@@ -930,6 +932,7 @@ body {
   color: #2dff73;
   font-size: 11px;
   line-height: 1.3;
+  text-align: center;
 }
 
 .device-loading-spinner {
@@ -944,6 +947,8 @@ body {
   align-content: start;
   gap: 8px;
   overflow: hidden;
+  width: 100%;
+  justify-items: center;
 }
 
 .device-loading-lines p {
@@ -951,6 +956,7 @@ body {
   color: #ffffff;
   font-size: 11px;
   line-height: 1.3;
+  text-align: center;
 }
 
 .settings-card {
