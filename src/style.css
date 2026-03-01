@@ -893,6 +893,66 @@ body {
   padding: 8px;
 }
 
+.device-loading-screen {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 8px;
+}
+
+.device-loading-card {
+  width: 100%;
+  height: 100%;
+  margin: 0 !important;
+}
+
+.device-loading-content {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto auto auto 1fr;
+  align-content: start;
+  gap: 12px;
+  padding: 14px;
+  overflow: hidden;
+}
+
+.device-loading-content h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.device-loading-product {
+  margin: 0;
+  color: #2dff73;
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+.device-loading-spinner {
+  width: 40px;
+  height: 40px;
+  color: #ffffff;
+}
+
+.device-loading-lines {
+  min-height: 0;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.device-loading-lines p {
+  margin: 0;
+  color: #ffffff;
+  font-size: 11px;
+  line-height: 1.3;
+}
+
 .settings-card {
   width: 100%;
   height: 100%;

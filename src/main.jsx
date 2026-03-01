@@ -424,6 +424,57 @@ function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
   );
 }
 
+function DeviceLoadingScreen({ productName, onHome, onBack, onSettings, onDone }) {
+  const loadingLines = [
+    "Initializing device session...",
+    "Reading supported feature set...",
+    "Binding secure data channels...",
+    "Syncing package manager service...",
+    "Loading tool permissions...",
+    "Preparing device management modules..."
+  ];
+  const [visibleCount, setVisibleCount] = useState(1);
+
+  useEffect(() => {
+    setVisibleCount(1);
+    const lineTimer = setInterval(() => {
+      setVisibleCount((count) => Math.min(count + 1, loadingLines.length));
+    }, 450);
+
+    const doneTimer = setTimeout(() => {
+      onDone();
+    }, 3200);
+
+    return () => {
+      clearInterval(lineTimer);
+      clearTimeout(doneTimer);
+    };
+  }, [onDone]);
+
+  return (
+    <main className="select-os-root">
+      <section className="layout-shell">
+        <VerticalMenu onHome={onHome} onBack={onBack} onSettings={onSettings} />
+
+        <section className="device-loading-screen">
+          <Card className="device-loading-card">
+            <CardContent className="device-loading-content">
+              <h2>Connecting Device Features</h2>
+              <p className="device-loading-product">Device: {productName || "Unknown"}</p>
+              <Spinner className="device-loading-spinner" />
+              <div className="device-loading-lines">
+                {loadingLines.slice(0, visibleCount).map((line) => (
+                  <p key={line}>{line}</p>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+      </section>
+    </main>
+  );
+}
+
 function SettingsScreen({ onHome, onBack, onSettings }) {
   return (
     <main className="select-os-root">
@@ -547,6 +598,13 @@ function App() {
       return;
     }
 
+    if (screen === "device-loading") {
+      setScreen("select");
+      setConnectMode(true);
+      setConnectStage("cable_wait");
+      return;
+    }
+
     if (connectStage === "cable_wait") {
       setConnectStage("choose");
       return;
@@ -568,6 +626,18 @@ function App() {
         onHome={handleHome}
         onBack={handleBack}
         onSettings={handleSettingsOpen}
+      />
+    );
+  }
+
+  if (screen === "device-loading") {
+    return (
+      <DeviceLoadingScreen
+        productName={usbDeviceInfo.productName}
+        onHome={handleHome}
+        onBack={handleBack}
+        onSettings={handleSettingsOpen}
+        onDone={() => setScreen("device-management")}
       />
     );
   }
@@ -626,7 +696,7 @@ function App() {
                         <p className="device-info-line">Manufacturer: {usbDeviceInfo.manufacturer}</p>
                         <div className="access-device-slot">
                           {accessReady ? (
-                            <Button className="access-device-btn" onClick={() => setScreen("device-management")}>
+                            <Button className="access-device-btn" onClick={() => setScreen("device-loading")}>
                               Access Device
                             </Button>
                           ) : (
