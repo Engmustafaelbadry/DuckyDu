@@ -42,6 +42,7 @@ apt-get install -y --no-install-recommends \
   x11-xserver-utils \
   python3 \
   usbutils \
+  network-manager \
   "${CHROMIUM_PKG}"
 
 SCRIPT_SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

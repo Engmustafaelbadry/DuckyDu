@@ -2,14 +2,22 @@ import { useCallback, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Icon } from "@iconify/react";
 import {
-  ArrowLeftSolid,
-  Code
+  ArrowLeftSolid
 } from "@2hoch1/pixel-icon-library-react/icons";
 import pixelIcons from "@iconify-json/pixel/icons.json";
 import pixelarticons from "@iconify-json/pixelarticons/icons.json";
 import { Button } from "@/components/ui/pixelact-ui/button";
 import { Card, CardContent } from "@/components/ui/pixelact-ui/card";
 import { Spinner } from "@/components/ui/pixelact-ui/spinner";
+import { Avatar, AvatarFallback } from "@/components/ui/pixelact-ui/avatar";
+import { Input } from "@/components/ui/pixelact-ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/pixelact-ui/select";
 import { VerticalMenu } from "@/components/VerticalMenu";
 import "./style.css";
 
@@ -33,6 +41,11 @@ const statusIconDefaults = {
   height: pixelarticons.height
 };
 
+const otherOsIcon = {
+  ...statusIconDefaults,
+  ...pixelarticons.icons.grid
+};
+
 const connectCableIcon = {
   ...statusIconDefaults,
   ...pixelarticons.icons.link
@@ -46,6 +59,21 @@ const connectWirelessIcon = {
 const arrowRightIcon = {
   ...statusIconDefaults,
   ...pixelarticons.icons["arrow-right"]
+};
+
+const launchWifiIcon = {
+  ...statusIconDefaults,
+  ...pixelarticons.icons.wifi
+};
+
+const launchProfileIcon = {
+  ...statusIconDefaults,
+  ...pixelarticons.icons.user
+};
+
+const launchSettingsIcon = {
+  ...statusIconDefaults,
+  ...pixelarticons.icons.sliders
 };
 
 const DEVICE_GROUPS = [
@@ -92,7 +120,7 @@ const DEVICE_GROUPS = [
 const iconMap = {
   android: { type: "iconify", icon: androidOsIcon },
   ios: { type: "iconify", icon: iosOsIcon },
-  other: { type: "component", icon: Code }
+  other: { type: "iconify", icon: otherOsIcon }
 };
 
 const USB_STATUS_URLS = [
@@ -103,6 +131,36 @@ const USB_STATUS_URLS = [
 const ADB_NOTE_TEST_URLS = [
   "http://127.0.0.1:17373/adb/note-test",
   "http://localhost:17373/adb/note-test"
+];
+
+const WIFI_STATUS_URLS = [
+  "http://127.0.0.1:17373/wifi/status",
+  "http://localhost:17373/wifi/status"
+];
+
+const WIFI_NETWORKS_URLS = [
+  "http://127.0.0.1:17373/wifi/networks",
+  "http://localhost:17373/wifi/networks"
+];
+
+const WIFI_SCAN_URLS = [
+  "http://127.0.0.1:17373/wifi/scan",
+  "http://localhost:17373/wifi/scan"
+];
+
+const WIFI_CONNECT_URLS = [
+  "http://127.0.0.1:17373/wifi/connect",
+  "http://localhost:17373/wifi/connect"
+];
+
+const WIFI_DISCONNECT_URLS = [
+  "http://127.0.0.1:17373/wifi/disconnect",
+  "http://localhost:17373/wifi/disconnect"
+];
+
+const WIFI_TOGGLE_URLS = [
+  "http://127.0.0.1:17373/wifi/toggle",
+  "http://localhost:17373/wifi/toggle"
 ];
 
 const UNLOCK_LOG_LINES = [
@@ -172,14 +230,7 @@ function normalizeUsbDeviceInfo(payload) {
 function OsCard({ id, label, selected, onSelect, className = "", compact = false }) {
   const iconConfig = iconMap[id];
   const iconClassName = `pixel-icon${id === "other" ? " pixel-icon-small" : ""}${compact ? " pixel-icon-compact" : ""}`;
-  const ComponentIcon = iconConfig.type === "component" ? iconConfig.icon : null;
-
-  const iconElement =
-    iconConfig.type === "iconify" ? (
-      <Icon icon={iconConfig.icon} className={iconClassName} />
-    ) : (
-      <ComponentIcon className={iconClassName} />
-    );
+  const iconElement = <Icon icon={iconConfig.icon} className={iconClassName} />;
 
   return (
     <button
@@ -196,6 +247,310 @@ function OsCard({ id, label, selected, onSelect, className = "", compact = false
         </CardContent>
       </Card>
     </button>
+  );
+}
+
+async function requestBridgeJson(urls, options) {
+  let lastError = new Error("bridge_unreachable");
+
+  for (const url of urls) {
+    try {
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        let payload = {};
+        try {
+          payload = await response.json();
+        } catch {
+          payload = {};
+        }
+        throw new Error(payload.error || `bridge_http_${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      if (error instanceof Error && error.message.startsWith("bridge_http_")) {
+        throw error;
+      }
+      if (error instanceof Error && error.message !== "Failed to fetch") {
+        throw error;
+      }
+      lastError = error instanceof Error ? error : new Error("bridge_unreachable");
+    }
+  }
+
+  throw new Error(lastError.message || "bridge_unreachable");
+}
+
+function WifiSettingsPanel() {
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [bridgeOnline, setBridgeOnline] = useState(true);
+  const [status, setStatus] = useState({
+    enabled: true,
+    connected: false,
+    ssid: "",
+    ipAddress: "",
+    interface: ""
+  });
+  const [networks, setNetworks] = useState([]);
+  const [selectedSsid, setSelectedSsid] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+
+  const loadStatus = useCallback(async () => {
+    const data = await requestBridgeJson(WIFI_STATUS_URLS);
+    setStatus({
+      enabled: Boolean(data.enabled),
+      connected: Boolean(data.connected),
+      ssid: data.ssid || "",
+      ipAddress: data.ipAddress || "",
+      interface: data.interface || ""
+    });
+  }, []);
+
+  const loadNetworks = useCallback(async () => {
+    const data = await requestBridgeJson(WIFI_NETWORKS_URLS);
+    const nextNetworks = Array.isArray(data.networks) ? data.networks.filter((item) => item.ssid) : [];
+    setNetworks(nextNetworks);
+
+    const connectedNetwork = nextNetworks.find((item) => item.active);
+    if (connectedNetwork) {
+      setSelectedSsid(connectedNetwork.ssid);
+      return;
+    }
+
+    if (nextNetworks.length > 0 && !nextNetworks.some((item) => item.ssid === selectedSsid)) {
+      setSelectedSsid(nextNetworks[0].ssid);
+    }
+  }, [selectedSsid]);
+
+  const refreshAll = useCallback(async () => {
+    try {
+      await Promise.all([loadStatus(), loadNetworks()]);
+      setBridgeOnline(true);
+    } catch (error) {
+      setBridgeOnline(false);
+      setMessage(error instanceof Error ? error.message : "Wi-Fi bridge is offline.");
+    } finally {
+      setLoading(false);
+    }
+  }, [loadNetworks, loadStatus]);
+
+  useEffect(() => {
+    refreshAll();
+    const timer = setInterval(refreshAll, 8000);
+    return () => clearInterval(timer);
+  }, [refreshAll]);
+
+  const runAction = async (action) => {
+    setBusy(true);
+    setMessage("");
+    try {
+      await action();
+      await refreshAll();
+    } catch (error) {
+      const isOffline = error instanceof Error && error.message === "bridge_unreachable";
+      setBridgeOnline(!isOffline);
+      setMessage(error instanceof Error ? error.message : "Action failed.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleScan = () =>
+    runAction(async () => {
+      await requestBridgeJson(WIFI_SCAN_URLS, { method: "POST", headers: { "Content-Type": "application/json" } });
+      setMessage("Wi-Fi list refreshed.");
+    });
+
+  const handleToggle = () =>
+    runAction(async () => {
+      await requestBridgeJson(WIFI_TOGGLE_URLS, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled: !status.enabled })
+      });
+      setMessage(!status.enabled ? "Wi-Fi enabled." : "Wi-Fi disabled.");
+    });
+
+  const handleConnect = () =>
+    runAction(async () => {
+      if (!selectedSsid) {
+        setMessage("Select a network first.");
+        return;
+      }
+
+      await requestBridgeJson(WIFI_CONNECT_URLS, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ssid: selectedSsid, password: password || undefined })
+      });
+      setPassword("");
+      setMessage(`Connected request sent to ${selectedSsid}.`);
+    });
+
+  const handleDisconnect = () =>
+    runAction(async () => {
+      await requestBridgeJson(WIFI_DISCONNECT_URLS, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
+      setMessage("Disconnected from Wi-Fi.");
+    });
+
+  return (
+    <Card className="launch-panel-card">
+      <CardContent className="launch-panel-content">
+        <h3>Wi-Fi Settings</h3>
+        {loading ? (
+          <div className="launch-panel-loading">
+            <Spinner />
+          </div>
+        ) : (
+          <>
+            <p className={`wifi-state-line${status.connected ? " is-connected" : ""}`}>
+              Status: {status.connected ? `Connected (${status.ssid || "Unknown"})` : status.enabled ? "Not connected" : "Disabled"}
+            </p>
+            <p className="wifi-state-subline">
+              {status.ipAddress ? `IP: ${status.ipAddress}` : "IP: -"} {status.interface ? `| Iface: ${status.interface}` : ""}
+            </p>
+
+            <Select value={selectedSsid} onValueChange={setSelectedSsid} disabled={busy || !status.enabled || networks.length === 0}>
+              <SelectTrigger className="wifi-network-select">
+                <SelectValue placeholder={networks.length ? "Select network" : "No networks"} />
+              </SelectTrigger>
+              <SelectContent>
+                {networks.map((item) => (
+                  <SelectItem key={`${item.ssid}-${item.security}`} value={item.ssid}>
+                    {item.active ? "[*] " : ""}{item.ssid} ({item.signal}%)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Input
+              type="password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              className="wifi-password-input"
+              placeholder="Password (if required)"
+              disabled={busy || !status.enabled}
+            />
+
+            <div className="wifi-action-grid">
+              <Button className="launch-action-btn" onClick={handleScan} disabled={busy}>
+                Scan
+              </Button>
+              <Button className="launch-action-btn" onClick={handleToggle} disabled={busy}>
+                {status.enabled ? "Disable" : "Enable"}
+              </Button>
+              <Button className="launch-action-btn" onClick={handleConnect} disabled={busy || !status.enabled}>
+                Connect
+              </Button>
+              <Button variant="destructive" className="launch-action-btn" onClick={handleDisconnect} disabled={busy || !status.connected}>
+                Disconnect
+              </Button>
+            </div>
+          </>
+        )}
+
+        {!bridgeOnline ? <p className="wifi-message error">Bridge offline on port 17373.</p> : null}
+        {message ? <p className="wifi-message">{message}</p> : null}
+      </CardContent>
+    </Card>
+  );
+}
+
+function ProfilePanel() {
+  return (
+    <Card className="launch-panel-card">
+      <CardContent className="launch-panel-content profile-panel-content">
+        <h3>Profile</h3>
+        <Avatar size="large" variant="square" className="profile-avatar">
+          <AvatarFallback>PX</AvatarFallback>
+        </Avatar>
+        <p>PIXACHO Operator</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function SettingsComingSoonPanel() {
+  return (
+    <Card className="launch-panel-card">
+      <CardContent className="launch-panel-content profile-panel-content">
+        <h3>Settings</h3>
+        <p>Coming soon.</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function LaunchScreen({ onStart, onOpenWifi, onOpenProfile, onOpenQuickSettings, onHome, onBack, onSettings }) {
+  return (
+    <main className="launch-root">
+      <section className="layout-shell">
+        <VerticalMenu onHome={onHome} onBack={onBack} onSettings={onSettings} />
+
+        <section className="launch-screen">
+          <section className="launch-left">
+            <div className="launch-title-wrap">
+              <h1 className="launch-title-jp">ピクサチョ</h1>
+              <h2 className="launch-title-en">PIXACHO</h2>
+            </div>
+
+            <Button className="launch-start-btn" onClick={onStart}>
+              Start...
+            </Button>
+          </section>
+
+          <section className="launch-right">
+            <div className="launch-icon-column">
+              <button
+                className="launch-icon-btn"
+                onClick={onOpenQuickSettings}
+                aria-label="Settings"
+              >
+                <Icon icon={launchSettingsIcon} />
+              </button>
+              <button
+                className="launch-icon-btn"
+                onClick={onOpenWifi}
+                aria-label="Wi-Fi Settings"
+              >
+                <Icon icon={launchWifiIcon} />
+              </button>
+              <button
+                className="launch-icon-btn"
+                onClick={onOpenProfile}
+                aria-label="Profile"
+              >
+                <Icon icon={launchProfileIcon} />
+              </button>
+            </div>
+          </section>
+        </section>
+      </section>
+    </main>
+  );
+}
+
+function LaunchSubScreen({ title, children, onHome, onBack, onSettings }) {
+  return (
+    <main className="launch-root">
+      <section className="layout-shell">
+        <VerticalMenu onHome={onHome} onBack={onBack} onSettings={onSettings} />
+
+        <section className="launch-subscreen">
+          <header className="launch-subscreen-header">
+            <h2>{title}</h2>
+            <Button variant="destructive" className="launch-subscreen-back" onClick={onBack}>
+              Back
+            </Button>
+          </header>
+          <section className="launch-subscreen-content">{children}</section>
+        </section>
+      </section>
+    </main>
   );
 }
 
@@ -496,7 +851,7 @@ function SettingsScreen({ onHome, onBack, onSettings }) {
 }
 
 function App() {
-  const [screen, setScreen] = useState("select");
+  const [screen, setScreen] = useState("launch");
   const [lastScreenBeforeSettings, setLastScreenBeforeSettings] = useState("select");
   const [selected, setSelected] = useState("android");
   const [connectMode, setConnectMode] = useState(false);
@@ -583,13 +938,18 @@ function App() {
   }, []);
 
   const handleHome = () => {
-    setScreen("select");
+    setScreen("launch");
     setConnectMode(false);
     setConnectStage("choose");
     setAccessReady(false);
   };
 
   const handleBack = () => {
+    if (screen === "launch-wifi" || screen === "launch-profile" || screen === "launch-settings") {
+      setScreen("launch");
+      return;
+    }
+
     if (screen === "settings") {
       setScreen(lastScreenBeforeSettings);
       return;
@@ -616,8 +976,49 @@ function App() {
 
     if (connectMode) {
       setConnectMode(false);
+      return;
     }
+
+    setScreen("launch");
   };
+
+  if (screen === "launch") {
+    return (
+      <LaunchScreen
+        onStart={() => setScreen("select")}
+        onOpenWifi={() => setScreen("launch-wifi")}
+        onOpenProfile={() => setScreen("launch-profile")}
+        onOpenQuickSettings={() => setScreen("launch-settings")}
+        onHome={handleHome}
+        onBack={handleBack}
+        onSettings={handleSettingsOpen}
+      />
+    );
+  }
+
+  if (screen === "launch-wifi") {
+    return (
+      <LaunchSubScreen title="Wi-Fi Settings" onBack={handleBack} onHome={handleHome} onSettings={handleSettingsOpen}>
+        <WifiSettingsPanel />
+      </LaunchSubScreen>
+    );
+  }
+
+  if (screen === "launch-profile") {
+    return (
+      <LaunchSubScreen title="Profile" onBack={handleBack} onHome={handleHome} onSettings={handleSettingsOpen}>
+        <ProfilePanel />
+      </LaunchSubScreen>
+    );
+  }
+
+  if (screen === "launch-settings") {
+    return (
+      <LaunchSubScreen title="Settings" onBack={handleBack} onHome={handleHome} onSettings={handleSettingsOpen}>
+        <SettingsComingSoonPanel />
+      </LaunchSubScreen>
+    );
+  }
 
   if (screen === "settings") {
     return <SettingsScreen onHome={handleHome} onBack={handleBack} onSettings={handleSettingsOpen} />;
