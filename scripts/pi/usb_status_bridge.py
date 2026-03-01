@@ -5,8 +5,6 @@ import re
 import shutil
 import subprocess
 import threading
-import time
-import urllib.parse
 from pathlib import Path
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -56,8 +54,9 @@ note_test_lock = threading.Lock()
 
 
 def encode_adb_input_text(value: str) -> str:
-    # "adb shell input text" uses percent-style escapes. URL-encoding keeps literals safe.
-    return urllib.parse.quote(value, safe="")
+    # "adb shell input text" treats % as an escape prefix and %s as space.
+    # Use ADB-style escaping instead of URL encoding.
+    return value.replace("%", "%%").replace(" ", "%s")
 
 
 def parse_lsusb_output(text: str):
@@ -244,8 +243,6 @@ def adb_note_test_worker():
         _adb_cmd(["start-server"], timeout=8)
         _adb_has_ready_device()
         _adb_cmd(["shell", "input", "text", encode_adb_input_text(NOTE_TEST_TEXT_1)], timeout=10)
-        time.sleep(1)
-        _adb_cmd(["shell", "input", "text", encode_adb_input_text(NOTE_TEST_TEXT_2)], timeout=10)
 
         with note_test_lock:
             note_test_state["running"] = False
