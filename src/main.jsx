@@ -76,6 +76,11 @@ const launchSettingsIcon = {
   ...pixelarticons.icons.sliders
 };
 
+const launchUpdateIcon = {
+  ...statusIconDefaults,
+  ...pixelarticons.icons["reload-sharp"]
+};
+
 const DEVICE_GROUPS = [
   {
     name: "Decrypt Data",
@@ -485,7 +490,18 @@ function SettingsComingSoonPanel() {
   );
 }
 
-function LaunchScreen({ onStart, onOpenWifi, onOpenProfile, onOpenQuickSettings, onHome, onBack, onSettings }) {
+function UpdatePanel() {
+  return (
+    <Card className="launch-panel-card">
+      <CardContent className="launch-panel-content profile-panel-content">
+        <h3>Update</h3>
+        <p>Update center coming soon.</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function LaunchScreen({ onStart, onOpenWifi, onOpenProfile, onOpenQuickSettings, onOpenUpdate, onHome, onBack, onSettings }) {
   return (
     <main className="launch-root">
       <section className="layout-shell">
@@ -528,6 +544,18 @@ function LaunchScreen({ onStart, onOpenWifi, onOpenProfile, onOpenQuickSettings,
               >
                 <Icon icon={launchProfileIcon} />
               </button>
+              <button
+                className="launch-icon-btn"
+                onClick={onOpenUpdate}
+                aria-label="Update"
+              >
+                <Icon icon={launchUpdateIcon} />
+              </button>
+            </div>
+
+            <div className="launch-version-row" aria-label="Version">
+              <Icon icon={launchUpdateIcon} className="launch-version-icon" />
+              <span>Version 2.0.115</span>
             </div>
           </section>
         </section>
@@ -947,7 +975,7 @@ function App() {
   };
 
   const handleBack = () => {
-    if (screen === "launch-wifi" || screen === "launch-profile" || screen === "launch-settings") {
+    if (screen === "launch-wifi" || screen === "launch-profile" || screen === "launch-settings" || screen === "launch-update") {
       setScreen("launch");
       return;
     }
@@ -991,6 +1019,7 @@ function App() {
         onOpenWifi={() => setScreen("launch-wifi")}
         onOpenProfile={() => setScreen("launch-profile")}
         onOpenQuickSettings={() => setScreen("launch-settings")}
+        onOpenUpdate={() => setScreen("launch-update")}
         onHome={handleHome}
         onBack={handleBack}
         onSettings={handleSettingsOpen}
@@ -1018,6 +1047,14 @@ function App() {
     return (
       <LaunchSubScreen title="Settings" onBack={handleBack} onHome={handleHome} onSettings={handleSettingsOpen}>
         <SettingsComingSoonPanel />
+      </LaunchSubScreen>
+    );
+  }
+
+  if (screen === "launch-update") {
+    return (
+      <LaunchSubScreen title="Update" onBack={handleBack} onHome={handleHome} onSettings={handleSettingsOpen}>
+        <UpdatePanel />
       </LaunchSubScreen>
     );
   }

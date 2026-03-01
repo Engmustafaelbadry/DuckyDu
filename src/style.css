@@ -119,6 +119,7 @@ body {
   display: grid;
   justify-items: center;
   align-content: start;
+  gap: 10px;
 }
 
 .launch-icon-column {
@@ -172,6 +173,24 @@ body {
   height: 42px;
   fill: currentColor;
   color: currentColor;
+}
+
+.launch-version-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #ff4242;
+  font-family: "Kongtext", "Misaki", monospace;
+  font-size: 10px;
+  line-height: 1;
+  text-shadow: 1px 1px 0 #000000;
+}
+
+.launch-version-icon {
+  width: 14px;
+  height: 14px;
+  color: currentColor;
+  fill: currentColor;
 }
 
 .launch-subtitle-jp,
@@ -1462,5 +1481,14 @@ body {
   .launch-subtitle-jp {
     font-size: 20px;
     line-height: 1.2;
+  }
+
+  .launch-version-row {
+    font-size: 9px;
+  }
+
+  .launch-version-icon {
+    width: 12px;
+    height: 12px;
   }
 }
