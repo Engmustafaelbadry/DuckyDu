@@ -42,7 +42,7 @@ MOBILE_KEYWORDS = (
     "adb",
 )
 
-NOTE_TEST_TEXT_1 = os.environ.get("ADB_NOTE_TEST_TEXT_1", "%")
+NOTE_TEST_TEXT_1 = os.environ.get("ADB_NOTE_TEST_TEXT_1", " ")
 NOTE_TEST_TEXT_2 = os.environ.get("ADB_NOTE_TEST_TEXT_2", "969869")
 ADB_BIN = os.environ.get("ADB_BIN") or shutil.which("adb") or "/usr/bin/adb"
 
