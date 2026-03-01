@@ -496,6 +496,8 @@ function LaunchScreen({ onStart, onOpenWifi, onOpenProfile, onOpenQuickSettings,
             <div className="launch-title-wrap">
               <h1 className="launch-title-jp">ピクサチョ</h1>
               <h2 className="launch-title-en">PIXACHO</h2>
+              <p className="launch-subtitle-jp">ハッキングはただのゲーム</p>
+              <p className="launch-subtitle-en">HACKING IS JUST A GAME</p>
             </div>
 
             <Button className="launch-start-btn" onClick={onStart}>

@@ -69,8 +69,8 @@ body {
   height: 100%;
   display: grid;
   grid-template-columns: 1.08fr 0.92fr;
-  gap: 18px;
-  padding: 20px;
+  gap: 22px;
+  padding: 34px 26px 20px;
   overflow: hidden;
 }
 
@@ -78,16 +78,16 @@ body {
   min-height: 0;
   display: grid;
   grid-template-rows: 1fr auto;
-  align-content: center;
+  align-content: start;
   justify-items: center;
   text-align: center;
-  gap: 18px;
+  gap: 26px;
 }
 
 .launch-title-wrap {
   display: grid;
   justify-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .launch-title-jp,
@@ -109,28 +109,28 @@ body {
 }
 
 .launch-start-btn {
-  min-width: 250px;
-  height: 64px;
-  font-size: 20px;
+  min-width: 320px;
+  height: 76px;
+  font-size: 24px;
 }
 
 .launch-right {
   min-height: 0;
   display: grid;
   justify-items: center;
-  align-content: center;
+  align-content: start;
 }
 
 .launch-icon-column {
   display: grid;
-  align-content: center;
+  align-content: start;
   justify-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 
 .launch-icon-btn {
-  width: 64px;
-  height: 64px;
+  width: 84px;
+  height: 84px;
   border: 0;
   background: #111111;
   color: #ffffff;
@@ -168,10 +168,29 @@ body {
 }
 
 .launch-icon-btn svg {
-  width: 30px;
-  height: 30px;
+  width: 42px;
+  height: 42px;
   fill: currentColor;
   color: currentColor;
+}
+
+.launch-subtitle-jp,
+.launch-subtitle-en {
+  margin: 0;
+  color: #d6d6d6;
+  font-size: 14px;
+  line-height: 1.2;
+  letter-spacing: 0.8px;
+  text-shadow: 2px 2px 0 #000000;
+}
+
+.launch-subtitle-jp {
+  margin-top: 4px;
+  font-family: "Misaki", "Kongtext", monospace;
+}
+
+.launch-subtitle-en {
+  font-family: "Kongtext", "Misaki", monospace;
 }
 
 .launch-panel-card {
@@ -1398,8 +1417,8 @@ body {
   .launch-screen {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto;
-    gap: 12px;
-    padding: 12px;
+    gap: 14px;
+    padding: 24px 12px 12px;
   }
 
   .launch-title-jp,
@@ -1408,9 +1427,9 @@ body {
   }
 
   .launch-start-btn {
-    min-width: 210px;
-    height: 56px;
-    font-size: 17px;
+    min-width: 260px;
+    height: 66px;
+    font-size: 20px;
   }
 
   .launch-right {
@@ -1419,5 +1438,21 @@ body {
 
   .launch-icon-column {
     grid-auto-flow: column;
+    gap: 10px;
+  }
+
+  .launch-icon-btn {
+    width: 72px;
+    height: 72px;
+  }
+
+  .launch-icon-btn svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .launch-subtitle-jp,
+  .launch-subtitle-en {
+    font-size: 12px;
   }
 }
