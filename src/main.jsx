@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Icon } from "@iconify/react";
 import {
@@ -429,17 +429,16 @@ function DeviceLoadingScreen({ productName, onHome, onBack, onSettings, onDone }
     "Initializing device session...",
     "Reading supported feature set...",
     "Binding secure data channels...",
-    "Syncing package manager service...",
     "Loading tool permissions...",
     "Preparing device management modules..."
   ];
-  const [visibleCount, setVisibleCount] = useState(1);
+  const [visibleCount, setVisibleCount] = useState(0);
 
   useEffect(() => {
-    setVisibleCount(1);
+    setVisibleCount(0);
     const lineTimer = setInterval(() => {
       setVisibleCount((count) => Math.min(count + 1, loadingLines.length));
-    }, 450);
+    }, 650);
 
     const doneTimer = setTimeout(() => {
       onDone();
@@ -463,8 +462,10 @@ function DeviceLoadingScreen({ productName, onHome, onBack, onSettings, onDone }
               <p className="device-loading-product">Device Name: {productName || "Unknown"}</p>
               <Spinner className="device-loading-spinner" />
               <div className="device-loading-lines">
-                {loadingLines.slice(0, visibleCount).map((line) => (
-                  <p key={line}>{line}</p>
+                {loadingLines.map((line, idx) => (
+                  <p key={line} className={idx < visibleCount ? "" : "loading-line-placeholder"}>
+                    {line}
+                  </p>
                 ))}
               </div>
             </CardContent>
@@ -577,6 +578,9 @@ function App() {
     setLastScreenBeforeSettings(screen);
     setScreen("settings");
   };
+  const handleDeviceLoadingDone = useCallback(() => {
+    setScreen("device-management");
+  }, []);
 
   const handleHome = () => {
     setScreen("select");
@@ -637,7 +641,7 @@ function App() {
         onHome={handleHome}
         onBack={handleBack}
         onSettings={handleSettingsOpen}
-        onDone={() => setScreen("device-management")}
+        onDone={handleDeviceLoadingDone}
       />
     );
   }
