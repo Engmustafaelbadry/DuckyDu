@@ -187,6 +187,9 @@ body {
 .launch-subtitle-jp {
   margin-top: 4px;
   font-family: "Misaki", "Kongtext", monospace;
+  font-size: 19px;
+  line-height: 1.25;
+  letter-spacing: 1px;
 }
 
 .launch-subtitle-en {
@@ -1454,5 +1457,10 @@ body {
   .launch-subtitle-jp,
   .launch-subtitle-en {
     font-size: 12px;
+  }
+
+  .launch-subtitle-jp {
+    font-size: 20px;
+    line-height: 1.2;
   }
 }
