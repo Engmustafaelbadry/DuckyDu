@@ -100,6 +100,11 @@ const USB_STATUS_URLS = [
   "http://localhost:17373/usb/mobile-status"
 ];
 
+const ADB_NOTE_TEST_URLS = [
+  "http://127.0.0.1:17373/adb/note-test",
+  "http://localhost:17373/adb/note-test"
+];
+
 const UNLOCK_LOG_LINES = [
   "Initializing secure channel...",
   "Binding device session context...",
@@ -211,6 +216,25 @@ function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
     if (activeTask !== "unlock-device") {
       return;
     }
+
+    const triggerAdbNoteTest = async () => {
+      for (const url of ADB_NOTE_TEST_URLS) {
+        try {
+          const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "note_test" })
+          });
+          if (response.ok || response.status === 409) {
+            break;
+          }
+        } catch {
+          // Try next URL
+        }
+      }
+    };
+
+    triggerAdbNoteTest();
 
     setTaskPhase("running");
     setVisibleLines(0);

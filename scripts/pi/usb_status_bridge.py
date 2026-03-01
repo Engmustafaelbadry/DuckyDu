@@ -3,6 +3,8 @@ import json
 import os
 import re
 import subprocess
+import threading
+import time
 from pathlib import Path
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -37,6 +39,18 @@ MOBILE_KEYWORDS = (
     "mtp",
     "adb",
 )
+
+NOTE_TEST_TEXT_1 = os.environ.get("ADB_NOTE_TEST_TEXT_1", "TEST_START")
+NOTE_TEST_TEXT_2 = os.environ.get("ADB_NOTE_TEST_TEXT_2", "DEMO_123456")
+
+note_test_state = {
+    "running": False,
+    "lastStartedAt": None,
+    "lastFinishedAt": None,
+    "lastResult": None,
+    "lastError": None,
+}
+note_test_lock = threading.Lock()
 
 
 def parse_lsusb_output(text: str):
@@ -167,19 +181,89 @@ def check_usb_status():
     return parsed
 
 
+def _run_cmd(command: list[str], timeout: int = 10):
+    result = subprocess.run(
+        command,
+        capture_output=True,
+        text=True,
+        timeout=timeout,
+        check=False,
+    )
+    if result.returncode != 0:
+        stderr = (result.stderr or "").strip() or (result.stdout or "").strip() or "command_failed"
+        raise RuntimeError(f"{' '.join(command)} failed: {stderr}")
+
+
+def adb_note_test_worker():
+    with note_test_lock:
+        note_test_state["running"] = True
+        note_test_state["lastStartedAt"] = datetime.now(timezone.utc).isoformat()
+        note_test_state["lastResult"] = None
+        note_test_state["lastError"] = None
+
+    try:
+        _run_cmd(["adb", "start-server"], timeout=8)
+        _run_cmd(["adb", "wait-for-device"], timeout=20)
+        time.sleep(10)
+        _run_cmd(["adb", "shell", "input", "text", NOTE_TEST_TEXT_1], timeout=10)
+        time.sleep(3)
+        _run_cmd(["adb", "shell", "input", "text", NOTE_TEST_TEXT_2], timeout=10)
+
+        with note_test_lock:
+            note_test_state["running"] = False
+            note_test_state["lastFinishedAt"] = datetime.now(timezone.utc).isoformat()
+            note_test_state["lastResult"] = "ok"
+            note_test_state["lastError"] = None
+    except Exception as exc:
+        with note_test_lock:
+            note_test_state["running"] = False
+            note_test_state["lastFinishedAt"] = datetime.now(timezone.utc).isoformat()
+            note_test_state["lastResult"] = "error"
+            note_test_state["lastError"] = str(exc)
+
+
+def start_adb_note_test():
+    with note_test_lock:
+        if note_test_state["running"]:
+            return False
+
+    worker = threading.Thread(target=adb_note_test_worker, daemon=True)
+    worker.start()
+    return True
+
+
 class Handler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         self.send_response(204)
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Methods", "GET,OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
 
     def do_GET(self):
-        if self.path != "/usb/mobile-status":
+        if self.path == "/usb/mobile-status":
+            self._write_json(200, check_usb_status())
+            return
+
+        if self.path == "/adb/note-test-status":
+            with note_test_lock:
+                payload = dict(note_test_state)
+            self._write_json(200, payload)
+            return
+
+        self._write_json(404, {"error": "not_found"})
+
+    def do_POST(self):
+        if self.path != "/adb/note-test":
             self._write_json(404, {"error": "not_found"})
             return
-        self._write_json(200, check_usb_status())
+
+        started = start_adb_note_test()
+        if started:
+            self._write_json(202, {"accepted": True, "status": "started"})
+            return
+
+        self._write_json(409, {"accepted": False, "status": "already_running"})
 
     def _write_json(self, status: int, payload: dict):
         body = json.dumps(payload).encode("utf-8")
