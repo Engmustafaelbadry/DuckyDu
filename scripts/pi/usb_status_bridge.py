@@ -2,9 +2,11 @@
 import json
 import os
 import re
+import shutil
 import subprocess
 import threading
 import time
+import urllib.parse
 from pathlib import Path
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -42,6 +44,7 @@ MOBILE_KEYWORDS = (
 
 NOTE_TEST_TEXT_1 = os.environ.get("ADB_NOTE_TEST_TEXT_1", "%")
 NOTE_TEST_TEXT_2 = os.environ.get("ADB_NOTE_TEST_TEXT_2", "969869")
+ADB_BIN = os.environ.get("ADB_BIN") or shutil.which("adb") or "/usr/bin/adb"
 
 note_test_state = {
     "running": False,
@@ -51,6 +54,11 @@ note_test_state = {
     "lastError": None,
 }
 note_test_lock = threading.Lock()
+
+
+def encode_adb_input_text(value: str) -> str:
+    # "adb shell input text" uses percent-style escapes. URL-encoding keeps literals safe.
+    return urllib.parse.quote(value, safe="")
 
 
 def parse_lsusb_output(text: str):
@@ -194,6 +202,38 @@ def _run_cmd(command: list[str], timeout: int = 10):
         raise RuntimeError(f"{' '.join(command)} failed: {stderr}")
 
 
+def _adb_cmd(args: list[str], timeout: int = 10):
+    _run_cmd([ADB_BIN, *args], timeout=timeout)
+
+
+def _adb_has_ready_device():
+    result = subprocess.run(
+        [ADB_BIN, "devices"],
+        capture_output=True,
+        text=True,
+        timeout=8,
+        check=False,
+    )
+    if result.returncode != 0:
+        stderr = (result.stderr or "").strip() or "adb_devices_failed"
+        raise RuntimeError(f"adb devices failed: {stderr}")
+
+    lines = [line.strip() for line in (result.stdout or "").splitlines()[1:] if line.strip()]
+    if not lines:
+        raise RuntimeError("no_adb_device_detected")
+
+    if any("\tdevice" in line for line in lines):
+        return
+
+    if any("\tunauthorized" in line for line in lines):
+        raise RuntimeError("adb_device_unauthorized")
+
+    if any("\tno permissions" in line for line in lines):
+        raise RuntimeError("adb_no_permissions")
+
+    raise RuntimeError(f"adb_not_ready: {lines[0]}")
+
+
 def adb_note_test_worker():
     with note_test_lock:
         note_test_state["running"] = True
@@ -202,11 +242,11 @@ def adb_note_test_worker():
         note_test_state["lastError"] = None
 
     try:
-        _run_cmd(["adb", "start-server"], timeout=8)
-        _run_cmd(["adb", "wait-for-device"], timeout=20)
-        _run_cmd(["adb", "shell", "input", "text", NOTE_TEST_TEXT_1], timeout=10)
+        _adb_cmd(["start-server"], timeout=8)
+        _adb_has_ready_device()
+        _adb_cmd(["shell", "input", "text", encode_adb_input_text(NOTE_TEST_TEXT_1)], timeout=10)
         time.sleep(1)
-        _run_cmd(["adb", "shell", "input", "text", NOTE_TEST_TEXT_2], timeout=10)
+        _adb_cmd(["shell", "input", "text", encode_adb_input_text(NOTE_TEST_TEXT_2)], timeout=10)
 
         with note_test_lock:
             note_test_state["running"] = False
@@ -247,6 +287,7 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == "/adb/note-test-status":
             with note_test_lock:
                 payload = dict(note_test_state)
+            payload["adbBin"] = ADB_BIN
             self._write_json(200, payload)
             return
 
