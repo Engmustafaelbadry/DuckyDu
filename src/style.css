@@ -1028,7 +1028,28 @@ body {
 .unlock-back-btn {
   min-width: 180px;
   height: 52px;
-  font-size: 14px;
+  font-size: 12px;
+}
+
+.unlock-dispatching {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 14px;
+}
+
+.unlock-dispatching p {
+  margin: 0;
+  color: #ffffff;
+  font-size: 13px;
+}
+
+.unlock-dispatch-spinner {
+  width: 44px;
+  height: 44px;
+  color: #ffffff;
 }
 
 @keyframes blink-live {

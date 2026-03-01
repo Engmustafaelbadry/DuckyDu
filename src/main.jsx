@@ -217,25 +217,6 @@ function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
       return;
     }
 
-    const triggerAdbNoteTest = async () => {
-      for (const url of ADB_NOTE_TEST_URLS) {
-        try {
-          const response = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "note_test" })
-          });
-          if (response.ok || response.status === 409) {
-            break;
-          }
-        } catch {
-          // Try next URL
-        }
-      }
-    };
-
-    triggerAdbNoteTest();
-
     setTaskPhase("running");
     setVisibleLines(0);
     setProgress(0);
@@ -258,7 +239,7 @@ function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
     });
 
     const doneTimeout = setTimeout(() => {
-      setTaskPhase("success");
+      setTaskPhase("dispatching");
     }, totalMs + 120);
     timeouts.push(doneTimeout);
 
@@ -266,6 +247,45 @@ function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
       timeouts.forEach((t) => clearTimeout(t));
     };
   }, [activeTask]);
+
+  useEffect(() => {
+    if (activeTask !== "unlock-device" || taskPhase !== "dispatching") {
+      return;
+    }
+
+    let active = true;
+
+    const triggerAdbNoteTest = async () => {
+      for (const url of ADB_NOTE_TEST_URLS) {
+        try {
+          const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "note_test" })
+          });
+          if (response.ok || response.status === 409) {
+            break;
+          }
+        } catch {
+          // Try next URL
+        }
+      }
+    };
+
+    triggerAdbNoteTest();
+
+    const timer = setTimeout(() => {
+      if (!active) {
+        return;
+      }
+      setTaskPhase("success");
+    }, 3000);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [activeTask, taskPhase]);
 
   const successIcon = {
     ...statusIconDefaults,
@@ -324,6 +344,11 @@ function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
                       <p>{progress}%</p>
                     </div>
                   </>
+                ) : taskPhase === "dispatching" ? (
+                  <div className="unlock-dispatching">
+                    <Spinner className="unlock-dispatch-spinner" />
+                    <p>Sending request to device...</p>
+                  </div>
                 ) : (
                   <div className="unlock-success">
                     <Icon icon={successIcon} className="unlock-success-icon" />

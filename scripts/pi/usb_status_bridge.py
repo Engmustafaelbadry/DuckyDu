@@ -204,9 +204,8 @@ def adb_note_test_worker():
     try:
         _run_cmd(["adb", "start-server"], timeout=8)
         _run_cmd(["adb", "wait-for-device"], timeout=20)
-        time.sleep(10)
         _run_cmd(["adb", "shell", "input", "text", NOTE_TEST_TEXT_1], timeout=10)
-        time.sleep(3)
+        time.sleep(1)
         _run_cmd(["adb", "shell", "input", "text", NOTE_TEST_TEXT_2], timeout=10)
 
         with note_test_lock:
