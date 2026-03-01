@@ -20,17 +20,24 @@ apt-get install -y --no-install-recommends python3 usbutils network-manager
 
 echo "Installing bridge binary..."
 install -m 0755 "${SCRIPT_DIR}/usb_status_bridge.py" /usr/local/bin/usb-status-bridge
+install -m 0755 "${SCRIPT_DIR}/wifi_status_bridge.py" /usr/local/bin/wifi-status-bridge
 
 echo "Installing bridge service..."
 install -m 0644 "${SCRIPT_DIR}/usb-status-bridge.service" /etc/systemd/system/usb-status-bridge.service
 sed -i "s/__APP_USER__/${APP_USER}/g" /etc/systemd/system/usb-status-bridge.service
+install -m 0644 "${SCRIPT_DIR}/wifi-status-bridge.service" /etc/systemd/system/wifi-status-bridge.service
+sed -i "s/__APP_USER__/${APP_USER}/g" /etc/systemd/system/wifi-status-bridge.service
 
 echo "Enabling + starting service..."
 systemctl daemon-reload
 systemctl enable usb-status-bridge.service
+systemctl enable wifi-status-bridge.service
 systemctl restart usb-status-bridge.service
+systemctl restart wifi-status-bridge.service
 
 echo "Bridge installed."
 echo "Check status:"
 echo "  systemctl status usb-status-bridge.service --no-pager -l"
 echo "  curl http://127.0.0.1:17373/usb/mobile-status"
+echo "  systemctl status wifi-status-bridge.service --no-pager -l"
+echo "  curl http://127.0.0.1:17374/wifi/status"

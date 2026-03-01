@@ -134,33 +134,33 @@ const ADB_NOTE_TEST_URLS = [
 ];
 
 const WIFI_STATUS_URLS = [
-  "http://127.0.0.1:17373/wifi/status",
-  "http://localhost:17373/wifi/status"
+  "http://127.0.0.1:17374/wifi/status",
+  "http://localhost:17374/wifi/status"
 ];
 
 const WIFI_NETWORKS_URLS = [
-  "http://127.0.0.1:17373/wifi/networks",
-  "http://localhost:17373/wifi/networks"
+  "http://127.0.0.1:17374/wifi/networks",
+  "http://localhost:17374/wifi/networks"
 ];
 
 const WIFI_SCAN_URLS = [
-  "http://127.0.0.1:17373/wifi/scan",
-  "http://localhost:17373/wifi/scan"
+  "http://127.0.0.1:17374/wifi/scan",
+  "http://localhost:17374/wifi/scan"
 ];
 
 const WIFI_CONNECT_URLS = [
-  "http://127.0.0.1:17373/wifi/connect",
-  "http://localhost:17373/wifi/connect"
+  "http://127.0.0.1:17374/wifi/connect",
+  "http://localhost:17374/wifi/connect"
 ];
 
 const WIFI_DISCONNECT_URLS = [
-  "http://127.0.0.1:17373/wifi/disconnect",
-  "http://localhost:17373/wifi/disconnect"
+  "http://127.0.0.1:17374/wifi/disconnect",
+  "http://localhost:17374/wifi/disconnect"
 ];
 
 const WIFI_TOGGLE_URLS = [
-  "http://127.0.0.1:17373/wifi/toggle",
-  "http://localhost:17373/wifi/toggle"
+  "http://127.0.0.1:17374/wifi/toggle",
+  "http://localhost:17374/wifi/toggle"
 ];
 
 const UNLOCK_LOG_LINES = [
@@ -453,7 +453,7 @@ function WifiSettingsPanel() {
           </>
         )}
 
-        {!bridgeOnline ? <p className="wifi-message error">Bridge offline on port 17373.</p> : null}
+        {!bridgeOnline ? <p className="wifi-message error">Wi-Fi bridge offline on port 17374.</p> : null}
         {message ? <p className="wifi-message">{message}</p> : null}
       </CardContent>
     </Card>

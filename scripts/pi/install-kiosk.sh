@@ -76,18 +76,23 @@ chown -R "${APP_USER}:${APP_USER}" "${KIOSK_DIR}"
 echo "Installing kiosk launcher..."
 install -m 0755 "${SCRIPT_SOURCE_DIR}/start-kiosk.sh" /usr/local/bin/start-kiosk.sh
 install -m 0755 "${SCRIPT_SOURCE_DIR}/usb_status_bridge.py" /usr/local/bin/usb-status-bridge
+install -m 0755 "${SCRIPT_SOURCE_DIR}/wifi_status_bridge.py" /usr/local/bin/wifi-status-bridge
 
 echo "Installing systemd service..."
 install -m 0644 "${SCRIPT_SOURCE_DIR}/raspi-kiosk.service" /etc/systemd/system/raspi-kiosk.service
 sed -i "s/__APP_USER__/${APP_USER}/g" /etc/systemd/system/raspi-kiosk.service
 install -m 0644 "${SCRIPT_SOURCE_DIR}/usb-status-bridge.service" /etc/systemd/system/usb-status-bridge.service
 sed -i "s/__APP_USER__/${APP_USER}/g" /etc/systemd/system/usb-status-bridge.service
+install -m 0644 "${SCRIPT_SOURCE_DIR}/wifi-status-bridge.service" /etc/systemd/system/wifi-status-bridge.service
+sed -i "s/__APP_USER__/${APP_USER}/g" /etc/systemd/system/wifi-status-bridge.service
 
 echo "Enabling service..."
 systemctl daemon-reload
 systemctl enable raspi-kiosk.service
 systemctl enable usb-status-bridge.service
+systemctl enable wifi-status-bridge.service
 systemctl restart usb-status-bridge.service || true
+systemctl restart wifi-status-bridge.service || true
 
 echo "Applying optional display/touch template notes..."
 echo "Read and apply if needed:"
