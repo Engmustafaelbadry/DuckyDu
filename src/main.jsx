@@ -81,6 +81,16 @@ const launchUpdateIcon = {
   ...pixelarticons.icons["reload-sharp"]
 };
 
+const launchLanguageIcon = {
+  ...statusIconDefaults,
+  ...pixelarticons.icons.globe
+};
+
+const selectLottiePlaceholderIcon = {
+  ...statusIconDefaults,
+  ...pixelarticons.icons.earth
+};
+
 const DEVICE_GROUPS = [
   {
     name: "Decrypt Data",
@@ -501,7 +511,18 @@ function UpdatePanel() {
   );
 }
 
-function LaunchScreen({ onStart, onOpenWifi, onOpenProfile, onOpenQuickSettings, onOpenUpdate, onHome, onBack, onSettings }) {
+function LaunchScreen({
+  onStart,
+  onOpenWifi,
+  onOpenProfile,
+  onOpenQuickSettings,
+  onOpenUpdate,
+  onHome,
+  onBack,
+  onSettings,
+  uiLanguage,
+  onToggleLanguage
+}) {
   return (
     <main className="launch-root">
       <section className="layout-shell">
@@ -550,6 +571,14 @@ function LaunchScreen({ onStart, onOpenWifi, onOpenProfile, onOpenQuickSettings,
                 aria-label="Update"
               >
                 <Icon icon={launchUpdateIcon} />
+              </button>
+              <button
+                className="launch-icon-btn launch-lang-btn"
+                onClick={onToggleLanguage}
+                aria-label="Language"
+              >
+                <Icon icon={launchLanguageIcon} />
+                <span>{uiLanguage}</span>
               </button>
             </div>
 
@@ -882,6 +911,7 @@ function SettingsScreen({ onHome, onBack, onSettings }) {
 
 function App() {
   const [screen, setScreen] = useState("launch");
+  const [uiLanguage, setUiLanguage] = useState("EN");
   const [lastScreenBeforeSettings, setLastScreenBeforeSettings] = useState("select");
   const [selected, setSelected] = useState("android");
   const [connectMode, setConnectMode] = useState(false);
@@ -1023,6 +1053,8 @@ function App() {
         onHome={handleHome}
         onBack={handleBack}
         onSettings={handleSettingsOpen}
+        uiLanguage={uiLanguage}
+        onToggleLanguage={() => setUiLanguage((value) => (value === "EN" ? "JP" : "EN"))}
       />
     );
   }
@@ -1103,14 +1135,29 @@ function App() {
             />
           </div>
 
-          <div className={`os-selection-group${connectMode ? " is-hidden" : ""}`}>
-            <div className="row-main">
-              <OsCard id="android" label="Android" selected={selected === "android"} onSelect={handleCardSelect} />
-              <OsCard id="ios" label="iOS" selected={selected === "ios"} onSelect={handleCardSelect} />
-            </div>
+          {!connectMode ? (
+            <div className="select-main-layout">
+              <Card className="select-lottie-card">
+                <CardContent className="select-lottie-content">
+                  <Icon icon={selectLottiePlaceholderIcon} className="select-lottie-icon" />
+                  <p>Lottie Slot</p>
+                  <span>Left 1/3 Animation Area</span>
+                </CardContent>
+              </Card>
 
-            <OsCard id="other" label="Other OS" selected={selected === "other"} onSelect={handleCardSelect} />
-          </div>
+              <div className="select-right-grid">
+                <OsCard id="android" label="Android" selected={selected === "android"} onSelect={handleCardSelect} className="select-os-card-main" />
+                <OsCard id="ios" label="iOS" selected={selected === "ios"} onSelect={handleCardSelect} className="select-os-card-main" />
+                <div className="select-small-row">
+                  <OsCard id="other" label="Other OS" selected={selected === "other"} onSelect={handleCardSelect} className="select-os-card-small" />
+                  <Button variant="destructive" className="select-back-small" onClick={handleBack}>
+                    <ArrowLeftSolid className="cancel-icon" />
+                    Back
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : null}
 
           {connectMode ? (
             <Card className="connect-panel is-visible">
@@ -1165,7 +1212,7 @@ function App() {
             </Card>
           ) : null}
 
-          {connectStage !== "cable_wait" ? (
+          {connectMode && connectStage !== "cable_wait" ? (
             <Button variant="destructive" className="cancel-btn" onClick={handleBack}>
               <ArrowLeftSolid className="cancel-icon" />
               Back

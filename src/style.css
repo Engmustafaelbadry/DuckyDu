@@ -193,6 +193,19 @@ body {
   fill: currentColor;
 }
 
+.launch-lang-btn {
+  display: grid;
+  gap: 2px;
+  align-content: center;
+  justify-items: center;
+}
+
+.launch-lang-btn span {
+  font-family: "Kongtext", "Misaki", monospace;
+  font-size: 10px;
+  line-height: 1;
+}
+
 .launch-subtitle-jp,
 .launch-subtitle-en {
   margin: 0;
@@ -343,7 +356,9 @@ body {
 .select-os-root {
   width: 100%;
   height: 100%;
-  background: #000000;
+  background:
+    linear-gradient(110deg, rgb(0 0 0 / 82%) 0%, rgb(0 0 0 / 60%) 45%, rgb(0 0 0 / 78%) 100%),
+    url("/assets/Background.gif") center / cover no-repeat;
 }
 
 .layout-shell {
@@ -431,13 +446,134 @@ body {
   height: 100%;
   padding: 8px;
   display: grid;
-  grid-template-rows: 0fr 1fr auto;
+  grid-template-rows: 1fr;
   gap: 10px;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .select-os-screen.is-connect-mode {
-  grid-template-rows: auto 0fr 1fr auto;
+  grid-template-rows: auto 1fr auto;
   gap: 2px;
+}
+
+.select-main-layout {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 12px;
+}
+
+.select-lottie-card {
+  width: 100%;
+  height: 100%;
+  margin: 0 !important;
+  box-shadow: var(--pixel-box-shadow) !important;
+  background: rgb(0 0 0 / 70%) !important;
+  border: 2px solid #2dff73 !important;
+}
+
+.select-lottie-content {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  text-align: center;
+  padding: 10px;
+  overflow: hidden;
+}
+
+.select-lottie-icon {
+  width: 74px;
+  height: 74px;
+  color: #2dff73;
+  fill: currentColor;
+  animation: lottie-slot-pulse 1300ms steps(2, end) infinite;
+}
+
+.select-lottie-content p {
+  margin: 0;
+  color: #ffffff;
+  font-size: 13px;
+}
+
+.select-lottie-content span {
+  margin: 0;
+  color: #b9b9b9;
+  font-size: 9px;
+  line-height: 1.3;
+}
+
+.select-right-grid {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: 1fr 1fr auto;
+  gap: 10px;
+}
+
+.select-os-card-main {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.select-os-card-main .os-card {
+  height: 100%;
+}
+
+.select-os-card-main .os-card-content {
+  gap: 6px;
+}
+
+.select-os-card-main .os-text h2 {
+  font-size: 22px;
+}
+
+.select-small-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  min-height: 0;
+}
+
+.select-os-card-small {
+  width: 100%;
+  height: 90px;
+}
+
+.select-os-card-small .os-card {
+  height: 90px;
+}
+
+.select-os-card-small .os-card-content {
+  gap: 8px;
+  padding: 8px;
+}
+
+.select-os-card-small .pixel-icon {
+  width: 34px;
+  height: 34px;
+}
+
+.select-os-card-small .os-text h2 {
+  font-size: 13px;
+}
+
+.select-back-small {
+  width: 100%;
+  height: 90px;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .focus-slot-wrap {
@@ -1435,6 +1571,19 @@ body {
   }
 }
 
+@keyframes lottie-slot-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: translateY(-3px);
+  }
+}
+
 @media (max-width: 860px) {
   .launch-screen {
     grid-template-columns: 1fr;
@@ -1490,5 +1639,10 @@ body {
   .launch-version-icon {
     width: 12px;
     height: 12px;
+  }
+
+  .select-main-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: 160px 1fr;
   }
 }
