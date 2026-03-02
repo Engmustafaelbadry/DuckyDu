@@ -4,171 +4,201 @@
 - Platform: Raspberry Pi 5 kiosk UI.
 - Framework: React + Vite.
 - Visual direction: Pixelact-style UI with pixel icon sets and stepped pixel corners.
-- Navigation model: flow-based screens, no top menu; shared left vertical menu on all screens.
+- Navigation model: flow-based screens, no top menu.
+- Shared left vertical menu is present across launch/select/settings/device flows.
 
 ## 2) Screen / Resolution Notes
 - Target display: 800x480.
 - Measured visible kiosk area on device: 780x460.
 - App fills viewport (`html, body, #app` 100%).
-- Main background: pure black (`#000000`).
+- No-scroll kiosk rule is still active for all main screens.
 
 ## 3) Implemented Screen Flow
 
-### A) Select OS screen
-- Cards: Android, iOS, Other OS.
-- Tap any card -> enters connect mode.
-- Selected card folds to compact top card.
-- Other cards hide.
+### A) Launch screen (new first screen before Select OS)
+- Device title shown in Japanese + English:
+  - `ピクサチョ`
+  - `PIXACHO`
+- Subtitle shown in Japanese + English:
+  - `ハッキングはただのゲーム`
+  - `HACKING IS JUST A GAME`
+- Background: `public/assets/Background.gif`.
+- Left: main branding + `Start...`.
+- Right: icon rail with pages:
+  - Settings (coming soon panel)
+  - Wi-Fi page
+  - Profile page (Pixelact avatar)
+  - Update page (coming soon panel)
+  - Language toggle icon (`EN` / `JP`) for future translation wiring.
+- Version row shown under icons: `Version 2.0.115`.
 
-### B) Connect mode (Cable path)
-- `Connect via` stage: Cable / Wireless cards.
-- Tap `Cable` -> cable waiting stage.
-- Waiting stage polls local USB bridge endpoint:
+### B) Select OS screen (refined)
+- Header: `Select OS`.
+- Uses background GIF overlay styling.
+- Main layout:
+  - Left 1/3: animation area with `public/assets/samurai.png`.
+  - Right 2/3: OS cards.
+- OS card structure:
+  - Android card (large)
+  - iOS card (large)
+  - Bottom row: `Other OS` + small `Back` button side by side.
+- Samurai animation behavior:
+  - Horizontal only (left-right), hard step motion.
+  - No vertical bounce.
+  - No flip.
+
+### C) Connect mode (Cable path)
+- `Connect via` stage: Cable / Wireless.
+- Cable wait stage polls:
   - `http://127.0.0.1:17373/usb/mobile-status`
   - `http://localhost:17373/usb/mobile-status`
-- If no endpoint: shows `USB bridge offline`.
-- If connected:
-  - Status label: `Status: Connected` (green, larger)
-  - Product Name and Manufacturer lines
-  - Access slot behavior:
-    - shows spinner for 3 seconds
-    - then shows `Access Device` button in the same slot (no layout shift)
+- Connected state shows product/manufacturer and delayed Access button.
+- Access button opens loading screen then Device Management.
 
-### C) Device Management screen
-- Opened by pressing `Access Device`.
-- Uses shared vertical menu.
-- Top-right label shows current product name.
-- Grouped pages with one group per page:
+### D) Device Management screen
+- Uses grouped pages:
   1. Decrypt Data
   2. Data Management
   3. Device Management
   4. Delete Encryption
-- Card layout is fixed 3x3, no scroll.
-- Footer navigation:
-  - Previous group button (from page 2 onward) on left
-  - Next group button on right
-  - equal button widths and one-line labels (ellipsis if long)
-- Circle pagination buttons (numbered) for direct page jump.
+- 3x3 fixed grid behavior maintained.
+- Back/home handling kept context-aware.
 
-### D) Settings screen
-- Placeholder page implemented.
-- Opened by left menu Settings button.
-- Content intentionally minimal for future fill.
+### E) Settings screen (now functional)
+- Replaced placeholder with operational controls that call local bridge APIs.
+- Settings is now page-based (one group per page to avoid UI noise):
+  - `Settings` home page with navigation buttons.
+  - `Display Settings` page.
+  - `Pixacho Configuration` page.
+  - `Customization` page.
+- Display Settings page is wired to Pi display controls (real bridge calls, no mock):
+  - Brightness
+  - Contrast
+  - Gamma
+  - Saturation
+  - Includes Apply + Reset buttons.
+- Pixacho Configuration page contains system operation buttons:
+  - Show `lsusb`
+  - Restart ADB
+  - Restart Bridges
+  - Restart Kiosk
+  - Pull Latest Code (`git pull`)
+  - Apply Full Update pipeline
+  - Restart Pi
+  - Shutdown Pi
+- Customization page:
+  - Open sudo terminal over kiosk (touch flow).
+- Added output log panel to show command results/errors.
+- Layout tuned to fit kiosk ratio with fixed-height sections and no page-level overflow.
 
-## 4) Vertical Menu Behavior
+## 4) Wi-Fi System
+
+### A) Dedicated Wi-Fi bridge (separate from USB bridge)
+- Script: `scripts/pi/wifi_status_bridge.py`
+- Service: `scripts/pi/wifi-status-bridge.service`
+- Port: `17374`
+- Endpoints:
+  - `GET /wifi/status`
+  - `GET /wifi/networks`
+  - `POST /wifi/scan`
+  - `POST /wifi/connect`
+  - `POST /wifi/disconnect`
+  - `POST /wifi/toggle`
+
+### B) Wi-Fi UI behavior
+- Wi-Fi page redesigned for touch usability:
+  - Left 1/3 controls (Refresh / On-Off / Connect / Disconnect).
+  - Right 2/3 network list + password input.
+- Added in-app touchscreen keyboard for password entry (no physical keyboard required):
+  - opens when password input is tapped
+  - supports key rows, Space, Backspace, Clear, Done.
+
+## 5) USB + ADB + System Control Bridge
+
+### A) USB/ADB bridge
+- Script: `scripts/pi/usb_status_bridge.py`
+- Service: `scripts/pi/usb-status-bridge.service`
+- Port: `17373`
+- Existing endpoints maintained (`/usb/mobile-status`, `/adb/note-test`, etc.).
+
+### B) New system control endpoints (on USB bridge)
+- `GET /system/lsusb`
+- `GET /system/display-status`
+- `POST /system/restart-adb`
+- `POST /system/restart-bridges`
+- `POST /system/restart-kiosk`
+- `POST /system/restart-pi`
+- `POST /system/shutdown-pi`
+- `POST /system/pull-latest`
+- `POST /system/apply-update`
+- `POST /system/display-apply`
+- `POST /system/open-sudo-terminal`
+
+### C) Apply update pipeline behavior
+- Runs project update/deploy sequence from bridge side:
+  - git pull
+  - npm install
+  - npm run build
+  - sudo deploy dist to `/opt/raspi-launcher`
+  - restart `raspi-kiosk.service`
+- Uses configured app paths/env defaults in bridge.
+- Follows kiosk deploy command intent:
+  - `cd /home/duckydu/DuckyDu && git pull && npm install && npm run build && sudo rm -rf /opt/raspi-launcher/* && sudo cp -r dist/* /opt/raspi-launcher/ && sudo chown -R duckydu:duckydu /opt/raspi-launcher && sudo systemctl restart raspi-kiosk.service`
+
+## 6) Install / Service Scripts
+- Added unified bridge installer:
+  - `scripts/pi/install-bridges.sh`
+- Updated installers to deploy both bridges and enable both services:
+  - `scripts/pi/install-kiosk.sh`
+  - `scripts/pi/install-usb-bridge-only.sh`
+  - `scripts/pi/install-bridges.sh`
+- Installers now include additional dependencies for settings/system-display tooling:
+  - `xcalib`
+  - `xterm`
+- Added sudoers template for bridge-managed system actions:
+  - `scripts/pi/duckydu-bridge-sudoers`
+
+## 7) Vertical Menu Behavior
 File: `src/components/VerticalMenu.jsx`
+- Rotated clock, battery, Wi-Fi, cloud, live dot.
+- Buttons:
+  - Home: returns to launch screen.
+  - Back: context-aware stage back.
+  - Settings: opens system settings screen.
 
-- Status area:
-  - Rotated digital clock
-  - Battery icon (rotated)
-  - WiFi icon
-  - Green cloud icon
-  - Blinking green live dot (opacity 1.0 <-> 0.2)
-- Menu buttons now wired:
-  - Home: always returns to Select OS
-  - Back: goes back one stage (context-aware)
-  - Settings: opens Settings page
+## 8) Back/Home Stage Rules
+- Launch sub-pages (`launch-wifi`, `launch-profile`, `launch-settings`, `launch-update`) back to launch.
+- Settings back returns to previous screen.
+- Device Management/Device Loading back returns to cable wait stage.
+- Home always returns to launch base state.
 
-## 5) Back/Home Stage Rules
-- From Device Management -> Back returns to connected-device cable stage.
-- From cable stage -> Back returns to `Connect via` stage.
-- From connect mode choose stage -> Back returns to Select OS normal mode.
-- From Settings -> Back returns to previous screen.
-- Home always returns to Select OS base state.
+## 9) Key Project Files
+- `src/main.jsx` -> app flow + screen routing + Wi-Fi UI + settings system actions.
+- `src/style.css` -> all visual system/layout/animations.
+- `src/components/VerticalMenu.jsx` -> shared side menu.
+- `scripts/pi/usb_status_bridge.py` -> USB, ADB, and system control endpoints.
+- `scripts/pi/wifi_status_bridge.py` -> dedicated Wi-Fi endpoints.
+- `scripts/pi/install-bridges.sh` -> one-command bridge installer.
+- `scripts/pi/duckydu-bridge-sudoers` -> sudoers template for safe command execution.
 
-## 6) Device Management Groups and Cards
-
-### Decrypt Data
-- Unlock Device
-- Unlock Safe Folder
-- Access Hidden Files
-- Access Root Files
-- Decrypt Security
-- Decrypt Biometrics
-- Decrypt Apps Security
-- Show Passwords
-
-### Data Management
-- Backup Data
-- Delete All Data
-- Hard Reset
-- Upload Data To Cloud
-
-### Device Management
-- Device Cloud Mirror
-- Install Permissions
-
-### Delete Encryption
-- Wipe All data
-- Hard Reset
-- Delete G Account
-- Remove Login Credientals
-
-## 7) Icon Mapping (Current)
-Libraries used:
-- `@iconify-json/pixel`
-- `@iconify-json/pixelarticons`
-- `@2hoch1/pixel-icon-library-react`
-
-Examples:
-- OS cards: `pixel:android`, `pixel:ios`, `Code` component for Other OS
-- Status: battery / wifi / cloud
-- Connect and group cards: pixelart/pixel icons mapped per card
-- Show Passwords now uses a pixel password-style icon (not star-composition)
-
-## 8) Styling Rules in Effect
-File: `src/style.css`
-
-- Pixel-step corner style (`--pixel-step`) with stepped `clip-path` corners.
-- Pixel shadow framing (`--pixel-box-shadow`) on cards/buttons.
-- No page scrolling behavior for card groups.
-- **Hard UI rule:** never allow screen/page expansion that introduces scrolling.
-  - For progressive logs (like Unlock Device), content must stay inside fixed-height containers.
-  - Extra lines are clipped/contained; viewport must remain static with no scrollbars.
-- Device cards tuned to fit fixed 3x3 grid.
-- Prev/Next group buttons aligned left/right with equal width.
-
-## 9) USB Detection Bridge
-
-### Frontend usage
-- UI polls local bridge every ~1.2s in cable wait stage.
-- Connected state is driven by bridge JSON response.
-
-### Bridge code
-- `scripts/pi/usb_status_bridge.py`
-- Endpoint: `/usb/mobile-status` on `127.0.0.1:17373`
-- Detection strategy:
-  - Prefer `/sys/bus/usb/devices` info for `manufacturer` and `productName`
-  - Fallback to `lsusb` parsing
-
-### Service files / install
-- `scripts/pi/usb-status-bridge.service`
-- `scripts/pi/install-usb-bridge-only.sh`
-- `scripts/pi/install-kiosk.sh` updated to install/enable bridge
-- `scripts/pi/start-kiosk.sh` has bridge launch support
-
-## 10) Key Project Files
-- `src/main.jsx` -> app flow + screens + USB polling + navigation logic
-- `src/style.css` -> all layout/theme/animation styles
-- `src/components/VerticalMenu.jsx` -> shared menu component
-- `scripts/pi/usb_status_bridge.py` -> USB status local bridge
-- `scripts/pi/usb-status-bridge.service` -> systemd unit
-- `scripts/pi/install-usb-bridge-only.sh` -> targeted bridge installer
-
-## 11) npm Scripts
+## 10) npm Scripts
 - `npm run dev`
 - `npm run build`
 - `npm run preview`
-- `npm run usb-bridge` (Node bridge script remains available in repo)
+- `npm run usb-bridge` (legacy Node bridge script remains)
 
-## 12) Current Known Notes
+## 11) Current Known Notes
 - Build passes.
-- Vite warns about large chunk size (>500KB), non-blocking.
-- Samsung S24 Ultra was not detected on this setup; another phone was detected successfully.
-- If `USB bridge offline` appears, service is missing/not running on Pi.
+- Python bridge syntax checks pass.
+- Vite still warns for large chunk size (>500KB), non-blocking.
+- System control buttons require proper Pi installation/restart of services and sudoers setup from install scripts.
 
-## 13) Next Suggested Steps
-1. Wire actual actions for each management card.
-2. Implement Wireless flow behavior (currently card present, no deeper flow).
-3. Connect `Access Device` to backend task execution/auth gate if needed.
-4. Optional optimization: split large bundle via route/code-splitting.
+## 12) Permanent Rules
+- Hard UI rule: never allow screen/page expansion that introduces scrolling.
+- Summary maintenance rule (new): after finishing any meaningful change, update `PROJECT_SUMMARY.md` in the same task by adding new items and editing outdated ones.
+
+## 13) Suggested Next Steps
+1. Wire real translation text switching for `EN/JP` state.
+2. Replace samurai placeholder animation area with real lottie runtime if desired.
+3. Add confirmation dialogs for destructive system actions (shutdown/reboot/apply update).
+4. Add auth gate/role check for system-control buttons.

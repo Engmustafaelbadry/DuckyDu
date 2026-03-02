@@ -43,6 +43,8 @@ apt-get install -y --no-install-recommends \
   python3 \
   usbutils \
   network-manager \
+  xcalib \
+  xterm \
   "${CHROMIUM_PKG}"
 
 SCRIPT_SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

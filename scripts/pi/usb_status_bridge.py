@@ -54,6 +54,11 @@ SUDO_BIN = os.environ.get("SUDO_BIN") or shutil.which("sudo") or "/usr/bin/sudo"
 SYSTEMCTL_BIN = os.environ.get("SYSTEMCTL_BIN") or shutil.which("systemctl") or "/bin/systemctl"
 REBOOT_BIN = os.environ.get("REBOOT_BIN") or shutil.which("reboot") or "/sbin/reboot"
 SHUTDOWN_BIN = os.environ.get("SHUTDOWN_BIN") or shutil.which("shutdown") or "/sbin/shutdown"
+XRANDR_BIN = os.environ.get("XRANDR_BIN") or shutil.which("xrandr") or "/usr/bin/xrandr"
+XCALIB_BIN = os.environ.get("XCALIB_BIN") or shutil.which("xcalib") or "/usr/bin/xcalib"
+XTERM_BIN = os.environ.get("XTERM_BIN") or shutil.which("xterm") or "/usr/bin/xterm"
+DISPLAY_ENV = os.environ.get("DISPLAY", ":0")
+XAUTHORITY_ENV = os.environ.get("XAUTHORITY", f"/home/{APP_USER}/.Xauthority")
 
 note_test_state = {
     "running": False,
@@ -63,6 +68,12 @@ note_test_state = {
     "lastError": None,
 }
 note_test_lock = threading.Lock()
+display_state = {
+    "brightness": 1.0,
+    "contrast": 1.0,
+    "gamma": 1.0,
+    "saturation": 1.0,
+}
 
 
 def encode_adb_input_text(value: str) -> str:
@@ -279,7 +290,7 @@ def start_adb_note_test():
     return True
 
 
-def _run_cmd_capture(command: list[str], timeout: int = 25, cwd: str | None = None):
+def _run_cmd_capture(command: list[str], timeout: int = 25, cwd: str | None = None, env: dict | None = None):
     result = subprocess.run(
         command,
         capture_output=True,
@@ -287,6 +298,7 @@ def _run_cmd_capture(command: list[str], timeout: int = 25, cwd: str | None = No
         timeout=timeout,
         check=False,
         cwd=cwd,
+        env=env,
     )
     stdout = (result.stdout or "").strip()
     stderr = (result.stderr or "").strip()
@@ -364,10 +376,15 @@ def apply_update_pipeline():
         {"display": f"{GIT_BIN} pull", "command": [GIT_BIN, "pull"], "timeout": 60, "cwd": APP_REPO_DIR},
         {"display": f"{NPM_BIN} install", "command": [NPM_BIN, "install"], "timeout": 120, "cwd": APP_REPO_DIR},
         {"display": f"{NPM_BIN} run build", "command": [NPM_BIN, "run", "build"], "timeout": 180, "cwd": APP_REPO_DIR},
-        {"display": f"rm -rf {APP_DEPLOY_DIR}/*", "command": ["bash", "-lc", f"rm -rf {APP_DEPLOY_DIR}/*"], "timeout": 20, "cwd": None},
         {
-            "display": f"cp -r {APP_REPO_DIR}/dist/* {APP_DEPLOY_DIR}/",
-            "command": ["bash", "-lc", f"cp -r {APP_REPO_DIR}/dist/* {APP_DEPLOY_DIR}/"],
+            "display": f"{SUDO_BIN} rm -rf {APP_DEPLOY_DIR}/*",
+            "command": ["bash", "-lc", f"{SUDO_BIN} rm -rf {APP_DEPLOY_DIR}/*"],
+            "timeout": 20,
+            "cwd": None,
+        },
+        {
+            "display": f"{SUDO_BIN} cp -r {APP_REPO_DIR}/dist/* {APP_DEPLOY_DIR}/",
+            "command": ["bash", "-lc", f"{SUDO_BIN} cp -r {APP_REPO_DIR}/dist/* {APP_DEPLOY_DIR}/"],
             "timeout": 20,
             "cwd": None,
         },
@@ -393,6 +410,131 @@ def apply_update_pipeline():
             return {"ok": False, "output": "\n".join(logs)}
 
     return {"ok": True, "output": "\n".join(logs)}
+
+
+def _x11_env():
+    env = os.environ.copy()
+    env["DISPLAY"] = DISPLAY_ENV
+    env["XAUTHORITY"] = XAUTHORITY_ENV
+    return env
+
+
+def _clamp(value: float, min_value: float, max_value: float):
+    return max(min_value, min(max_value, value))
+
+
+def _detect_active_output():
+    query = _run_cmd_capture([XRANDR_BIN, "--query"], timeout=8, env=_x11_env())
+    if not query["ok"]:
+        raise RuntimeError(query["output"] or "xrandr_query_failed")
+
+    lines = query["stdout"].splitlines()
+    primary = None
+    connected = None
+
+    for line in lines:
+        if " connected primary " in line:
+            primary = line.split()[0]
+            break
+        if " connected " in line and connected is None:
+            connected = line.split()[0]
+
+    output = primary or connected
+    if not output:
+        raise RuntimeError("display_output_not_found")
+    return output
+
+
+def _display_status_payload(output_name: str):
+    return {
+        "output": output_name,
+        "brightness": display_state["brightness"],
+        "contrast": display_state["contrast"],
+        "gamma": display_state["gamma"],
+        "saturation": display_state["saturation"],
+    }
+
+
+def get_display_status():
+    output_name = _detect_active_output()
+    return _display_status_payload(output_name)
+
+
+def apply_display_controls(payload: dict):
+    brightness = _clamp(float(payload.get("brightness", display_state["brightness"])), 0.4, 1.6)
+    contrast = _clamp(float(payload.get("contrast", display_state["contrast"])), 0.5, 1.5)
+    gamma = _clamp(float(payload.get("gamma", display_state["gamma"])), 0.6, 2.0)
+    saturation = _clamp(float(payload.get("saturation", display_state["saturation"])), 0.5, 1.5)
+
+    output_name = _detect_active_output()
+    x11_env = _x11_env()
+
+    xrandr_result = _run_cmd_capture(
+        [
+            XRANDR_BIN,
+            "--output",
+            output_name,
+            "--brightness",
+            f"{brightness:.2f}",
+            "--gamma",
+            f"{gamma:.2f}:{gamma:.2f}:{gamma:.2f}",
+        ],
+        timeout=10,
+        env=x11_env,
+    )
+    if not xrandr_result["ok"]:
+        raise RuntimeError(xrandr_result["output"] or "display_apply_failed")
+
+    contrast_result = _run_cmd_capture(
+        [XCALIB_BIN, "-d", DISPLAY_ENV, "-co", str(int(contrast * 100)), "-a"],
+        timeout=10,
+        env=x11_env,
+    )
+    if not contrast_result["ok"]:
+        raise RuntimeError(contrast_result["output"] or "contrast_apply_failed")
+
+    saturation_prop = str(int((saturation - 1.0) * 100))
+    saturation_result = _run_cmd_capture(
+        [XRANDR_BIN, "--output", output_name, "--set", "Saturation", saturation_prop],
+        timeout=10,
+        env=x11_env,
+    )
+
+    saturation_note = "applied"
+    if not saturation_result["ok"]:
+        saturation_note = "saturation_property_unavailable"
+
+    display_state["brightness"] = brightness
+    display_state["contrast"] = contrast
+    display_state["gamma"] = gamma
+    display_state["saturation"] = saturation
+
+    return {
+        "ok": True,
+        "output": f"display applied on {output_name} (saturation: {saturation_note})",
+        **_display_status_payload(output_name),
+    }
+
+
+def open_sudo_terminal():
+    command = [
+        SUDO_BIN,
+        XTERM_BIN,
+        "-fa",
+        "Monospace",
+        "-fs",
+        "12",
+        "-bg",
+        "black",
+        "-fg",
+        "#2dff73",
+        "-e",
+        "bash",
+        "-lc",
+        "sudo -s",
+    ]
+    result = _run_cmd_capture(command, timeout=8, env=_x11_env())
+    return {"ok": result["ok"], "output": result["output"] or "sudo terminal requested"}
 
 
 def _read_json_body(handler: BaseHTTPRequestHandler):
@@ -625,6 +767,13 @@ class Handler(BaseHTTPRequestHandler):
             self._write_json(200 if result["ok"] else 500, result)
             return
 
+        if self.path == "/system/display-status":
+            try:
+                self._write_json(200, get_display_status())
+            except Exception as exc:
+                self._write_json(500, {"error": str(exc)})
+            return
+
         if self.path == "/adb/note-test-status":
             with note_test_lock:
                 payload = dict(note_test_state)
@@ -709,6 +858,19 @@ class Handler(BaseHTTPRequestHandler):
 
         if self.path == "/system/apply-update":
             result = apply_update_pipeline()
+            self._write_json(200 if result["ok"] else 500, result)
+            return
+
+        if self.path == "/system/display-apply":
+            body = _read_json_body(self)
+            try:
+                self._write_json(200, apply_display_controls(body))
+            except Exception as exc:
+                self._write_json(500, {"error": str(exc)})
+            return
+
+        if self.path == "/system/open-sudo-terminal":
+            result = open_sudo_terminal()
             self._write_json(200 if result["ok"] else 500, result)
             return
 

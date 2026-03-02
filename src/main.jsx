@@ -206,6 +206,21 @@ const SYSTEM_APPLY_UPDATE_URLS = [
   "http://localhost:17373/system/apply-update"
 ];
 
+const SYSTEM_DISPLAY_STATUS_URLS = [
+  "http://127.0.0.1:17373/system/display-status",
+  "http://localhost:17373/system/display-status"
+];
+
+const SYSTEM_DISPLAY_APPLY_URLS = [
+  "http://127.0.0.1:17373/system/display-apply",
+  "http://localhost:17373/system/display-apply"
+];
+
+const SYSTEM_OPEN_SUDO_TERMINAL_URLS = [
+  "http://127.0.0.1:17373/system/open-sudo-terminal",
+  "http://localhost:17373/system/open-sudo-terminal"
+];
+
 const WIFI_OSK_ROWS = [
   ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
   ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
@@ -982,8 +997,37 @@ function DeviceLoadingScreen({ productName, onHome, onBack, onSettings, onDone }
 }
 
 function SettingsScreen({ onHome, onBack, onSettings }) {
+  const [settingsPage, setSettingsPage] = useState("home");
   const [busyKey, setBusyKey] = useState("");
   const [resultLog, setResultLog] = useState("No command run yet.");
+  const [displayControls, setDisplayControls] = useState({
+    brightness: 1,
+    contrast: 1,
+    gamma: 1,
+    saturation: 1
+  });
+
+  const setDisplayValue = (key, value) => {
+    setDisplayControls((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const loadDisplayStatus = useCallback(async () => {
+    try {
+      const payload = await requestBridgeJson(SYSTEM_DISPLAY_STATUS_URLS, { method: "GET" });
+      setDisplayControls({
+        brightness: Number(payload?.brightness ?? 1),
+        contrast: Number(payload?.contrast ?? 1),
+        gamma: Number(payload?.gamma ?? 1),
+        saturation: Number(payload?.saturation ?? 1)
+      });
+    } catch {
+      // Keep defaults if status endpoint is unavailable.
+    }
+  }, []);
+
+  useEffect(() => {
+    loadDisplayStatus();
+  }, [loadDisplayStatus]);
 
   const runSystemAction = async (label, urls) => {
     setBusyKey(label);
@@ -993,6 +1037,44 @@ function SettingsScreen({ onHome, onBack, onSettings }) {
       setResultLog(payload?.output || `${label} completed.`);
     } catch (error) {
       setResultLog(error instanceof Error ? error.message : "Action failed");
+    } finally {
+      setBusyKey("");
+    }
+  };
+
+  const applyDisplay = async () => {
+    setBusyKey("apply display");
+    setResultLog("Applying display controls...");
+    try {
+      const payload = await requestBridgeJson(SYSTEM_DISPLAY_APPLY_URLS, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(displayControls)
+      });
+      setResultLog(payload?.output || "Display controls applied.");
+      await loadDisplayStatus();
+    } catch (error) {
+      setResultLog(error instanceof Error ? error.message : "Apply display failed");
+    } finally {
+      setBusyKey("");
+    }
+  };
+
+  const resetDisplay = async () => {
+    const resetValues = { brightness: 1, contrast: 1, gamma: 1, saturation: 1 };
+    setDisplayControls(resetValues);
+    setBusyKey("reset display");
+    setResultLog("Resetting display controls...");
+    try {
+      const payload = await requestBridgeJson(SYSTEM_DISPLAY_APPLY_URLS, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(resetValues)
+      });
+      setResultLog(payload?.output || "Display controls reset.");
+      await loadDisplayStatus();
+    } catch (error) {
+      setResultLog(error instanceof Error ? error.message : "Reset display failed");
     } finally {
       setBusyKey("");
     }
@@ -1011,6 +1093,15 @@ function SettingsScreen({ onHome, onBack, onSettings }) {
     }
   };
 
+  const pageTitle =
+    settingsPage === "display"
+      ? "Display Settings"
+      : settingsPage === "pixacho"
+        ? "Pixacho Configuration"
+        : settingsPage === "customization"
+          ? "Customization"
+          : "Settings";
+
   return (
     <main className="select-os-root">
       <section className="layout-shell">
@@ -1019,64 +1110,160 @@ function SettingsScreen({ onHome, onBack, onSettings }) {
         <section className="settings-screen">
           <Card className="settings-card">
             <CardContent className="settings-card-content">
-              <h2>Settings</h2>
-
-              <div className="settings-actions-grid">
-                <Button className="settings-action-btn" disabled={Boolean(busyKey)} onClick={runLsusb}>
-                  {busyKey === "lsusb" ? "Running..." : "Show lsusb"}
-                </Button>
-                <Button
-                  className="settings-action-btn"
-                  disabled={Boolean(busyKey)}
-                  onClick={() => runSystemAction("restart adb", SYSTEM_RESTART_ADB_URLS)}
-                >
-                  {busyKey === "restart adb" ? "Running..." : "Restart ADB"}
-                </Button>
-                <Button
-                  className="settings-action-btn"
-                  disabled={Boolean(busyKey)}
-                  onClick={() => runSystemAction("restart bridges", SYSTEM_RESTART_BRIDGES_URLS)}
-                >
-                  {busyKey === "restart bridges" ? "Running..." : "Restart Bridges"}
-                </Button>
-                <Button
-                  className="settings-action-btn"
-                  disabled={Boolean(busyKey)}
-                  onClick={() => runSystemAction("restart kiosk", SYSTEM_RESTART_KIOSK_URLS)}
-                >
-                  {busyKey === "restart kiosk" ? "Running..." : "Restart Kiosk"}
-                </Button>
-                <Button
-                  className="settings-action-btn"
-                  disabled={Boolean(busyKey)}
-                  onClick={() => runSystemAction("pull latest", SYSTEM_PULL_LATEST_URLS)}
-                >
-                  {busyKey === "pull latest" ? "Running..." : "Pull Latest Code"}
-                </Button>
-                <Button
-                  className="settings-action-btn"
-                  disabled={Boolean(busyKey)}
-                  onClick={() => runSystemAction("apply update", SYSTEM_APPLY_UPDATE_URLS)}
-                >
-                  {busyKey === "apply update" ? "Running..." : "Apply Full Update"}
-                </Button>
-                <Button
-                  variant="destructive"
-                  className="settings-action-btn"
-                  disabled={Boolean(busyKey)}
-                  onClick={() => runSystemAction("restart pi", SYSTEM_RESTART_PI_URLS)}
-                >
-                  {busyKey === "restart pi" ? "Running..." : "Restart Pi"}
-                </Button>
-                <Button
-                  variant="destructive"
-                  className="settings-action-btn"
-                  disabled={Boolean(busyKey)}
-                  onClick={() => runSystemAction("shutdown pi", SYSTEM_SHUTDOWN_PI_URLS)}
-                >
-                  {busyKey === "shutdown pi" ? "Running..." : "Shutdown Pi"}
-                </Button>
+              <div className="settings-page-header">
+                <h2>{pageTitle}</h2>
+                {settingsPage !== "home" ? (
+                  <Button className="settings-page-back-btn" onClick={() => setSettingsPage("home")} disabled={Boolean(busyKey)}>
+                    Back
+                  </Button>
+                ) : null}
               </div>
+
+              {settingsPage === "home" ? (
+                <div className="settings-home-grid">
+                  <button className="settings-home-btn" onClick={() => setSettingsPage("display")}>Display Settings</button>
+                  <button className="settings-home-btn" onClick={() => setSettingsPage("pixacho")}>Pixacho Configuration</button>
+                  <button className="settings-home-btn" onClick={() => setSettingsPage("customization")}>Customization</button>
+                </div>
+              ) : null}
+
+              {settingsPage === "display" ? (
+                <section className="settings-section-card display-section-card settings-page-content">
+                  <div className="display-control">
+                    <label>Brightness</label>
+                    <input
+                      type="range"
+                      min="0.4"
+                      max="1.6"
+                      step="0.01"
+                      value={displayControls.brightness}
+                      onChange={(event) => setDisplayValue("brightness", Number(event.target.value))}
+                    />
+                    <span>{displayControls.brightness.toFixed(2)}</span>
+                  </div>
+
+                  <div className="display-control">
+                    <label>Contrast</label>
+                    <input
+                      type="range"
+                      min="0.5"
+                      max="1.5"
+                      step="0.01"
+                      value={displayControls.contrast}
+                      onChange={(event) => setDisplayValue("contrast", Number(event.target.value))}
+                    />
+                    <span>{displayControls.contrast.toFixed(2)}</span>
+                  </div>
+
+                  <div className="display-control">
+                    <label>Gamma</label>
+                    <input
+                      type="range"
+                      min="0.6"
+                      max="2.0"
+                      step="0.01"
+                      value={displayControls.gamma}
+                      onChange={(event) => setDisplayValue("gamma", Number(event.target.value))}
+                    />
+                    <span>{displayControls.gamma.toFixed(2)}</span>
+                  </div>
+
+                  <div className="display-control">
+                    <label>Saturation</label>
+                    <input
+                      type="range"
+                      min="0.5"
+                      max="1.5"
+                      step="0.01"
+                      value={displayControls.saturation}
+                      onChange={(event) => setDisplayValue("saturation", Number(event.target.value))}
+                    />
+                    <span>{displayControls.saturation.toFixed(2)}</span>
+                  </div>
+
+                  <div className="settings-actions-grid display-action-row">
+                    <Button className="settings-action-btn" disabled={Boolean(busyKey)} onClick={applyDisplay}>
+                      {busyKey === "apply display" ? "Running..." : "Apply Display"}
+                    </Button>
+                    <Button className="settings-action-btn" disabled={Boolean(busyKey)} onClick={resetDisplay}>
+                      {busyKey === "reset display" ? "Running..." : "Reset Display"}
+                    </Button>
+                  </div>
+                </section>
+              ) : null}
+
+              {settingsPage === "pixacho" ? (
+                <section className="settings-section-card settings-page-content">
+                  <div className="settings-actions-grid">
+                    <Button className="settings-action-btn" disabled={Boolean(busyKey)} onClick={runLsusb}>
+                      {busyKey === "lsusb" ? "Running..." : "Show lsusb"}
+                    </Button>
+                    <Button
+                      className="settings-action-btn"
+                      disabled={Boolean(busyKey)}
+                      onClick={() => runSystemAction("restart adb", SYSTEM_RESTART_ADB_URLS)}
+                    >
+                      {busyKey === "restart adb" ? "Running..." : "Restart ADB"}
+                    </Button>
+                    <Button
+                      className="settings-action-btn"
+                      disabled={Boolean(busyKey)}
+                      onClick={() => runSystemAction("restart bridges", SYSTEM_RESTART_BRIDGES_URLS)}
+                    >
+                      {busyKey === "restart bridges" ? "Running..." : "Restart Bridges"}
+                    </Button>
+                    <Button
+                      className="settings-action-btn"
+                      disabled={Boolean(busyKey)}
+                      onClick={() => runSystemAction("restart kiosk", SYSTEM_RESTART_KIOSK_URLS)}
+                    >
+                      {busyKey === "restart kiosk" ? "Running..." : "Restart Kiosk"}
+                    </Button>
+                    <Button
+                      className="settings-action-btn"
+                      disabled={Boolean(busyKey)}
+                      onClick={() => runSystemAction("pull latest", SYSTEM_PULL_LATEST_URLS)}
+                    >
+                      {busyKey === "pull latest" ? "Running..." : "Pull Latest Code"}
+                    </Button>
+                    <Button
+                      className="settings-action-btn"
+                      disabled={Boolean(busyKey)}
+                      onClick={() => runSystemAction("apply update", SYSTEM_APPLY_UPDATE_URLS)}
+                    >
+                      {busyKey === "apply update" ? "Running..." : "Apply Full Update"}
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      className="settings-action-btn"
+                      disabled={Boolean(busyKey)}
+                      onClick={() => runSystemAction("restart pi", SYSTEM_RESTART_PI_URLS)}
+                    >
+                      {busyKey === "restart pi" ? "Running..." : "Restart Pi"}
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      className="settings-action-btn"
+                      disabled={Boolean(busyKey)}
+                      onClick={() => runSystemAction("shutdown pi", SYSTEM_SHUTDOWN_PI_URLS)}
+                    >
+                      {busyKey === "shutdown pi" ? "Running..." : "Shutdown Pi"}
+                    </Button>
+                  </div>
+                </section>
+              ) : null}
+
+              {settingsPage === "customization" ? (
+                <section className="settings-section-card settings-page-content">
+                  <Button
+                    className="settings-action-btn customization-terminal-btn"
+                    disabled={Boolean(busyKey)}
+                    onClick={() => runSystemAction("open sudo terminal", SYSTEM_OPEN_SUDO_TERMINAL_URLS)}
+                  >
+                    {busyKey === "open sudo terminal" ? "Running..." : "Open Sudo Terminal"}
+                  </Button>
+                </section>
+              ) : null}
 
               <pre className="settings-output-log">{resultLog}</pre>
             </CardContent>

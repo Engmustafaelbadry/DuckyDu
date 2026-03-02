@@ -16,7 +16,7 @@ fi
 
 echo "Installing bridge dependencies..."
 apt-get update
-apt-get install -y --no-install-recommends python3 usbutils network-manager
+apt-get install -y --no-install-recommends python3 usbutils network-manager xcalib xterm
 
 echo "Installing bridge binaries..."
 install -m 0755 "${SCRIPT_DIR}/usb_status_bridge.py" /usr/local/bin/usb-status-bridge

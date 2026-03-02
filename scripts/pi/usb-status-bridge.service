@@ -7,6 +7,10 @@ Type=simple
 User=__APP_USER__
 Group=__APP_USER__
 Environment=HOME=/home/__APP_USER__
+Environment=APP_USER=__APP_USER__
+Environment=APP_REPO_DIR=/home/__APP_USER__/DuckyDu
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/__APP_USER__/.Xauthority
 ExecStart=/usr/local/bin/usb-status-bridge
 Restart=always
 RestartSec=2
