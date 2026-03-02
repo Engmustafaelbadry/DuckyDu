@@ -79,6 +79,11 @@ const launchLanguageIcon = {
   ...pixelarticons.icons.globe
 };
 
+const settingsGearIcon = {
+  ...statusIconDefaults,
+  ...pixelarticons.icons["settings-cog-2"]
+};
+
 const DEVICE_GROUPS = [
   {
     name: "Decrypt Data",
@@ -219,6 +224,16 @@ const SYSTEM_DISPLAY_APPLY_URLS = [
 const SYSTEM_OPEN_SUDO_TERMINAL_URLS = [
   "http://127.0.0.1:17373/system/open-sudo-terminal",
   "http://localhost:17373/system/open-sudo-terminal"
+];
+
+const SYSTEM_EXIT_KIOSK_URLS = [
+  "http://127.0.0.1:17373/system/exit-kiosk",
+  "http://localhost:17373/system/exit-kiosk"
+];
+
+const SYSTEM_CREATE_KIOSK_DESKTOP_APP_URLS = [
+  "http://127.0.0.1:17373/system/create-kiosk-desktop-app",
+  "http://localhost:17373/system/create-kiosk-desktop-app"
 ];
 
 const WIFI_OSK_ROWS = [
@@ -1145,10 +1160,15 @@ function SettingsScreen({ onHome, onBack, onSettings }) {
               </div>
 
               {settingsPage === "home" ? (
-                <div className="settings-home-grid">
-                  <Button className="settings-home-btn" onClick={() => setSettingsPage("display")}>Display Settings</Button>
-                  <Button className="settings-home-btn" onClick={() => setSettingsPage("pixacho")}>Pixacho Configuration</Button>
-                  <Button className="settings-home-btn" onClick={() => setSettingsPage("customization")}>Customization</Button>
+                <div className="settings-home-layout">
+                  <div className="settings-home-gear-wrap">
+                    <Icon icon={settingsGearIcon} className="settings-home-gear" />
+                  </div>
+                  <div className="settings-home-grid">
+                    <Button className="settings-home-btn" onClick={() => setSettingsPage("display")}>Display Settings</Button>
+                    <Button className="settings-home-btn" onClick={() => setSettingsPage("pixacho")}>Pixacho Configuration</Button>
+                    <Button className="settings-home-btn" onClick={() => setSettingsPage("customization")}>Customization</Button>
+                  </div>
                 </div>
               ) : null}
 
@@ -1279,6 +1299,20 @@ function SettingsScreen({ onHome, onBack, onSettings }) {
                       {busyKey === "apply update" ? "Running..." : "Apply Full Update"}
                     </Button>
                     <Button
+                      className="settings-action-btn"
+                      disabled={Boolean(busyKey)}
+                      onClick={() => runSystemAction("exit kiosk", SYSTEM_EXIT_KIOSK_URLS)}
+                    >
+                      {busyKey === "exit kiosk" ? "Running..." : "Exit Kiosk"}
+                    </Button>
+                    <Button
+                      className="settings-action-btn"
+                      disabled={Boolean(busyKey)}
+                      onClick={() => runSystemAction("create desktop app", SYSTEM_CREATE_KIOSK_DESKTOP_APP_URLS)}
+                    >
+                      {busyKey === "create desktop app" ? "Running..." : "Create Desktop Kiosk App"}
+                    </Button>
+                    <Button
                       variant="destructive"
                       className="settings-action-btn"
                       disabled={Boolean(busyKey)}
@@ -1295,6 +1329,7 @@ function SettingsScreen({ onHome, onBack, onSettings }) {
                       {busyKey === "shutdown pi" ? "Running..." : "Shutdown Pi"}
                     </Button>
                   </div>
+                  <div className="settings-result-box">{resultLog}</div>
                 </section>
               ) : null}
 
@@ -1310,7 +1345,8 @@ function SettingsScreen({ onHome, onBack, onSettings }) {
                 </section>
               ) : null}
 
-              <pre className="settings-output-log">{resultLog}</pre>
+              {settingsPage === "display" ? <div className="settings-result-box">{resultLog}</div> : null}
+              {settingsPage === "customization" ? <div className="settings-result-box">{resultLog}</div> : null}
             </CardContent>
           </Card>
         </section>

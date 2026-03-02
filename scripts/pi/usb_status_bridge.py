@@ -348,6 +348,35 @@ def restart_kiosk():
     return {"ok": result["ok"], "output": result["output"] or "kiosk restart requested"}
 
 
+def stop_kiosk():
+    result = _run_cmd_capture([SUDO_BIN, SYSTEMCTL_BIN, "stop", "raspi-kiosk.service"], timeout=20)
+    return {"ok": result["ok"], "output": result["output"] or "kiosk stop requested"}
+
+
+def start_kiosk():
+    result = _run_cmd_capture([SUDO_BIN, SYSTEMCTL_BIN, "start", "raspi-kiosk.service"], timeout=20)
+    return {"ok": result["ok"], "output": result["output"] or "kiosk start requested"}
+
+
+def create_desktop_kiosk_app():
+    desktop_dir = Path(f"/home/{APP_USER}/Desktop")
+    desktop_dir.mkdir(parents=True, exist_ok=True)
+    launcher_path = desktop_dir / "Start-DuckyDu-Kiosk.desktop"
+
+    content = """[Desktop Entry]
+Type=Application
+Name=Start DuckyDu Kiosk
+Comment=Start DuckyDu kiosk service
+Exec=sudo /bin/systemctl start raspi-kiosk.service
+Icon=utilities-terminal
+Terminal=true
+Categories=System;
+"""
+    launcher_path.write_text(content, encoding="utf-8")
+    launcher_path.chmod(0o755)
+    return {"ok": True, "output": f"desktop launcher created: {launcher_path}"}
+
+
 def restart_pi():
     result = _run_cmd_capture([SUDO_BIN, REBOOT_BIN], timeout=8)
     return {"ok": result["ok"], "output": result["output"] or "reboot requested"}
@@ -881,6 +910,16 @@ class Handler(BaseHTTPRequestHandler):
 
         if self.path == "/system/restart-kiosk":
             result = restart_kiosk()
+            self._write_json(200 if result["ok"] else 500, result)
+            return
+
+        if self.path == "/system/exit-kiosk":
+            result = stop_kiosk()
+            self._write_json(200 if result["ok"] else 500, result)
+            return
+
+        if self.path == "/system/create-kiosk-desktop-app":
+            result = create_desktop_kiosk_app()
             self._write_json(200 if result["ok"] else 500, result)
             return
 

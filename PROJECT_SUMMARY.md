@@ -71,6 +71,10 @@
   - `Display Settings` page.
   - `Pixacho Configuration` page.
   - `Customization` page.
+- Settings home layout now uses 1/3 + 2/3 split:
+  - Left 1/3: animated pixel gear.
+  - Right 2/3: vertical navigation buttons.
+  - Gear animation is stepped loop rotation (non-smooth).
 - Display Settings page is wired to Pi display controls (real bridge calls, no mock):
   - Brightness
   - Contrast
@@ -85,12 +89,14 @@
   - Restart Kiosk
   - Pull Latest Code (`git pull`)
   - Apply Full Update pipeline
+  - Exit Kiosk (`systemctl stop raspi-kiosk.service`)
+  - Create Desktop Kiosk App launcher on Pi desktop
   - Restart Pi
   - Shutdown Pi
 - Customization page:
   - Open sudo terminal over kiosk (touch flow).
-- Added output log panel to show command results/errors.
-- Layout tuned to fit kiosk ratio with fixed-height sections and no page-level overflow.
+- Result/output panel now appears only inside action pages (not on settings home).
+- Layout tuned to fit kiosk ratio with fixed-height sections and no page-level overflow/scroll.
 - Settings UI now uses Pixelact components consistently for navigation/buttons/inputs.
 
 ## 4) Wi-Fi System
@@ -129,6 +135,8 @@
 - `POST /system/restart-adb`
 - `POST /system/restart-bridges`
 - `POST /system/restart-kiosk`
+- `POST /system/exit-kiosk`
+- `POST /system/create-kiosk-desktop-app`
 - `POST /system/restart-pi`
 - `POST /system/shutdown-pi`
 - `POST /system/pull-latest`
@@ -160,6 +168,7 @@
 - Added sudoers template for bridge-managed system actions:
   - `scripts/pi/duckydu-bridge-sudoers`
   - includes escaped `chown` sudoers command format to avoid sudoers syntax errors.
+  - includes kiosk service `start/stop` permissions for desktop launcher and exit action.
 
 ## 7) Vertical Menu Behavior
 File: `src/components/VerticalMenu.jsx`
