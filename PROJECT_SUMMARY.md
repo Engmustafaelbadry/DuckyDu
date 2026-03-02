@@ -157,6 +157,7 @@
   - `xterm`
 - Added sudoers template for bridge-managed system actions:
   - `scripts/pi/duckydu-bridge-sudoers`
+  - includes escaped `chown` sudoers command format to avoid sudoers syntax errors.
 
 ## 7) Vertical Menu Behavior
 File: `src/components/VerticalMenu.jsx`
