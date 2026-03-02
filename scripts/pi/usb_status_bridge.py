@@ -57,6 +57,7 @@ SHUTDOWN_BIN = os.environ.get("SHUTDOWN_BIN") or shutil.which("shutdown") or "/s
 XRANDR_BIN = os.environ.get("XRANDR_BIN") or shutil.which("xrandr") or "/usr/bin/xrandr"
 XCALIB_BIN = os.environ.get("XCALIB_BIN") or shutil.which("xcalib") or "/usr/bin/xcalib"
 XTERM_BIN = os.environ.get("XTERM_BIN") or shutil.which("xterm") or "/usr/bin/xterm"
+PKILL_BIN = os.environ.get("PKILL_BIN") or shutil.which("pkill") or "/usr/bin/pkill"
 DISPLAY_ENV = os.environ.get("DISPLAY", ":0")
 XAUTHORITY_ENV = os.environ.get("XAUTHORITY", f"/home/{APP_USER}/.Xauthority")
 
@@ -349,8 +350,30 @@ def restart_kiosk():
 
 
 def stop_kiosk():
-    result = _run_cmd_capture([SUDO_BIN, SYSTEMCTL_BIN, "stop", "raspi-kiosk.service"], timeout=20)
-    return {"ok": result["ok"], "output": result["output"] or "kiosk stop requested"}
+    logs = []
+    stop_result = _run_cmd_capture([SUDO_BIN, SYSTEMCTL_BIN, "stop", "raspi-kiosk.service"], timeout=20)
+    logs.append(f"systemctl stop: {stop_result['output'] or 'ok'}")
+
+    status_after_stop = _run_cmd_capture([SYSTEMCTL_BIN, "is-active", "raspi-kiosk.service"], timeout=8)
+    active_after_stop = status_after_stop["stdout"].strip() == "active"
+    logs.append(f"service state after stop: {status_after_stop['stdout'] or status_after_stop['stderr'] or 'unknown'}")
+
+    if active_after_stop and PKILL_BIN and Path(PKILL_BIN).exists():
+        for pattern in ("start-kiosk.sh", "chromium --kiosk", "chromium-browser --kiosk", "xinit /usr/local/bin/start-kiosk.sh"):
+            kill_result = _run_cmd_capture([PKILL_BIN, "-f", pattern], timeout=6)
+            if kill_result["returncode"] in (0, 1):
+                logs.append(f"pkill -f '{pattern}': {kill_result['output'] or 'ok'}")
+            else:
+                logs.append(f"pkill -f '{pattern}' failed: {kill_result['output'] or 'error'}")
+
+        second_stop = _run_cmd_capture([SUDO_BIN, SYSTEMCTL_BIN, "stop", "raspi-kiosk.service"], timeout=20)
+        logs.append(f"systemctl stop retry: {second_stop['output'] or 'ok'}")
+        status_after_stop = _run_cmd_capture([SYSTEMCTL_BIN, "is-active", "raspi-kiosk.service"], timeout=8)
+        active_after_stop = status_after_stop["stdout"].strip() == "active"
+        logs.append(f"service state after retry: {status_after_stop['stdout'] or status_after_stop['stderr'] or 'unknown'}")
+
+    ok = stop_result["ok"] and not active_after_stop
+    return {"ok": ok, "output": "\n".join(logs)}
 
 
 def start_kiosk():
@@ -359,22 +382,54 @@ def start_kiosk():
 
 
 def create_desktop_kiosk_app():
-    desktop_dir = Path(f"/home/{APP_USER}/Desktop")
-    desktop_dir.mkdir(parents=True, exist_ok=True)
-    launcher_path = desktop_dir / "Start-DuckyDu-Kiosk.desktop"
+    home_dir = Path(f"/home/{APP_USER}")
+    xdg_desktop_dir = home_dir / "Desktop"
+    user_dirs_file = home_dir / ".config" / "user-dirs.dirs"
+
+    if user_dirs_file.exists():
+        user_dirs_text = read_text(user_dirs_file)
+        match = re.search(r'^\s*XDG_DESKTOP_DIR\s*=\s*"?([^"\n]+)"?\s*$', user_dirs_text, flags=re.MULTILINE)
+        if match:
+            candidate = match.group(1).replace("$HOME", str(home_dir)).replace("${HOME}", str(home_dir)).strip()
+            if candidate:
+                xdg_desktop_dir = Path(candidate)
+
+    launcher_dirs = [
+        xdg_desktop_dir,
+        home_dir / "Desktop",
+        home_dir / ".local" / "share" / "applications",
+    ]
 
     content = """[Desktop Entry]
 Type=Application
 Name=Start DuckyDu Kiosk
 Comment=Start DuckyDu kiosk service
-Exec=sudo /bin/systemctl start raspi-kiosk.service
+Exec=/bin/bash -lc "sudo systemctl start raspi-kiosk.service"
 Icon=utilities-terminal
 Terminal=true
 Categories=System;
 """
-    launcher_path.write_text(content, encoding="utf-8")
-    launcher_path.chmod(0o755)
-    return {"ok": True, "output": f"desktop launcher created: {launcher_path}"}
+
+    created_paths = []
+    errors = []
+
+    for launcher_dir in launcher_dirs:
+        try:
+            launcher_dir.mkdir(parents=True, exist_ok=True)
+            launcher_path = launcher_dir / "Start-DuckyDu-Kiosk.desktop"
+            launcher_path.write_text(content, encoding="utf-8")
+            launcher_path.chmod(0o755)
+            created_paths.append(str(launcher_path))
+        except Exception as exc:
+            errors.append(f"{launcher_dir}: {exc}")
+
+    if created_paths:
+        output = "desktop launcher created:\n" + "\n".join(created_paths)
+        if errors:
+            output += "\npartial errors:\n" + "\n".join(errors)
+        return {"ok": True, "output": output}
+
+    return {"ok": False, "output": "failed to create launcher:\n" + "\n".join(errors or ["no_target_dirs"])}
 
 
 def restart_pi():
@@ -418,8 +473,8 @@ def apply_update_pipeline():
             "cwd": None,
         },
         {
-            "display": f"chown -R {APP_USER}:{APP_USER} {APP_DEPLOY_DIR}",
-            "command": [SUDO_BIN, "chown", "-R", f"{APP_USER}:{APP_USER}", APP_DEPLOY_DIR],
+            "display": f"chown -R {APP_USER} {APP_DEPLOY_DIR}",
+            "command": [SUDO_BIN, "chown", "-R", APP_USER, APP_DEPLOY_DIR],
             "timeout": 20,
             "cwd": None,
         },

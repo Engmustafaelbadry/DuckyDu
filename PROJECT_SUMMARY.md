@@ -148,6 +148,18 @@
 - `POST /system/display-apply`
 - `POST /system/open-sudo-terminal`
 
+### D) Kiosk exit + desktop shortcut reliability fixes
+- `POST /system/exit-kiosk` now:
+  - stops `raspi-kiosk.service`
+  - verifies service state with `systemctl is-active`
+  - applies process-kill fallback (`start-kiosk.sh` / kiosk chromium / xinit) if still active
+  - returns detailed logs for troubleshooting from UI.
+- `POST /system/create-kiosk-desktop-app` now creates launcher in multiple user locations:
+  - XDG desktop directory from `~/.config/user-dirs.dirs` when available
+  - `/home/<user>/Desktop`
+  - `/home/<user>/.local/share/applications`
+- Launcher `Exec` now runs via bash and sudo systemctl start command for better desktop compatibility.
+
 ### C) Apply update pipeline behavior
 - Runs project update/deploy sequence from bridge side:
   - git pull
@@ -171,7 +183,8 @@
   - `xterm`
 - Added sudoers template for bridge-managed system actions:
   - `scripts/pi/duckydu-bridge-sudoers`
-  - includes escaped `chown` sudoers command format to avoid sudoers syntax errors.
+  - includes both `/bin/systemctl` and `/usr/bin/systemctl` command paths (start/stop/restart) for compatibility.
+  - fixed sudoers syntax issue by replacing problematic `chown user:group` rule with `chown -R user`.
   - includes kiosk service `start/stop` permissions for desktop launcher and exit action.
 
 ## 7) Vertical Menu Behavior
