@@ -1641,7 +1641,7 @@ body {
 
 .settings-action-btn {
   width: 100%;
-  min-height: 30px;
+  min-height: 28px;
   font-size: 10px;
 }
 
@@ -1688,6 +1688,19 @@ body {
   width: 100%;
   min-height: 0;
   overflow: hidden;
+}
+
+.settings-config-layout {
+  width: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 6px;
+}
+
+.settings-result-box-config {
+  height: 100%;
+  min-height: 0;
 }
 
 .settings-section-card h3 {

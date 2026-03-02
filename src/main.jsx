@@ -1174,6 +1174,8 @@ function SettingsScreen({ onHome, onBack, onSettings }) {
 
               {settingsPage === "display" ? (
                 <section className="settings-section-card display-section-card settings-page-content">
+                  <h3>Display Settings</h3>
+
                   <div className="display-control-input">
                     <label>Brightness</label>
                     <div className="display-input-wrap">
@@ -1259,45 +1261,71 @@ function SettingsScreen({ onHome, onBack, onSettings }) {
 
               {settingsPage === "pixacho" ? (
                 <section className="settings-section-card settings-page-content">
+                  <div className="settings-config-layout">
+                    <div className="settings-result-box settings-result-box-config">{resultLog}</div>
+                    <div className="settings-actions-grid">
+                      <Button className="settings-action-btn" disabled={Boolean(busyKey)} onClick={runLsusb}>
+                        {busyKey === "lsusb" ? "Running..." : "Show lsusb"}
+                      </Button>
+                      <Button
+                        className="settings-action-btn"
+                        disabled={Boolean(busyKey)}
+                        onClick={() => runSystemAction("restart adb", SYSTEM_RESTART_ADB_URLS)}
+                      >
+                        {busyKey === "restart adb" ? "Running..." : "Restart ADB"}
+                      </Button>
+                      <Button
+                        className="settings-action-btn"
+                        disabled={Boolean(busyKey)}
+                        onClick={() => runSystemAction("restart bridges", SYSTEM_RESTART_BRIDGES_URLS)}
+                      >
+                        {busyKey === "restart bridges" ? "Running..." : "Restart Bridges"}
+                      </Button>
+                      <Button
+                        className="settings-action-btn"
+                        disabled={Boolean(busyKey)}
+                        onClick={() => runSystemAction("restart kiosk", SYSTEM_RESTART_KIOSK_URLS)}
+                      >
+                        {busyKey === "restart kiosk" ? "Running..." : "Restart Kiosk"}
+                      </Button>
+                      <Button
+                        className="settings-action-btn"
+                        disabled={Boolean(busyKey)}
+                        onClick={() => runSystemAction("pull latest", SYSTEM_PULL_LATEST_URLS)}
+                      >
+                        {busyKey === "pull latest" ? "Running..." : "Pull Latest Code"}
+                      </Button>
+                      <Button
+                        className="settings-action-btn"
+                        disabled={Boolean(busyKey)}
+                        onClick={() => runSystemAction("apply update", SYSTEM_APPLY_UPDATE_URLS)}
+                      >
+                        {busyKey === "apply update" ? "Running..." : "Apply Full Update"}
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        className="settings-action-btn"
+                        disabled={Boolean(busyKey)}
+                        onClick={() => runSystemAction("restart pi", SYSTEM_RESTART_PI_URLS)}
+                      >
+                        {busyKey === "restart pi" ? "Running..." : "Restart Pi"}
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        className="settings-action-btn"
+                        disabled={Boolean(busyKey)}
+                        onClick={() => runSystemAction("shutdown pi", SYSTEM_SHUTDOWN_PI_URLS)}
+                      >
+                        {busyKey === "shutdown pi" ? "Running..." : "Shutdown Pi"}
+                      </Button>
+                    </div>
+                  </div>
+                </section>
+              ) : null}
+
+              {settingsPage === "customization" ? (
+                <section className="settings-section-card settings-page-content">
                   <div className="settings-actions-grid">
-                    <Button className="settings-action-btn" disabled={Boolean(busyKey)} onClick={runLsusb}>
-                      {busyKey === "lsusb" ? "Running..." : "Show lsusb"}
-                    </Button>
-                    <Button
-                      className="settings-action-btn"
-                      disabled={Boolean(busyKey)}
-                      onClick={() => runSystemAction("restart adb", SYSTEM_RESTART_ADB_URLS)}
-                    >
-                      {busyKey === "restart adb" ? "Running..." : "Restart ADB"}
-                    </Button>
-                    <Button
-                      className="settings-action-btn"
-                      disabled={Boolean(busyKey)}
-                      onClick={() => runSystemAction("restart bridges", SYSTEM_RESTART_BRIDGES_URLS)}
-                    >
-                      {busyKey === "restart bridges" ? "Running..." : "Restart Bridges"}
-                    </Button>
-                    <Button
-                      className="settings-action-btn"
-                      disabled={Boolean(busyKey)}
-                      onClick={() => runSystemAction("restart kiosk", SYSTEM_RESTART_KIOSK_URLS)}
-                    >
-                      {busyKey === "restart kiosk" ? "Running..." : "Restart Kiosk"}
-                    </Button>
-                    <Button
-                      className="settings-action-btn"
-                      disabled={Boolean(busyKey)}
-                      onClick={() => runSystemAction("pull latest", SYSTEM_PULL_LATEST_URLS)}
-                    >
-                      {busyKey === "pull latest" ? "Running..." : "Pull Latest Code"}
-                    </Button>
-                    <Button
-                      className="settings-action-btn"
-                      disabled={Boolean(busyKey)}
-                      onClick={() => runSystemAction("apply update", SYSTEM_APPLY_UPDATE_URLS)}
-                    >
-                      {busyKey === "apply update" ? "Running..." : "Apply Full Update"}
-                    </Button>
                     <Button
                       className="settings-action-btn"
                       disabled={Boolean(busyKey)}
@@ -1312,29 +1340,7 @@ function SettingsScreen({ onHome, onBack, onSettings }) {
                     >
                       {busyKey === "create desktop app" ? "Running..." : "Create Desktop Kiosk App"}
                     </Button>
-                    <Button
-                      variant="destructive"
-                      className="settings-action-btn"
-                      disabled={Boolean(busyKey)}
-                      onClick={() => runSystemAction("restart pi", SYSTEM_RESTART_PI_URLS)}
-                    >
-                      {busyKey === "restart pi" ? "Running..." : "Restart Pi"}
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      className="settings-action-btn"
-                      disabled={Boolean(busyKey)}
-                      onClick={() => runSystemAction("shutdown pi", SYSTEM_SHUTDOWN_PI_URLS)}
-                    >
-                      {busyKey === "shutdown pi" ? "Running..." : "Shutdown Pi"}
-                    </Button>
                   </div>
-                  <div className="settings-result-box">{resultLog}</div>
-                </section>
-              ) : null}
-
-              {settingsPage === "customization" ? (
-                <section className="settings-section-card settings-page-content">
                   <Button
                     className="settings-action-btn customization-terminal-btn"
                     disabled={Boolean(busyKey)}

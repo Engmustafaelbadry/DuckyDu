@@ -89,13 +89,17 @@
   - Restart Kiosk
   - Pull Latest Code (`git pull`)
   - Apply Full Update pipeline
-  - Exit Kiosk (`systemctl stop raspi-kiosk.service`)
-  - Create Desktop Kiosk App launcher on Pi desktop
   - Restart Pi
   - Shutdown Pi
+- Pixacho Configuration page layout:
+  - Left 1/3: command result/terminal output panel
+  - Right 2/3: vertical operation buttons
 - Customization page:
   - Open sudo terminal over kiosk (touch flow).
+  - Exit Kiosk (`systemctl stop raspi-kiosk.service`).
+  - Create Desktop Kiosk App launcher on Pi desktop.
 - Result/output panel now appears only inside action pages (not on settings home).
+- Display page has explicit top header within page content (`Display Settings`) followed by controls.
 - Layout tuned to fit kiosk ratio with fixed-height sections and no page-level overflow/scroll.
 - Settings UI now uses Pixelact components consistently for navigation/buttons/inputs.
 
