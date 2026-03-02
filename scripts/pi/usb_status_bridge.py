@@ -455,9 +455,52 @@ def _display_status_payload(output_name: str):
     }
 
 
+def _read_xrandr_live_values(output_name: str):
+    result = _run_cmd_capture([XRANDR_BIN, "--verbose"], timeout=10, env=_x11_env())
+    if not result["ok"]:
+        return {}
+
+    lines = result["stdout"].splitlines()
+    capture = False
+    brightness = None
+    gamma = None
+
+    for line in lines:
+        stripped = line.strip()
+        if line.startswith(output_name + " "):
+            capture = True
+            continue
+
+        if capture and line and not line.startswith(" "):
+            break
+
+        if capture and stripped.startswith("Brightness:"):
+            try:
+                brightness = float(stripped.split(":", 1)[1].strip())
+            except Exception:
+                brightness = None
+
+        if capture and stripped.startswith("Gamma:"):
+            try:
+                gamma_raw = stripped.split(":", 1)[1].strip()
+                gamma = float(gamma_raw.split(":")[0])
+            except Exception:
+                gamma = None
+
+    payload = {}
+    if brightness is not None:
+        payload["brightness"] = brightness
+    if gamma is not None:
+        payload["gamma"] = gamma
+    return payload
+
+
 def get_display_status():
     output_name = _detect_active_output()
-    return _display_status_payload(output_name)
+    payload = _display_status_payload(output_name)
+    live = _read_xrandr_live_values(output_name)
+    payload.update(live)
+    return payload
 
 
 def apply_display_controls(payload: dict):

@@ -77,6 +77,7 @@
   - Gamma
   - Saturation
   - Includes Apply + Reset buttons.
+  - Display status reads live xrandr brightness/gamma when available.
 - Pixacho Configuration page contains system operation buttons:
   - Show `lsusb`
   - Restart ADB
@@ -90,6 +91,7 @@
   - Open sudo terminal over kiosk (touch flow).
 - Added output log panel to show command results/errors.
 - Layout tuned to fit kiosk ratio with fixed-height sections and no page-level overflow.
+- Settings UI now uses Pixelact components consistently for navigation/buttons/inputs.
 
 ## 4) Wi-Fi System
 

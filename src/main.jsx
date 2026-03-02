@@ -997,6 +997,13 @@ function DeviceLoadingScreen({ productName, onHome, onBack, onSettings, onDone }
 }
 
 function SettingsScreen({ onHome, onBack, onSettings }) {
+  const DISPLAY_LIMITS = {
+    brightness: { min: 0.4, max: 1.6, step: 0.01 },
+    contrast: { min: 0.5, max: 1.5, step: 0.01 },
+    gamma: { min: 0.6, max: 2.0, step: 0.01 },
+    saturation: { min: 0.5, max: 1.5, step: 0.01 }
+  };
+
   const [settingsPage, setSettingsPage] = useState("home");
   const [busyKey, setBusyKey] = useState("");
   const [resultLog, setResultLog] = useState("No command run yet.");
@@ -1008,7 +1015,25 @@ function SettingsScreen({ onHome, onBack, onSettings }) {
   });
 
   const setDisplayValue = (key, value) => {
-    setDisplayControls((prev) => ({ ...prev, [key]: value }));
+    const bounds = DISPLAY_LIMITS[key];
+    const safeValue = Number.isFinite(value) ? Math.max(bounds.min, Math.min(bounds.max, value)) : bounds.min;
+    setDisplayControls((prev) => ({ ...prev, [key]: safeValue }));
+  };
+
+  const nudgeDisplayValue = (key, direction) => {
+    const bounds = DISPLAY_LIMITS[key];
+    const current = displayControls[key];
+    setDisplayValue(key, Number((current + bounds.step * direction).toFixed(2)));
+  };
+
+  const setDisplayValueFromInput = (key, raw) => {
+    if (raw === "" || raw === "-" || raw === ".") {
+      return;
+    }
+    const parsed = Number(raw);
+    if (Number.isFinite(parsed)) {
+      setDisplayValue(key, parsed);
+    }
   };
 
   const loadDisplayStatus = useCallback(async () => {
@@ -1121,64 +1146,84 @@ function SettingsScreen({ onHome, onBack, onSettings }) {
 
               {settingsPage === "home" ? (
                 <div className="settings-home-grid">
-                  <button className="settings-home-btn" onClick={() => setSettingsPage("display")}>Display Settings</button>
-                  <button className="settings-home-btn" onClick={() => setSettingsPage("pixacho")}>Pixacho Configuration</button>
-                  <button className="settings-home-btn" onClick={() => setSettingsPage("customization")}>Customization</button>
+                  <Button className="settings-home-btn" onClick={() => setSettingsPage("display")}>Display Settings</Button>
+                  <Button className="settings-home-btn" onClick={() => setSettingsPage("pixacho")}>Pixacho Configuration</Button>
+                  <Button className="settings-home-btn" onClick={() => setSettingsPage("customization")}>Customization</Button>
                 </div>
               ) : null}
 
               {settingsPage === "display" ? (
                 <section className="settings-section-card display-section-card settings-page-content">
-                  <div className="display-control">
+                  <div className="display-control-input">
                     <label>Brightness</label>
-                    <input
-                      type="range"
-                      min="0.4"
-                      max="1.6"
-                      step="0.01"
-                      value={displayControls.brightness}
-                      onChange={(event) => setDisplayValue("brightness", Number(event.target.value))}
-                    />
-                    <span>{displayControls.brightness.toFixed(2)}</span>
+                    <div className="display-input-wrap">
+                      <Button className="display-adjust-btn" onClick={() => nudgeDisplayValue("brightness", -1)} disabled={Boolean(busyKey)}>-</Button>
+                      <Input
+                        type="number"
+                        className="display-number-input"
+                        min={DISPLAY_LIMITS.brightness.min}
+                        max={DISPLAY_LIMITS.brightness.max}
+                        step={DISPLAY_LIMITS.brightness.step}
+                        value={displayControls.brightness.toFixed(2)}
+                        onChange={(event) => setDisplayValueFromInput("brightness", event.target.value)}
+                        disabled={Boolean(busyKey)}
+                      />
+                      <Button className="display-adjust-btn" onClick={() => nudgeDisplayValue("brightness", 1)} disabled={Boolean(busyKey)}>+</Button>
+                    </div>
                   </div>
 
-                  <div className="display-control">
+                  <div className="display-control-input">
                     <label>Contrast</label>
-                    <input
-                      type="range"
-                      min="0.5"
-                      max="1.5"
-                      step="0.01"
-                      value={displayControls.contrast}
-                      onChange={(event) => setDisplayValue("contrast", Number(event.target.value))}
-                    />
-                    <span>{displayControls.contrast.toFixed(2)}</span>
+                    <div className="display-input-wrap">
+                      <Button className="display-adjust-btn" onClick={() => nudgeDisplayValue("contrast", -1)} disabled={Boolean(busyKey)}>-</Button>
+                      <Input
+                        type="number"
+                        className="display-number-input"
+                        min={DISPLAY_LIMITS.contrast.min}
+                        max={DISPLAY_LIMITS.contrast.max}
+                        step={DISPLAY_LIMITS.contrast.step}
+                        value={displayControls.contrast.toFixed(2)}
+                        onChange={(event) => setDisplayValueFromInput("contrast", event.target.value)}
+                        disabled={Boolean(busyKey)}
+                      />
+                      <Button className="display-adjust-btn" onClick={() => nudgeDisplayValue("contrast", 1)} disabled={Boolean(busyKey)}>+</Button>
+                    </div>
                   </div>
 
-                  <div className="display-control">
+                  <div className="display-control-input">
                     <label>Gamma</label>
-                    <input
-                      type="range"
-                      min="0.6"
-                      max="2.0"
-                      step="0.01"
-                      value={displayControls.gamma}
-                      onChange={(event) => setDisplayValue("gamma", Number(event.target.value))}
-                    />
-                    <span>{displayControls.gamma.toFixed(2)}</span>
+                    <div className="display-input-wrap">
+                      <Button className="display-adjust-btn" onClick={() => nudgeDisplayValue("gamma", -1)} disabled={Boolean(busyKey)}>-</Button>
+                      <Input
+                        type="number"
+                        className="display-number-input"
+                        min={DISPLAY_LIMITS.gamma.min}
+                        max={DISPLAY_LIMITS.gamma.max}
+                        step={DISPLAY_LIMITS.gamma.step}
+                        value={displayControls.gamma.toFixed(2)}
+                        onChange={(event) => setDisplayValueFromInput("gamma", event.target.value)}
+                        disabled={Boolean(busyKey)}
+                      />
+                      <Button className="display-adjust-btn" onClick={() => nudgeDisplayValue("gamma", 1)} disabled={Boolean(busyKey)}>+</Button>
+                    </div>
                   </div>
 
-                  <div className="display-control">
+                  <div className="display-control-input">
                     <label>Saturation</label>
-                    <input
-                      type="range"
-                      min="0.5"
-                      max="1.5"
-                      step="0.01"
-                      value={displayControls.saturation}
-                      onChange={(event) => setDisplayValue("saturation", Number(event.target.value))}
-                    />
-                    <span>{displayControls.saturation.toFixed(2)}</span>
+                    <div className="display-input-wrap">
+                      <Button className="display-adjust-btn" onClick={() => nudgeDisplayValue("saturation", -1)} disabled={Boolean(busyKey)}>-</Button>
+                      <Input
+                        type="number"
+                        className="display-number-input"
+                        min={DISPLAY_LIMITS.saturation.min}
+                        max={DISPLAY_LIMITS.saturation.max}
+                        step={DISPLAY_LIMITS.saturation.step}
+                        value={displayControls.saturation.toFixed(2)}
+                        onChange={(event) => setDisplayValueFromInput("saturation", event.target.value)}
+                        disabled={Boolean(busyKey)}
+                      />
+                      <Button className="display-adjust-btn" onClick={() => nudgeDisplayValue("saturation", 1)} disabled={Boolean(busyKey)}>+</Button>
+                    </div>
                   </div>
 
                   <div className="settings-actions-grid display-action-row">

@@ -1595,13 +1595,8 @@ body {
 .settings-home-btn {
   width: 100%;
   min-height: 74px;
-  border: 0;
-  background: #111111;
-  color: #ffffff;
-  box-shadow: var(--pixel-box-shadow);
   font-family: "Kongtext", "Misaki", monospace;
   font-size: 11px;
-  cursor: pointer;
   padding: 10px 8px;
   text-align: center;
 }
@@ -1703,27 +1698,35 @@ body {
   min-height: 44px;
 }
 
-.display-control {
+.display-control-input {
   display: grid;
-  grid-template-columns: 72px minmax(0, 1fr) 46px;
+  grid-template-columns: 88px minmax(0, 1fr);
   align-items: center;
   gap: 6px;
 }
 
-.display-control label {
+.display-control-input label {
   color: #d2d2d2;
   font-size: 9px;
 }
 
-.display-control span {
-  color: #8ee3ff;
-  font-size: 9px;
-  text-align: right;
+.display-input-wrap {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 34px;
+  gap: 6px;
+  align-items: center;
 }
 
-.display-control input[type="range"] {
+.display-number-input {
   width: 100%;
-  accent-color: #2dff73;
+  min-height: 34px;
+  text-align: center;
+}
+
+.display-adjust-btn {
+  min-height: 34px;
+  width: 100%;
+  font-size: 12px;
 }
 
 .display-action-row {
