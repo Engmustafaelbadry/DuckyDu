@@ -11,13 +11,6 @@ import { Card, CardContent } from "@/components/ui/pixelact-ui/card";
 import { Spinner } from "@/components/ui/pixelact-ui/spinner";
 import { Avatar, AvatarFallback } from "@/components/ui/pixelact-ui/avatar";
 import { Input } from "@/components/ui/pixelact-ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/pixelact-ui/select";
 import { VerticalMenu } from "@/components/VerticalMenu";
 import "./style.css";
 
@@ -305,6 +298,8 @@ function WifiSettingsPanel() {
   const [selectedSsid, setSelectedSsid] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const selectedNetwork = networks.find((item) => item.ssid === selectedSsid) || null;
+  const selectedNeedsPassword = Boolean(selectedNetwork && selectedNetwork.security && selectedNetwork.security !== "--");
 
   const loadStatus = useCallback(async () => {
     const data = await requestBridgeJson(WIFI_STATUS_URLS);
@@ -407,53 +402,72 @@ function WifiSettingsPanel() {
       setMessage("Disconnected from Wi-Fi.");
     });
 
+  const prettyMessage = (raw) =>
+    String(raw || "")
+      .replace(/_/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
   return (
-    <Card className="launch-panel-card">
-      <CardContent className="launch-panel-content">
-        <h3>Wi-Fi Settings</h3>
+    <Card className="launch-panel-card wifi-panel-card">
+      <CardContent className="launch-panel-content wifi-panel-content">
+        <div className="wifi-header-row">
+          <h3>Wi-Fi Settings</h3>
+          <span className={`wifi-chip${status.connected ? " is-online" : status.enabled ? " is-idle" : " is-off"}`}>
+            {status.connected ? "ONLINE" : status.enabled ? "IDLE" : "OFF"}
+          </span>
+        </div>
+
+        <div className="wifi-meta-grid">
+          <p><span>SSID</span>{status.ssid || "-"}</p>
+          <p><span>IP</span>{status.ipAddress || "-"}</p>
+          <p><span>Interface</span>{status.interface || "-"}</p>
+        </div>
+
+        <div className="wifi-toolbar">
+          <Button className="wifi-toolbar-btn" onClick={handleScan} disabled={busy}>
+            Refresh
+          </Button>
+          <Button className="wifi-toolbar-btn" onClick={handleToggle} disabled={busy}>
+            {status.enabled ? "Turn Off" : "Turn On"}
+          </Button>
+        </div>
+
         {loading ? (
           <div className="launch-panel-loading">
             <Spinner />
           </div>
         ) : (
           <>
-            <p className={`wifi-state-line${status.connected ? " is-connected" : ""}`}>
-              Status: {status.connected ? `Connected (${status.ssid || "Unknown"})` : status.enabled ? "Not connected" : "Disabled"}
-            </p>
-            <p className="wifi-state-subline">
-              {status.ipAddress ? `IP: ${status.ipAddress}` : "IP: -"} {status.interface ? `| Iface: ${status.interface}` : ""}
-            </p>
-
-            <Select value={selectedSsid} onValueChange={setSelectedSsid} disabled={busy || !status.enabled || networks.length === 0}>
-              <SelectTrigger className="wifi-network-select">
-                <SelectValue placeholder={networks.length ? "Select network" : "No networks"} />
-              </SelectTrigger>
-              <SelectContent>
-                {networks.map((item) => (
-                  <SelectItem key={`${item.ssid}-${item.security}`} value={item.ssid}>
-                    {item.active ? "[*] " : ""}{item.ssid} ({item.signal}%)
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="wifi-network-list">
+              {networks.length === 0 ? (
+                <p className="wifi-list-empty">No networks found. Press Refresh.</p>
+              ) : (
+                networks.map((item) => (
+                  <button
+                    key={`${item.ssid}-${item.security}`}
+                    className={`wifi-network-item${selectedSsid === item.ssid ? " is-selected" : ""}${item.active ? " is-active" : ""}`}
+                    onClick={() => setSelectedSsid(item.ssid)}
+                    disabled={!status.enabled || busy}
+                  >
+                    <span className="wifi-network-name">{item.ssid}</span>
+                    <span className="wifi-network-meta">{item.signal}% {item.security || "open"} {item.active ? "| connected" : ""}</span>
+                  </button>
+                ))
+              )}
+            </div>
 
             <Input
               type="password"
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               className="wifi-password-input"
-              placeholder="Password (if required)"
-              disabled={busy || !status.enabled}
+              placeholder={selectedNeedsPassword ? "Enter password" : "No password needed for selected network"}
+              disabled={busy || !status.enabled || !selectedNeedsPassword}
             />
 
-            <div className="wifi-action-grid">
-              <Button className="launch-action-btn" onClick={handleScan} disabled={busy}>
-                Scan
-              </Button>
-              <Button className="launch-action-btn" onClick={handleToggle} disabled={busy}>
-                {status.enabled ? "Disable" : "Enable"}
-              </Button>
-              <Button className="launch-action-btn" onClick={handleConnect} disabled={busy || !status.enabled}>
+            <div className="wifi-action-grid wifi-action-grid-main">
+              <Button className="launch-action-btn" onClick={handleConnect} disabled={busy || !status.enabled || !selectedNetwork}>
                 Connect
               </Button>
               <Button variant="destructive" className="launch-action-btn" onClick={handleDisconnect} disabled={busy || !status.connected}>
@@ -464,7 +478,7 @@ function WifiSettingsPanel() {
         )}
 
         {!bridgeOnline ? <p className="wifi-message error">Wi-Fi bridge offline on port 17374.</p> : null}
-        {message ? <p className="wifi-message">{message}</p> : null}
+        {message ? <p className="wifi-message">{prettyMessage(message)}</p> : null}
       </CardContent>
     </Card>
   );
