@@ -27,6 +27,8 @@ install -m 0644 "${SCRIPT_DIR}/usb-status-bridge.service" /etc/systemd/system/us
 sed -i "s/__APP_USER__/${APP_USER}/g" /etc/systemd/system/usb-status-bridge.service
 install -m 0644 "${SCRIPT_DIR}/wifi-status-bridge.service" /etc/systemd/system/wifi-status-bridge.service
 sed -i "s/__APP_USER__/${APP_USER}/g" /etc/systemd/system/wifi-status-bridge.service
+install -m 0440 "${SCRIPT_DIR}/duckydu-bridge-sudoers" /etc/sudoers.d/duckydu-bridge
+sed -i "s/__APP_USER__/${APP_USER}/g" /etc/sudoers.d/duckydu-bridge
 
 echo "Enabling + starting service..."
 systemctl daemon-reload

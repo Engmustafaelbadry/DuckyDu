@@ -166,6 +166,46 @@ const WIFI_TOGGLE_URLS = [
   "http://localhost:17374/wifi/toggle"
 ];
 
+const SYSTEM_LSUSB_URLS = [
+  "http://127.0.0.1:17373/system/lsusb",
+  "http://localhost:17373/system/lsusb"
+];
+
+const SYSTEM_RESTART_ADB_URLS = [
+  "http://127.0.0.1:17373/system/restart-adb",
+  "http://localhost:17373/system/restart-adb"
+];
+
+const SYSTEM_RESTART_BRIDGES_URLS = [
+  "http://127.0.0.1:17373/system/restart-bridges",
+  "http://localhost:17373/system/restart-bridges"
+];
+
+const SYSTEM_RESTART_KIOSK_URLS = [
+  "http://127.0.0.1:17373/system/restart-kiosk",
+  "http://localhost:17373/system/restart-kiosk"
+];
+
+const SYSTEM_RESTART_PI_URLS = [
+  "http://127.0.0.1:17373/system/restart-pi",
+  "http://localhost:17373/system/restart-pi"
+];
+
+const SYSTEM_SHUTDOWN_PI_URLS = [
+  "http://127.0.0.1:17373/system/shutdown-pi",
+  "http://localhost:17373/system/shutdown-pi"
+];
+
+const SYSTEM_PULL_LATEST_URLS = [
+  "http://127.0.0.1:17373/system/pull-latest",
+  "http://localhost:17373/system/pull-latest"
+];
+
+const SYSTEM_APPLY_UPDATE_URLS = [
+  "http://127.0.0.1:17373/system/apply-update",
+  "http://localhost:17373/system/apply-update"
+];
+
 const WIFI_OSK_ROWS = [
   ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
   ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
@@ -942,6 +982,35 @@ function DeviceLoadingScreen({ productName, onHome, onBack, onSettings, onDone }
 }
 
 function SettingsScreen({ onHome, onBack, onSettings }) {
+  const [busyKey, setBusyKey] = useState("");
+  const [resultLog, setResultLog] = useState("No command run yet.");
+
+  const runSystemAction = async (label, urls) => {
+    setBusyKey(label);
+    setResultLog(`Running ${label}...`);
+    try {
+      const payload = await requestBridgeJson(urls, { method: "POST", headers: { "Content-Type": "application/json" } });
+      setResultLog(payload?.output || `${label} completed.`);
+    } catch (error) {
+      setResultLog(error instanceof Error ? error.message : "Action failed");
+    } finally {
+      setBusyKey("");
+    }
+  };
+
+  const runLsusb = async () => {
+    setBusyKey("lsusb");
+    setResultLog("Running lsusb...");
+    try {
+      const payload = await requestBridgeJson(SYSTEM_LSUSB_URLS, { method: "GET" });
+      setResultLog(payload?.output || "No lsusb output.");
+    } catch (error) {
+      setResultLog(error instanceof Error ? error.message : "lsusb failed");
+    } finally {
+      setBusyKey("");
+    }
+  };
+
   return (
     <main className="select-os-root">
       <section className="layout-shell">
@@ -951,7 +1020,65 @@ function SettingsScreen({ onHome, onBack, onSettings }) {
           <Card className="settings-card">
             <CardContent className="settings-card-content">
               <h2>Settings</h2>
-              <p>Settings page placeholder. We will fill this page later.</p>
+
+              <div className="settings-actions-grid">
+                <Button className="settings-action-btn" disabled={Boolean(busyKey)} onClick={runLsusb}>
+                  {busyKey === "lsusb" ? "Running..." : "Show lsusb"}
+                </Button>
+                <Button
+                  className="settings-action-btn"
+                  disabled={Boolean(busyKey)}
+                  onClick={() => runSystemAction("restart adb", SYSTEM_RESTART_ADB_URLS)}
+                >
+                  {busyKey === "restart adb" ? "Running..." : "Restart ADB"}
+                </Button>
+                <Button
+                  className="settings-action-btn"
+                  disabled={Boolean(busyKey)}
+                  onClick={() => runSystemAction("restart bridges", SYSTEM_RESTART_BRIDGES_URLS)}
+                >
+                  {busyKey === "restart bridges" ? "Running..." : "Restart Bridges"}
+                </Button>
+                <Button
+                  className="settings-action-btn"
+                  disabled={Boolean(busyKey)}
+                  onClick={() => runSystemAction("restart kiosk", SYSTEM_RESTART_KIOSK_URLS)}
+                >
+                  {busyKey === "restart kiosk" ? "Running..." : "Restart Kiosk"}
+                </Button>
+                <Button
+                  className="settings-action-btn"
+                  disabled={Boolean(busyKey)}
+                  onClick={() => runSystemAction("pull latest", SYSTEM_PULL_LATEST_URLS)}
+                >
+                  {busyKey === "pull latest" ? "Running..." : "Pull Latest Code"}
+                </Button>
+                <Button
+                  className="settings-action-btn"
+                  disabled={Boolean(busyKey)}
+                  onClick={() => runSystemAction("apply update", SYSTEM_APPLY_UPDATE_URLS)}
+                >
+                  {busyKey === "apply update" ? "Running..." : "Apply Full Update"}
+                </Button>
+                <Button
+                  variant="destructive"
+                  className="settings-action-btn"
+                  disabled={Boolean(busyKey)}
+                  onClick={() => runSystemAction("restart pi", SYSTEM_RESTART_PI_URLS)}
+                >
+                  {busyKey === "restart pi" ? "Running..." : "Restart Pi"}
+                </Button>
+                <Button
+                  variant="destructive"
+                  className="settings-action-btn"
+                  disabled={Boolean(busyKey)}
+                  onClick={() => runSystemAction("shutdown pi", SYSTEM_SHUTDOWN_PI_URLS)}
+                >
+                  {busyKey === "shutdown pi" ? "Running..." : "Shutdown Pi"}
+                </Button>
+              </div>
+
+              <pre className="settings-output-log">{resultLog}</pre>
             </CardContent>
           </Card>
         </section>

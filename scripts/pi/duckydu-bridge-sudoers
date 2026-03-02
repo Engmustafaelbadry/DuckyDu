@@ -1,0 +1,6 @@
+__APP_USER__ ALL=(root) NOPASSWD: /bin/systemctl restart usb-status-bridge.service
+__APP_USER__ ALL=(root) NOPASSWD: /bin/systemctl restart wifi-status-bridge.service
+__APP_USER__ ALL=(root) NOPASSWD: /bin/systemctl restart raspi-kiosk.service
+__APP_USER__ ALL=(root) NOPASSWD: /bin/chown -R __APP_USER__:__APP_USER__ /opt/raspi-launcher
+__APP_USER__ ALL=(root) NOPASSWD: /sbin/reboot
+__APP_USER__ ALL=(root) NOPASSWD: /sbin/shutdown -h now

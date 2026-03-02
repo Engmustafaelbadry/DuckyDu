@@ -5,12 +5,16 @@ import re
 import shutil
 import subprocess
 import threading
+import time
 from pathlib import Path
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 HOST = os.environ.get("USB_BRIDGE_HOST", "127.0.0.1")
 PORT = int(os.environ.get("USB_BRIDGE_PORT", "17373"))
+APP_USER = os.environ.get("APP_USER", "duckydu")
+APP_REPO_DIR = os.environ.get("APP_REPO_DIR", "/home/duckydu/DuckyDu")
+APP_DEPLOY_DIR = os.environ.get("APP_DEPLOY_DIR", "/opt/raspi-launcher")
 
 KNOWN_PHONE_VENDOR_IDS = {
     "05ac",  # Apple
@@ -43,6 +47,13 @@ MOBILE_KEYWORDS = (
 NOTE_TEST_TEXT_1 = os.environ.get("ADB_NOTE_TEST_TEXT_1", "969869")
 ADB_BIN = os.environ.get("ADB_BIN") or shutil.which("adb") or "/usr/bin/adb"
 NMCLI_BIN = os.environ.get("NMCLI_BIN") or shutil.which("nmcli") or "/usr/bin/nmcli"
+GIT_BIN = os.environ.get("GIT_BIN") or shutil.which("git") or "/usr/bin/git"
+NPM_BIN = os.environ.get("NPM_BIN") or shutil.which("npm") or "/usr/bin/npm"
+LSUSB_BIN = os.environ.get("LSUSB_BIN") or shutil.which("lsusb") or "/usr/bin/lsusb"
+SUDO_BIN = os.environ.get("SUDO_BIN") or shutil.which("sudo") or "/usr/bin/sudo"
+SYSTEMCTL_BIN = os.environ.get("SYSTEMCTL_BIN") or shutil.which("systemctl") or "/bin/systemctl"
+REBOOT_BIN = os.environ.get("REBOOT_BIN") or shutil.which("reboot") or "/sbin/reboot"
+SHUTDOWN_BIN = os.environ.get("SHUTDOWN_BIN") or shutil.which("shutdown") or "/sbin/shutdown"
 
 note_test_state = {
     "running": False,
@@ -266,6 +277,122 @@ def start_adb_note_test():
     worker = threading.Thread(target=adb_note_test_worker, daemon=True)
     worker.start()
     return True
+
+
+def _run_cmd_capture(command: list[str], timeout: int = 25, cwd: str | None = None):
+    result = subprocess.run(
+        command,
+        capture_output=True,
+        text=True,
+        timeout=timeout,
+        check=False,
+        cwd=cwd,
+    )
+    stdout = (result.stdout or "").strip()
+    stderr = (result.stderr or "").strip()
+    return {
+        "ok": result.returncode == 0,
+        "returncode": result.returncode,
+        "stdout": stdout,
+        "stderr": stderr,
+        "output": stdout or stderr,
+    }
+
+
+def get_lsusb_output():
+    return _run_cmd_capture([LSUSB_BIN], timeout=6)
+
+
+def restart_adb():
+    kill_result = _run_cmd_capture([ADB_BIN, "kill-server"], timeout=8)
+    start_result = _run_cmd_capture([ADB_BIN, "start-server"], timeout=8)
+    devices_result = _run_cmd_capture([ADB_BIN, "devices"], timeout=8)
+    ok = kill_result["ok"] and start_result["ok"] and devices_result["ok"]
+    output = "\n".join(
+        [
+            "adb kill-server:",
+            kill_result["output"] or "ok",
+            "adb start-server:",
+            start_result["output"] or "ok",
+            "adb devices:",
+            devices_result["output"] or "ok",
+        ]
+    )
+    return {"ok": ok, "output": output}
+
+
+def restart_bridges_async():
+    def worker():
+        time.sleep(0.8)
+        _run_cmd_capture([SUDO_BIN, SYSTEMCTL_BIN, "restart", "wifi-status-bridge.service"], timeout=15)
+        _run_cmd_capture([SUDO_BIN, SYSTEMCTL_BIN, "restart", "usb-status-bridge.service"], timeout=15)
+
+    threading.Thread(target=worker, daemon=True).start()
+    return {"ok": True, "output": "Bridge restart scheduled."}
+
+
+def restart_kiosk():
+    result = _run_cmd_capture([SUDO_BIN, SYSTEMCTL_BIN, "restart", "raspi-kiosk.service"], timeout=20)
+    return {"ok": result["ok"], "output": result["output"] or "kiosk restart requested"}
+
+
+def restart_pi():
+    result = _run_cmd_capture([SUDO_BIN, REBOOT_BIN], timeout=8)
+    return {"ok": result["ok"], "output": result["output"] or "reboot requested"}
+
+
+def shutdown_pi():
+    result = _run_cmd_capture([SUDO_BIN, SHUTDOWN_BIN, "-h", "now"], timeout=8)
+    return {"ok": result["ok"], "output": result["output"] or "shutdown requested"}
+
+
+def pull_latest_code():
+    if not Path(APP_REPO_DIR).exists():
+        return {"ok": False, "output": f"repo not found: {APP_REPO_DIR}"}
+
+    result = _run_cmd_capture([GIT_BIN, "pull"], timeout=45, cwd=APP_REPO_DIR)
+    return {"ok": result["ok"], "output": result["output"] or "git pull completed"}
+
+
+def apply_update_pipeline():
+    if not Path(APP_REPO_DIR).exists():
+        return {"ok": False, "output": f"repo not found: {APP_REPO_DIR}"}
+
+    logs = []
+
+    steps = [
+        {"display": f"{GIT_BIN} pull", "command": [GIT_BIN, "pull"], "timeout": 60, "cwd": APP_REPO_DIR},
+        {"display": f"{NPM_BIN} install", "command": [NPM_BIN, "install"], "timeout": 120, "cwd": APP_REPO_DIR},
+        {"display": f"{NPM_BIN} run build", "command": [NPM_BIN, "run", "build"], "timeout": 180, "cwd": APP_REPO_DIR},
+        {"display": f"rm -rf {APP_DEPLOY_DIR}/*", "command": ["bash", "-lc", f"rm -rf {APP_DEPLOY_DIR}/*"], "timeout": 20, "cwd": None},
+        {
+            "display": f"cp -r {APP_REPO_DIR}/dist/* {APP_DEPLOY_DIR}/",
+            "command": ["bash", "-lc", f"cp -r {APP_REPO_DIR}/dist/* {APP_DEPLOY_DIR}/"],
+            "timeout": 20,
+            "cwd": None,
+        },
+        {
+            "display": f"chown -R {APP_USER}:{APP_USER} {APP_DEPLOY_DIR}",
+            "command": [SUDO_BIN, "chown", "-R", f"{APP_USER}:{APP_USER}", APP_DEPLOY_DIR],
+            "timeout": 20,
+            "cwd": None,
+        },
+        {
+            "display": f"{SUDO_BIN} {SYSTEMCTL_BIN} restart raspi-kiosk.service",
+            "command": [SUDO_BIN, SYSTEMCTL_BIN, "restart", "raspi-kiosk.service"],
+            "timeout": 20,
+            "cwd": None,
+        },
+    ]
+
+    for step in steps:
+        result = _run_cmd_capture(step["command"], timeout=step["timeout"], cwd=step["cwd"])
+        logs.append(f"$ {step['display']}")
+        logs.append(result["output"] or "ok")
+        if not result["ok"]:
+            return {"ok": False, "output": "\n".join(logs)}
+
+    return {"ok": True, "output": "\n".join(logs)}
 
 
 def _read_json_body(handler: BaseHTTPRequestHandler):
@@ -493,6 +620,11 @@ class Handler(BaseHTTPRequestHandler):
                 self._write_json(500, {"error": str(exc), "networks": []})
             return
 
+        if self.path == "/system/lsusb":
+            result = get_lsusb_output()
+            self._write_json(200 if result["ok"] else 500, result)
+            return
+
         if self.path == "/adb/note-test-status":
             with note_test_lock:
                 payload = dict(note_test_state)
@@ -543,6 +675,41 @@ class Handler(BaseHTTPRequestHandler):
                 self._write_json(200, toggle_wifi(enabled))
             except Exception as exc:
                 self._write_json(500, {"error": str(exc)})
+            return
+
+        if self.path == "/system/restart-adb":
+            result = restart_adb()
+            self._write_json(200 if result["ok"] else 500, result)
+            return
+
+        if self.path == "/system/restart-bridges":
+            result = restart_bridges_async()
+            self._write_json(202, result)
+            return
+
+        if self.path == "/system/restart-kiosk":
+            result = restart_kiosk()
+            self._write_json(200 if result["ok"] else 500, result)
+            return
+
+        if self.path == "/system/restart-pi":
+            result = restart_pi()
+            self._write_json(200 if result["ok"] else 500, result)
+            return
+
+        if self.path == "/system/shutdown-pi":
+            result = shutdown_pi()
+            self._write_json(200 if result["ok"] else 500, result)
+            return
+
+        if self.path == "/system/pull-latest":
+            result = pull_latest_code()
+            self._write_json(200 if result["ok"] else 500, result)
+            return
+
+        if self.path == "/system/apply-update":
+            result = apply_update_pipeline()
+            self._write_json(200 if result["ok"] else 500, result)
             return
 
         self._write_json(404, {"error": "not_found"})
