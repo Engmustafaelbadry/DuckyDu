@@ -166,6 +166,13 @@ const WIFI_TOGGLE_URLS = [
   "http://localhost:17374/wifi/toggle"
 ];
 
+const WIFI_OSK_ROWS = [
+  ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
+  ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
+  ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
+  ["z", "x", "c", "v", "b", "n", "m"]
+];
+
 const UNLOCK_LOG_LINES = [
   "Initializing secure channel...",
   "Binding device session context...",
@@ -298,6 +305,7 @@ function WifiSettingsPanel() {
   const [selectedSsid, setSelectedSsid] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [showKeyboard, setShowKeyboard] = useState(false);
   const selectedNetwork = networks.find((item) => item.ssid === selectedSsid) || null;
   const selectedNeedsPassword = Boolean(selectedNetwork && selectedNetwork.security && selectedNetwork.security !== "--");
 
@@ -408,6 +416,10 @@ function WifiSettingsPanel() {
       .replace(/\s+/g, " ")
       .trim();
 
+  const appendPasswordKey = (key) => setPassword((value) => `${value}${key}`);
+  const backspacePassword = () => setPassword((value) => value.slice(0, -1));
+  const clearPassword = () => setPassword("");
+
   return (
     <Card className="launch-panel-card wifi-panel-card">
       <CardContent className="launch-panel-content wifi-panel-content">
@@ -424,57 +436,87 @@ function WifiSettingsPanel() {
           <p><span>Interface</span>{status.interface || "-"}</p>
         </div>
 
-        <div className="wifi-toolbar">
-          <Button className="wifi-toolbar-btn" onClick={handleScan} disabled={busy}>
-            Refresh
-          </Button>
-          <Button className="wifi-toolbar-btn" onClick={handleToggle} disabled={busy}>
-            {status.enabled ? "Turn Off" : "Turn On"}
-          </Button>
-        </div>
-
         {loading ? (
           <div className="launch-panel-loading">
             <Spinner />
           </div>
         ) : (
-          <>
-            <div className="wifi-network-list">
-              {networks.length === 0 ? (
-                <p className="wifi-list-empty">No networks found. Press Refresh.</p>
-              ) : (
-                networks.map((item) => (
-                  <button
-                    key={`${item.ssid}-${item.security}`}
-                    className={`wifi-network-item${selectedSsid === item.ssid ? " is-selected" : ""}${item.active ? " is-active" : ""}`}
-                    onClick={() => setSelectedSsid(item.ssid)}
-                    disabled={!status.enabled || busy}
-                  >
-                    <span className="wifi-network-name">{item.ssid}</span>
-                    <span className="wifi-network-meta">{item.signal}% {item.security || "open"} {item.active ? "| connected" : ""}</span>
-                  </button>
-                ))
-              )}
-            </div>
-
-            <Input
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              className="wifi-password-input"
-              placeholder={selectedNeedsPassword ? "Enter password" : "No password needed for selected network"}
-              disabled={busy || !status.enabled || !selectedNeedsPassword}
-            />
-
-            <div className="wifi-action-grid wifi-action-grid-main">
+          <div className="wifi-workspace">
+            <section className="wifi-left-actions">
+              <Button className="launch-action-btn" onClick={handleScan} disabled={busy}>
+                Refresh
+              </Button>
+              <Button className="launch-action-btn" onClick={handleToggle} disabled={busy}>
+                {status.enabled ? "Turn Off" : "Turn On"}
+              </Button>
               <Button className="launch-action-btn" onClick={handleConnect} disabled={busy || !status.enabled || !selectedNetwork}>
                 Connect
               </Button>
               <Button variant="destructive" className="launch-action-btn" onClick={handleDisconnect} disabled={busy || !status.connected}>
                 Disconnect
               </Button>
-            </div>
-          </>
+            </section>
+
+            <section className="wifi-right-pane">
+              <div className="wifi-network-list">
+                {networks.length === 0 ? (
+                  <p className="wifi-list-empty">No networks found. Press Refresh.</p>
+                ) : (
+                  networks.map((item) => (
+                    <button
+                      key={`${item.ssid}-${item.security}`}
+                      className={`wifi-network-item${selectedSsid === item.ssid ? " is-selected" : ""}${item.active ? " is-active" : ""}`}
+                      onClick={() => setSelectedSsid(item.ssid)}
+                      disabled={!status.enabled || busy}
+                    >
+                      <span className="wifi-network-name">{item.ssid}</span>
+                      <span className="wifi-network-meta">{item.signal}% {item.security || "open"} {item.active ? "| connected" : ""}</span>
+                    </button>
+                  ))
+                )}
+              </div>
+
+              <Input
+                type="password"
+                value={password}
+                readOnly
+                onFocus={() => setShowKeyboard(true)}
+                onClick={() => setShowKeyboard(true)}
+                className="wifi-password-input"
+                placeholder={selectedNeedsPassword ? "Tap to enter password" : "No password needed for selected network"}
+                disabled={busy || !status.enabled || !selectedNeedsPassword}
+              />
+
+              {showKeyboard && selectedNeedsPassword ? (
+                <div className="wifi-osk">
+                  {WIFI_OSK_ROWS.map((row) => (
+                    <div className="wifi-osk-row" key={row.join("-")}>
+                      {row.map((key) => (
+                        <button key={key} className="wifi-osk-key" onClick={() => appendPasswordKey(key)}>
+                          {key}
+                        </button>
+                      ))}
+                    </div>
+                  ))}
+
+                  <div className="wifi-osk-row wifi-osk-row-actions">
+                    <button className="wifi-osk-key" onClick={() => appendPasswordKey(" ")}>
+                      Space
+                    </button>
+                    <button className="wifi-osk-key" onClick={backspacePassword}>
+                      Backspace
+                    </button>
+                    <button className="wifi-osk-key" onClick={clearPassword}>
+                      Clear
+                    </button>
+                    <button className="wifi-osk-key wifi-osk-key-done" onClick={() => setShowKeyboard(false)}>
+                      Done
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+            </section>
+          </div>
         )}
 
         {!bridgeOnline ? <p className="wifi-message error">Wi-Fi bridge offline on port 17374.</p> : null}
