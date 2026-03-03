@@ -105,7 +105,7 @@
   - `Wipe All Data` -> opens Device Management on relevant group page.
   - `More Functions` -> opens full Device Management groups view.
 - Quick Start uses Pixel-style cards/icons and inherits the visual language of Device Management.
-- Quick Start cards now render large 120px icons as background elements (bottom-left, ~30% opacity) with title/subtitle layered above.
+- Quick Start cards now use foreground icon-above-title layout (no subtitle), with icon/text sizing and line-height aligned to full Device Management cards.
 - Uses grouped pages:
   1. Decrypt Data
   2. Data Management
@@ -285,6 +285,7 @@ File: `src/components/VerticalMenu.jsx`
 - Vite still warns for large chunk size (>500KB), non-blocking.
 - System control buttons require proper Pi installation/restart of services and sudoers setup from install scripts.
 - Connection/error text areas are now font-locked to Kongtext/Misaki (Wi-Fi bridge errors and cable status notes), and custom fonts use `font-display: block` to reduce fallback font switching.
+- Font reliability fix: removed external Google Fonts dependency from Pixelact styles (`Press Start 2P` import) and switched `.pixel-font` to local `Kongtext/Misaki`, so offline/connection-loss does not impact font loading.
 
 ## 12) Permanent Rules
 - Hard UI rule: never allow screen/page expansion that introduces scrolling.

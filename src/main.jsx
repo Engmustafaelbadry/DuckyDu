@@ -1099,11 +1099,8 @@ function DeviceQuickStartScreen({
               >
                 <Card className={`device-card quickstart-card tone-${item.tone}`}>
                   <CardContent className="quickstart-card-content">
-                    <Icon icon={buildFeatureIcon(item)} className="quickstart-bg-icon" />
-                    <div className="quickstart-text">
-                      <p className="quickstart-title">{item.title}</p>
-                      <p className="quickstart-subtitle">{item.subtitle}</p>
-                    </div>
+                    <Icon icon={buildFeatureIcon(item)} className="quickstart-card-icon" />
+                    <p className="quickstart-title">{item.title}</p>
                   </CardContent>
                 </Card>
               </button>
