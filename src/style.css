@@ -1349,8 +1349,9 @@ body {
   display: grid;
   place-items: center;
   align-content: center;
-  gap: 8px;
   padding: 10px;
+  position: relative;
+  overflow: hidden;
 }
 
 .quickstart-title {
@@ -1367,6 +1368,28 @@ body {
   font-size: 8px;
   line-height: 1.2;
   color: #000000;
+}
+
+.quickstart-bg-icon {
+  position: absolute;
+  left: 8px;
+  bottom: 6px;
+  width: 90px;
+  height: 90px;
+  color: #000000;
+  fill: currentColor;
+  opacity: 0.3;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.quickstart-text {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
 }
 
 .device-card {

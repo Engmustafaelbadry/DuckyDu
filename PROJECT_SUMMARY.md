@@ -105,6 +105,7 @@
   - `Wipe All Data` -> opens Device Management on relevant group page.
   - `More Functions` -> opens full Device Management groups view.
 - Quick Start uses Pixel-style cards/icons and inherits the visual language of Device Management.
+- Quick Start cards now render large 120px icons as background elements (bottom-left, ~30% opacity) with title/subtitle layered above.
 - Uses grouped pages:
   1. Decrypt Data
   2. Data Management
