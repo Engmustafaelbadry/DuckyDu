@@ -75,6 +75,12 @@
   - Left 1/3: animated pixel gear.
   - Right 2/3: vertical navigation buttons.
   - Gear animation is stepped loop rotation (non-smooth).
+  - Gear now uses Pixel icon-library component style (white, slower stepped loop, no left-panel border/background).
+  - Home buttons are top-aligned with tighter spacing, leaving free space below for future additions.
+  - Home labels updated:
+    - `Pixacho Display`
+    - `Pixacho Configuration`
+    - `Pixacho Terminal`
 - Display Settings page is wired to Pi display controls (real bridge calls, no mock):
   - Brightness
   - Contrast
@@ -93,15 +99,18 @@
   - Shutdown Pi
 - Pixacho Configuration page layout:
   - Left 1/3: command result/terminal output panel
-  - Right 2/3: vertical operation buttons
+  - Right 2/3: 2-column operation grid (2 buttons per row) to fit full button set in page height.
 - Customization page:
   - Open sudo terminal over kiosk (touch flow).
   - Exit Kiosk (`systemctl stop raspi-kiosk.service`).
   - Create Desktop Kiosk App launcher on Pi desktop.
 - Result/output panel now appears only inside action pages (not on settings home).
 - Display page has explicit top header within page content (`Display Settings`) followed by controls.
+- Display page duplicate inner header removed; only the top settings page header remains (with back button).
+- Fixed legacy CSS overlap: removed forced grid-row placement from display card so header stays pinned at top.
 - Layout tuned to fit kiosk ratio with fixed-height sections and no page-level overflow/scroll.
 - Settings UI now uses Pixelact components consistently for navigation/buttons/inputs.
+- Launch screen settings icon now opens real `Settings` screen directly (not placeholder page).
 
 ## 4) Wi-Fi System
 
@@ -153,6 +162,7 @@
   - stops `raspi-kiosk.service`
   - verifies service state with `systemctl is-active`
   - applies process-kill fallback (`start-kiosk.sh` / kiosk chromium / xinit) if still active
+  - tries to start desktop session (`display-manager`, fallback `lightdm`) and switches to VT7 for desktop return flow
   - returns detailed logs for troubleshooting from UI.
 - `POST /system/create-kiosk-desktop-app` now creates launcher in multiple user locations:
   - XDG desktop directory from `~/.config/user-dirs.dirs` when available
@@ -185,6 +195,7 @@
   - `scripts/pi/duckydu-bridge-sudoers`
   - includes both `/bin/systemctl` and `/usr/bin/systemctl` command paths (start/stop/restart) for compatibility.
   - fixed sudoers syntax issue by replacing problematic `chown user:group` rule with `chown -R user`.
+  - includes desktop return permissions for kiosk exit flow (`start display-manager` / `start lightdm` / `chvt 7`).
   - includes kiosk service `start/stop` permissions for desktop launcher and exit action.
 
 ## 7) Vertical Menu Behavior

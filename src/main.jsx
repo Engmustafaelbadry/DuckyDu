@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Icon } from "@iconify/react";
 import {
-  ArrowLeftSolid
+  ArrowLeftSolid,
+  CogSolid
 } from "@2hoch1/pixel-icon-library-react/icons";
 import pixelIcons from "@iconify-json/pixel/icons.json";
 import pixelarticons from "@iconify-json/pixelarticons/icons.json";
@@ -77,11 +78,6 @@ const launchUpdateIcon = {
 const launchLanguageIcon = {
   ...statusIconDefaults,
   ...pixelarticons.icons.globe
-};
-
-const settingsGearIcon = {
-  ...statusIconDefaults,
-  ...pixelarticons.icons["settings-cog-2"]
 };
 
 const DEVICE_GROUPS = [
@@ -1162,20 +1158,18 @@ function SettingsScreen({ onHome, onBack, onSettings }) {
               {settingsPage === "home" ? (
                 <div className="settings-home-layout">
                   <div className="settings-home-gear-wrap">
-                    <Icon icon={settingsGearIcon} className="settings-home-gear" />
+                    <CogSolid className="settings-home-gear" />
                   </div>
                   <div className="settings-home-grid">
-                    <Button className="settings-home-btn" onClick={() => setSettingsPage("display")}>Display Settings</Button>
+                    <Button className="settings-home-btn" onClick={() => setSettingsPage("display")}>Pixacho Display</Button>
                     <Button className="settings-home-btn" onClick={() => setSettingsPage("pixacho")}>Pixacho Configuration</Button>
-                    <Button className="settings-home-btn" onClick={() => setSettingsPage("customization")}>Customization</Button>
+                    <Button className="settings-home-btn" onClick={() => setSettingsPage("customization")}>Pixacho Terminal</Button>
                   </div>
                 </div>
               ) : null}
 
               {settingsPage === "display" ? (
                 <section className="settings-section-card display-section-card settings-page-content">
-                  <h3>Display Settings</h3>
-
                   <div className="display-control-input">
                     <label>Brightness</label>
                     <div className="display-input-wrap">
@@ -1263,7 +1257,7 @@ function SettingsScreen({ onHome, onBack, onSettings }) {
                 <section className="settings-section-card settings-page-content">
                   <div className="settings-config-layout">
                     <div className="settings-result-box settings-result-box-config">{resultLog}</div>
-                    <div className="settings-actions-grid">
+                    <div className="settings-actions-grid settings-actions-grid-two-col">
                       <Button className="settings-action-btn" disabled={Boolean(busyKey)} onClick={runLsusb}>
                         {busyKey === "lsusb" ? "Running..." : "Show lsusb"}
                       </Button>
@@ -1500,7 +1494,7 @@ function App() {
         onStart={() => setScreen("select")}
         onOpenWifi={() => setScreen("launch-wifi")}
         onOpenProfile={() => setScreen("launch-profile")}
-        onOpenQuickSettings={() => setScreen("launch-settings")}
+        onOpenQuickSettings={handleSettingsOpen}
         onOpenUpdate={() => setScreen("launch-update")}
         onHome={handleHome}
         onBack={handleBack}

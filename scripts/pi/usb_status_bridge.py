@@ -58,6 +58,7 @@ XRANDR_BIN = os.environ.get("XRANDR_BIN") or shutil.which("xrandr") or "/usr/bin
 XCALIB_BIN = os.environ.get("XCALIB_BIN") or shutil.which("xcalib") or "/usr/bin/xcalib"
 XTERM_BIN = os.environ.get("XTERM_BIN") or shutil.which("xterm") or "/usr/bin/xterm"
 PKILL_BIN = os.environ.get("PKILL_BIN") or shutil.which("pkill") or "/usr/bin/pkill"
+CHVT_BIN = os.environ.get("CHVT_BIN") or shutil.which("chvt") or "/usr/bin/chvt"
 DISPLAY_ENV = os.environ.get("DISPLAY", ":0")
 XAUTHORITY_ENV = os.environ.get("XAUTHORITY", f"/home/{APP_USER}/.Xauthority")
 
@@ -372,7 +373,19 @@ def stop_kiosk():
         active_after_stop = status_after_stop["stdout"].strip() == "active"
         logs.append(f"service state after retry: {status_after_stop['stdout'] or status_after_stop['stderr'] or 'unknown'}")
 
-    ok = stop_result["ok"] and not active_after_stop
+    desktop_started = False
+    for desktop_service in ("display-manager", "lightdm"):
+        start_desktop = _run_cmd_capture([SUDO_BIN, SYSTEMCTL_BIN, "start", desktop_service], timeout=20)
+        logs.append(f"start {desktop_service}: {start_desktop['output'] or 'ok'}")
+        if start_desktop["ok"]:
+            desktop_started = True
+            break
+
+    if CHVT_BIN and Path(CHVT_BIN).exists():
+        chvt_result = _run_cmd_capture([SUDO_BIN, CHVT_BIN, "7"], timeout=6)
+        logs.append(f"switch vt7: {chvt_result['output'] or 'ok'}")
+
+    ok = stop_result["ok"] and not active_after_stop and desktop_started
     return {"ok": ok, "output": "\n".join(logs)}
 
 
