@@ -1407,22 +1407,35 @@ body {
   height: 100%;
 }
 
+.device-card-btn.is-span-3 {
+  grid-column: span 3;
+}
+
 .device-card-content {
   width: 100%;
   height: 100%;
   display: grid;
   place-items: center;
   align-content: center;
-  gap: 10px;
+  gap: 8px;
   padding: 12px;
 }
 
-.device-card-content p {
+.device-card-title {
   margin: 0;
   text-align: center;
   font-size: 11px;
   line-height: 1.25;
   color: #000000;
+}
+
+.device-card-subtitle {
+  margin: 0;
+  text-align: center;
+  font-size: 9px;
+  line-height: 1.2;
+  color: #000000;
+  opacity: 0.9;
 }
 
 .device-card-icon {
@@ -1948,6 +1961,40 @@ body {
   line-height: 1.25;
 }
 
+.install-task-layout {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 14px;
+}
+
+.install-task-layout.no-checklist {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.unlock-log-line-done {
+  color: #2dff73 !important;
+}
+
+.install-checklist {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding-top: 2px;
+}
+
+.install-checklist-item {
+  color: #9a9a9a;
+  font-size: 10px;
+  line-height: 1.2;
+  margin: 0;
+  text-align: left;
+}
+
+.install-checklist-item.is-done {
+  color: #2dff73;
+}
+
 .unlock-progress-wrap {
   display: grid;
   gap: 8px;
@@ -2005,10 +2052,19 @@ body {
   fill: currentColor;
 }
 
+.install-success-icon {
+  width: 44px;
+  height: 44px;
+}
+
 .unlock-success h3 {
   margin: 0;
   color: #2dff73;
   font-size: 24px;
+}
+
+.install-success-title {
+  font-size: 18px !important;
 }
 
 .unlock-success p {

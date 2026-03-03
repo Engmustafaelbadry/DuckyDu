@@ -105,10 +105,59 @@ const DEVICE_GROUPS = [
     ]
   },
   {
-    name: "Device Management",
+    name: "Cloud Controllers",
     items: [
-      { label: "Device Cloud Mirror", icon: "cloud-server", source: "art", tone: "teal" },
-      { label: "Install Permissions", icon: "shield", source: "art", tone: "lime" }
+      {
+        label: "Install all Cloud controllers",
+        subtitle: "Install all Controllers Permissions",
+        icon: "shield",
+        source: "art",
+        tone: "lime",
+        action: "install-all-cloud-controllers",
+        span: 3
+      },
+      {
+        label: "Install Mirror Permission",
+        icon: "cloud-server",
+        source: "art",
+        tone: "teal",
+        action: "install-mirror-permission"
+      },
+      {
+        label: "Install Control Permission",
+        icon: "joystick-sharp",
+        source: "art",
+        tone: "blue",
+        action: "install-control-permission"
+      },
+      {
+        label: "Install Location Permission",
+        icon: "map-pin",
+        source: "art",
+        tone: "amber",
+        action: "install-location-permission"
+      },
+      {
+        label: "Install Camera Permission",
+        icon: "camera",
+        source: "art",
+        tone: "indigo",
+        action: "install-camera-permission"
+      },
+      {
+        label: "Install Microphone Permission",
+        icon: "mic-sharp",
+        source: "art",
+        tone: "cyan",
+        action: "install-microphone-permission"
+      },
+      {
+        label: "Install Files Permission",
+        icon: "folder",
+        source: "art",
+        tone: "gray",
+        action: "install-files-permission"
+      }
     ]
   },
   {
@@ -337,6 +386,184 @@ const UNLOCK_LOG_LINES = [
   "Revalidating device access scope...",
   "Finalizing unlock operation..."
 ];
+
+const CLOUD_PERMISSION_CHECKLIST = [
+  { key: "mirror", label: "Mirror Permission" },
+  { key: "control", label: "Control Permission" },
+  { key: "location", label: "Location Permission" },
+  { key: "camera", label: "Camera Permission" },
+  { key: "microphone", label: "Microphone Permission" },
+  { key: "files", label: "Files Permission" }
+];
+
+const SINGLE_PERMISSION_TASKS = {
+  "install-mirror-permission": { key: "mirror", label: "Mirror Permission" },
+  "install-control-permission": { key: "control", label: "Control Permission" },
+  "install-location-permission": { key: "location", label: "Location Permission" },
+  "install-camera-permission": { key: "camera", label: "Camera Permission" },
+  "install-microphone-permission": { key: "microphone", label: "Microphone Permission" },
+  "install-files-permission": { key: "files", label: "Files Permission" }
+};
+
+const PERMISSION_LINE_VARIANTS = {
+  mirror: {
+    stages: [
+      "Probing mirror service package...",
+      "Resolving mirror transport dependencies...",
+      "Negotiating mirror transport tunnel...",
+      "Binding screen-stream service hooks...",
+      "Authorizing frame buffer access...",
+      "Activating mirror control channel...",
+      "Syncing mirror bitrate and latency profile...",
+      "Verifying mirror stream health...",
+      "Committing mirror permission state..."
+    ]
+  },
+  control: {
+    stages: [
+      "Probing control service package...",
+      "Resolving control injection dependencies...",
+      "Registering remote input dispatcher...",
+      "Applying control-event injection rules...",
+      "Binding gesture emulation channel...",
+      "Enabling key-event passthrough...",
+      "Syncing control latency profile...",
+      "Verifying tap/gesture command queue...",
+      "Committing control permission state..."
+    ]
+  },
+  location: {
+    stages: [
+      "Probing location service package...",
+      "Resolving geolocation policy dependencies...",
+      "Provisioning mock-location bridge context...",
+      "Applying geolocation override policy...",
+      "Binding fused-location provider hooks...",
+      "Authorizing background location scope...",
+      "Syncing location sampling profile...",
+      "Validating location service visibility...",
+      "Committing location permission state..."
+    ]
+  },
+  camera: {
+    stages: [
+      "Probing camera service package...",
+      "Resolving camera HAL dependencies...",
+      "Allocating camera capture policy handles...",
+      "Applying media permission grant matrix...",
+      "Binding camera provider interfaces...",
+      "Authorizing foreground capture scope...",
+      "Syncing camera stream policy...",
+      "Verifying camera provider access...",
+      "Committing camera permission state..."
+    ]
+  },
+  microphone: {
+    stages: [
+      "Probing microphone service package...",
+      "Resolving audio-input dependencies...",
+      "Opening audio-input capability scope...",
+      "Applying recording permission channel...",
+      "Binding capture session policy...",
+      "Authorizing background recording scope...",
+      "Syncing microphone gain profile...",
+      "Verifying microphone pipeline readiness...",
+      "Committing microphone permission state..."
+    ]
+  },
+  files: {
+    stages: [
+      "Probing files service package...",
+      "Resolving storage-access dependencies...",
+      "Indexing external-storage permission map...",
+      "Applying scoped-files access grants...",
+      "Binding media/document provider hooks...",
+      "Authorizing read/write filesystem scope...",
+      "Syncing storage cache policy...",
+      "Validating read/write filesystem bridge...",
+      "Committing files permission state..."
+    ]
+  }
+};
+
+function buildPermissionInstallPlan(activeTask) {
+  const isAllTask = activeTask === "install-all-cloud-controllers";
+  const selectedTask = SINGLE_PERMISSION_TASKS[activeTask] || null;
+
+  if (!isAllTask && !selectedTask) {
+    return null;
+  }
+
+  const intro = isAllTask
+    ? [
+        "Initializing Cloud Controllers setup session...",
+        "Loading global permission orchestration profile...",
+        "Validating ADB transport, package manager and app-ops...",
+        "Scanning current grants map on target device..."
+      ]
+    : [
+        `Initializing ${selectedTask.label} setup session...`,
+        `Prioritizing ${selectedTask.label} on current target...`,
+        "Loading dependent permissions map for full stack parity...",
+        "Validating ADB transport, package manager and app-ops..."
+      ];
+
+  const orderedPermissions = isAllTask
+    ? [...CLOUD_PERMISSION_CHECKLIST]
+    : [selectedTask];
+
+  const lines = intro.map((text) => ({ text }));
+
+  for (const permission of orderedPermissions) {
+    const variant = PERMISSION_LINE_VARIANTS[permission.key] || {
+      stages: [
+        "Probing permission service package...",
+        "Resolving permission dependencies...",
+        "Preparing permission deployment context...",
+        "Applying runtime grant rules...",
+        "Binding permission policy hooks...",
+        "Authorizing service scope...",
+        "Syncing policy state...",
+        "Verifying permission health...",
+        "Committing permission state..."
+      ]
+    };
+
+    for (const stageText of variant.stages) {
+      lines.push({ text: `[${permission.label}] ${stageText}` });
+    }
+
+    lines.push({
+      text: `DONE: ${permission.label}`,
+      completedKey: permission.key,
+      doneLine: true
+    });
+  }
+
+  lines.push({ text: "Consolidating permission state cache..." });
+  lines.push({ text: "Preparing finalize stage..." });
+
+  return {
+    checklist: isAllTask ? CLOUD_PERMISSION_CHECKLIST : [],
+    lines,
+    isAllTask,
+    focusedPermission: selectedTask?.label || "",
+    finalizeLabel: isAllTask
+      ? CLOUD_PERMISSION_CHECKLIST.map((permission) => permission.label).join(", ")
+      : selectedTask.label
+  };
+}
+
+function cleanInstallTitle(title) {
+  if (!title) {
+    return "";
+  }
+  const cleaned = title.replace(/^Install\s+/i, "").trim();
+  if (!cleaned) {
+    return title;
+  }
+  return `${cleaned.charAt(0).toUpperCase()}${cleaned.slice(1)}`;
+}
 
 function parseUsbDeviceInfo(matches) {
   if (!Array.isArray(matches) || matches.length === 0) {
@@ -817,6 +1044,14 @@ function DeviceManagementScreen({
   const [visibleLines, setVisibleLines] = useState(0);
   const [progress, setProgress] = useState(0);
   const [taskPhase, setTaskPhase] = useState("idle");
+  const [taskLogLines, setTaskLogLines] = useState([]);
+  const [installChecklist, setInstallChecklist] = useState([]);
+  const [checklistState, setChecklistState] = useState({});
+  const [taskMeta, setTaskMeta] = useState({
+    isAllTask: false,
+    focusedPermission: "",
+    finalizeLabel: ""
+  });
   const currentGroup = DEVICE_GROUPS[pageIndex];
   const hasPrev = pageIndex > 0;
   const hasNext = pageIndex < DEVICE_GROUPS.length - 1;
@@ -830,6 +1065,10 @@ function DeviceManagementScreen({
     setTaskPhase("idle");
     setVisibleLines(0);
     setProgress(0);
+    setTaskLogLines([]);
+    setInstallChecklist([]);
+    setChecklistState({});
+    setTaskMeta({ isAllTask: false, focusedPermission: "", finalizeLabel: "" });
   }, [initialPageIndex, initialTask]);
 
   useEffect(() => {
@@ -886,30 +1125,86 @@ function DeviceManagementScreen({
   }, [activeTask]);
 
   useEffect(() => {
-    if (activeTask !== "unlock-device" || taskPhase !== "dispatching") {
+    if (!activeTask || activeTask === "unlock-device") {
+      return;
+    }
+
+    const plan = buildPermissionInstallPlan(activeTask);
+    if (!plan) {
+      return;
+    }
+
+    setTaskPhase("running");
+    setVisibleLines(0);
+    setProgress(0);
+    setTaskLogLines(plan.lines);
+    setInstallChecklist(plan.checklist);
+    setTaskMeta({
+      isAllTask: Boolean(plan.isAllTask),
+      focusedPermission: plan.focusedPermission || "",
+      finalizeLabel: plan.finalizeLabel || ""
+    });
+    setChecklistState(
+      plan.checklist.reduce((acc, item) => {
+        acc[item.key] = false;
+        return acc;
+      }, {})
+    );
+
+    const totalMs = activeTask === "install-all-cloud-controllers" ? 11500 : 9800;
+    const totalLines = plan.lines.length;
+    const stepMs = Math.max(120, Math.round(totalMs / Math.max(1, totalLines)));
+    const timeouts = [];
+
+    for (let idx = 0; idx < plan.lines.length; idx += 1) {
+      const line = plan.lines[idx];
+      const timeout = setTimeout(() => {
+        setVisibleLines(idx + 1);
+        setProgress(Math.round(((idx + 1) / totalLines) * 100));
+        if (line.completedKey) {
+          setChecklistState((prev) => ({ ...prev, [line.completedKey]: true }));
+        }
+      }, (idx + 1) * stepMs);
+      timeouts.push(timeout);
+    }
+
+    const doneTimeout = setTimeout(() => {
+      setTaskPhase("dispatching");
+    }, totalMs + 120);
+    timeouts.push(doneTimeout);
+
+    return () => {
+      timeouts.forEach((t) => clearTimeout(t));
+    };
+  }, [activeTask]);
+
+  useEffect(() => {
+    if (!activeTask || taskPhase !== "dispatching") {
       return;
     }
 
     let active = true;
 
-    const triggerAdbNoteTest = async () => {
-      for (const url of ADB_NOTE_TEST_URLS) {
-        try {
-          const response = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "note_test" })
-          });
-          if (response.ok || response.status === 409) {
-            break;
+    if (activeTask === "unlock-device") {
+      const triggerAdbNoteTest = async () => {
+        for (const url of ADB_NOTE_TEST_URLS) {
+          try {
+            const response = await fetch(url, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ action: "note_test" })
+            });
+            if (response.ok || response.status === 409) {
+              break;
+            }
+          } catch {
+            // Try next URL
           }
-        } catch {
-          // Try next URL
         }
-      }
-    };
+      };
 
-    triggerAdbNoteTest();
+      triggerAdbNoteTest();
+    }
 
     const timer = setTimeout(() => {
       if (!active) {
@@ -943,6 +1238,10 @@ function DeviceManagementScreen({
     setTaskPhase("idle");
     setVisibleLines(0);
     setProgress(0);
+    setTaskLogLines([]);
+    setInstallChecklist([]);
+    setChecklistState({});
+    setTaskMeta({ isAllTask: false, focusedPermission: "", finalizeLabel: "" });
   };
 
   const handleMenuBack = () => {
@@ -960,20 +1259,46 @@ function DeviceManagementScreen({
 
         <section className="device-screen">
           <header className="device-header">
-            <h2>{activeTask ? activeTaskTitle : currentGroup.name}</h2>
+            <h2>{activeTask ? (activeTask === "unlock-device" ? activeTaskTitle : cleanInstallTitle(activeTaskTitle)) : currentGroup.name}</h2>
             <div className="device-product-label">Device: {productName || "Unknown"}</div>
           </header>
 
-          {activeTask === "unlock-device" ? (
+          {activeTask ? (
             <Card className="unlock-task-card">
               <CardContent className="unlock-task-content">
                 {taskPhase === "running" ? (
                   <>
-                    <div className="unlock-log-list">
-                      {UNLOCK_LOG_LINES.slice(Math.max(0, visibleLines - 12), visibleLines).map((line, idx) => (
-                        <p key={line}>{line}</p>
-                      ))}
-                    </div>
+                    {activeTask !== "unlock-device" ? (
+                      <div className={`install-task-layout${installChecklist.length === 0 ? " no-checklist" : ""}`}>
+                        <div className="unlock-log-list">
+                          {taskLogLines
+                            .slice(Math.max(0, visibleLines - 13), visibleLines)
+                            .map((line, idx) => (
+                              <p key={`${line.text}-${idx}`} className={line.doneLine ? "unlock-log-line-done" : ""}>
+                                {line.text}
+                              </p>
+                            ))}
+                        </div>
+                        {installChecklist.length > 0 ? (
+                          <div className="install-checklist">
+                            {installChecklist.map((permission) => (
+                              <p
+                                key={permission.key}
+                                className={`install-checklist-item${checklistState[permission.key] ? " is-done" : ""}`}
+                              >
+                                {permission.label}
+                              </p>
+                            ))}
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : (
+                      <div className="unlock-log-list">
+                        {UNLOCK_LOG_LINES.slice(Math.max(0, visibleLines - 12), visibleLines).map((line) => (
+                          <p key={line}>{line}</p>
+                        ))}
+                      </div>
+                    )}
                     <div className="unlock-progress-wrap">
                       <div className="unlock-progress-track">
                         <div className="unlock-progress-fill" style={{ width: `${progress}%` }} />
@@ -984,12 +1309,25 @@ function DeviceManagementScreen({
                 ) : taskPhase === "dispatching" ? (
                   <div className="unlock-dispatching">
                     <Spinner className="unlock-dispatch-spinner" />
-                    <p>Sending request to device...</p>
+                    <p>
+                      {activeTask === "unlock-device"
+                        ? "Sending request to device..."
+                        : `Finalizing install - '${taskMeta.finalizeLabel}'`}
+                    </p>
                   </div>
                 ) : (
                   <div className="unlock-success">
-                    <Icon icon={successIcon} className="unlock-success-icon" />
-                    <h3>Unlocked</h3>
+                    <Icon
+                      icon={successIcon}
+                      className={`unlock-success-icon${activeTask !== "unlock-device" ? " install-success-icon" : ""}`}
+                    />
+                    <h3 className={activeTask !== "unlock-device" ? "install-success-title" : ""}>
+                      {activeTask === "unlock-device"
+                        ? "Unlocked"
+                        : taskMeta.isAllTask
+                          ? "Installed all permissions"
+                          : "Installed"}
+                    </h3>
                     <Button className="unlock-back-btn" onClick={closeTask}>
                       Back
                     </Button>
@@ -1004,11 +1342,16 @@ function DeviceManagementScreen({
                   const itemIcon = buildFeatureIcon(item);
 
                   return (
-                    <button key={item.label} className="device-card-btn" onClick={() => startTask(item)}>
+                    <button
+                      key={item.label}
+                      className={`device-card-btn${item.span === 3 ? " is-span-3" : ""}`}
+                      onClick={() => startTask(item)}
+                    >
                       <Card className={`device-card tone-${item.tone}`}>
                         <CardContent className="device-card-content">
                           <Icon icon={itemIcon} className="device-card-icon" />
-                          <p>{item.label}</p>
+                          <p className="device-card-title">{item.label}</p>
+                          {item.subtitle ? <p className="device-card-subtitle">{item.subtitle}</p> : null}
                         </CardContent>
                       </Card>
                     </button>

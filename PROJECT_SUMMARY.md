@@ -109,10 +109,42 @@
 - Uses grouped pages:
   1. Decrypt Data
   2. Data Management
-  3. Device Management
+  3. Cloud Controllers
   4. Delete Encryption
 - 3x3 fixed grid behavior maintained.
 - Back/home handling kept context-aware.
+- Cloud Controllers group now contains:
+  - `Install all Cloud controllers` (spans 3 grid cells)
+  - `Install Mirror Permission`
+  - `Install Control Permission`
+  - `Install Location Permission`
+  - `Install Camera Permission`
+  - `Install Microphone Permission`
+  - `Install Files Permission`
+- Pressing any Cloud Controllers install card now opens a terminal-style loading page (same visual family as Unlock flow).
+- `Install all Cloud controllers` loading page includes a live checklist:
+  - Mirror, Control, Location, Camera, Microphone, Files
+  - each item starts gray and turns green when its install step completes.
+- Cloud Controllers cards support subtitle text (used by the all-install card).
+- Cloud Controllers loader refinements:
+  - All permission loaders now run expanded sequences (10+ log lines) with per-permission variation.
+  - Single-permission loaders now show only the selected permission flow (not other permissions), with 10 lines minimum for that permission.
+  - `Install all Cloud controllers` is the only mode that runs all permission flows together.
+  - Each permission stage writes a green `DONE:` log line when completed.
+  - Checklist moved to the right side of the loader as plain text (not cards), turning green as each permission completes.
+  - Checklist is now shown only in `Install all Cloud controllers`; single-permission pages show logs only.
+  - Loader headers now remove the `Install` prefix while in loading pages.
+  - Finalizing message now shows exact target:
+    - single: `Finalizing install - '<permission name>'`
+    - all: `Finalizing install - '<comma-separated permission list>'`
+  - Finalizing phase stays for ~3 seconds before success.
+  - Success title:
+    - single: `Installed`
+    - all: `Installed all permissions`
+  - Installed success visuals for permission tasks are reduced in size (smaller checkmark + smaller installed title font).
+
+## 10) Workflow Rule
+- After each completed feature/change, update `PROJECT_SUMMARY.md` in the same task turn: add new items and edit outdated entries so the summary stays current across chats.
 
 ### E) Settings screen (now functional)
 - Replaced placeholder with operational controls that call local bridge APIs.
