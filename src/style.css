@@ -617,8 +617,8 @@ body {
 }
 
 .select-os-screen.is-connect-mode {
-  grid-template-rows: auto 1fr auto;
-  gap: 2px;
+  grid-template-rows: 1fr;
+  gap: 0;
 }
 
 .select-os-header {
@@ -627,10 +627,11 @@ body {
   justify-content: flex-start;
 }
 
-.select-os-header h2 {
+.select-os-header h2,
+.connect-stage-header h2 {
   margin: 0;
   color: #ffffff;
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1.1;
 }
 
@@ -694,11 +695,19 @@ body {
 }
 
 .select-os-card-main .os-card-content {
-  gap: 6px;
+  gap: 10px;
 }
 
 .select-os-card-main .os-text h2 {
-  font-size: 22px;
+  font-size: 14px;
+}
+
+.select-os-card-main .os-text p {
+  display: block;
+  margin: 4px 0 0;
+  font-size: 9px;
+  line-height: 1.25;
+  text-align: center;
 }
 
 .select-small-row {
@@ -739,6 +748,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
+  padding: 0 8px;
 }
 
 .focus-slot-wrap {
@@ -843,8 +853,6 @@ body {
     0 calc(100% - (var(--pixel-step) * 2))
   );
 }
-
-.os-main {}
 
 .os-card-content {
   width: 100%;
@@ -952,7 +960,7 @@ body {
 
 .connect-panel {
   width: 100%;
-  background: #000000 !important;
+  background: rgb(0 0 0 / 50%) !important;
   color: #ffffff !important;
   border: 0 !important;
   border-radius: 0 !important;
@@ -1002,19 +1010,69 @@ body {
   height: 100%;
   min-height: 0;
   display: grid;
-  grid-template-rows: auto 1fr;
-  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-columns: 1fr;
   align-items: stretch;
-  row-gap: 18px;
-  column-gap: 14px;
-  padding: 10px;
+  gap: 8px;
+  padding: 0 10px 10px;
+}
+
+.connect-stage-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.connect-choose-layout {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 10px;
+}
+
+.connect-choose-left {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) 76px;
+  gap: 8px;
+  align-content: start;
+}
+
+.connect-choose-right {
+  min-height: 0;
+  display: grid;
+  place-items: center;
+}
+
+.connect-link-anim-wrap {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+
+.connect-link-anim-icon {
+  width: 72px;
+  height: 72px;
+  color: #ffffff;
+  fill: currentColor;
+  animation: connect-link-step 1200ms steps(2, end) infinite;
+}
+
+.connect-waiting-layout {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) 76px;
+  gap: 8px;
 }
 
 .connect-waiting {
   width: 100%;
   height: 100%;
-  grid-column: 1 / -1;
-  grid-row: 1 / -1;
   display: grid;
   place-items: center;
   align-content: center;
@@ -1107,18 +1165,9 @@ body {
   color: #ffffff;
 }
 
-.connect-via-title {
-  grid-column: 1 / -1;
-  margin: 0 0 6px;
-  text-align: center;
-  font-size: 15px;
-  line-height: 1.2;
-  color: #ffffff;
-}
-
 .connect-option {
   width: 100%;
-  background: #171717;
+  background: rgb(23 23 23 / 50%);
   border: 2px solid #ffffff;
   border-radius: 0;
   box-shadow: var(--pixel-box-shadow);
@@ -1152,6 +1201,10 @@ body {
   );
 }
 
+.connect-option:disabled {
+  opacity: 0.85;
+}
+
 .connect-option:focus-visible {
   outline: 2px solid #ffffff;
   outline-offset: 2px;
@@ -1165,45 +1218,20 @@ body {
   color: #ffffff;
 }
 
+.connect-option-subtitle {
+  margin: 0;
+  font-size: 8px;
+  line-height: 1.25;
+  color: #d2d2d2;
+  text-align: center;
+  max-width: 92%;
+}
+
 .connect-method-icon {
   width: 56px;
   height: 56px;
   color: #ffffff;
   fill: currentColor;
-}
-
-.cancel-btn {
-  width: 100%;
-  height: 56px;
-  border-radius: 0 !important;
-  margin: 0 !important;
-  font-size: 18px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  clip-path: polygon(
-    0 calc(var(--pixel-step) * 2),
-    var(--pixel-step) calc(var(--pixel-step) * 2),
-    var(--pixel-step) var(--pixel-step),
-    calc(var(--pixel-step) * 2) var(--pixel-step),
-    calc(var(--pixel-step) * 2) 0,
-    calc(100% - (var(--pixel-step) * 2)) 0,
-    calc(100% - (var(--pixel-step) * 2)) var(--pixel-step),
-    calc(100% - var(--pixel-step)) var(--pixel-step),
-    calc(100% - var(--pixel-step)) calc(var(--pixel-step) * 2),
-    100% calc(var(--pixel-step) * 2),
-    100% calc(100% - (var(--pixel-step) * 2)),
-    calc(100% - var(--pixel-step)) calc(100% - (var(--pixel-step) * 2)),
-    calc(100% - var(--pixel-step)) calc(100% - var(--pixel-step)),
-    calc(100% - (var(--pixel-step) * 2)) calc(100% - var(--pixel-step)),
-    calc(100% - (var(--pixel-step) * 2)) 100%,
-    calc(var(--pixel-step) * 2) 100%,
-    calc(var(--pixel-step) * 2) calc(100% - var(--pixel-step)),
-    var(--pixel-step) calc(100% - var(--pixel-step)),
-    var(--pixel-step) calc(100% - (var(--pixel-step) * 2)),
-    0 calc(100% - (var(--pixel-step) * 2))
-  );
 }
 
 .cancel-icon {
@@ -1213,6 +1241,33 @@ body {
 
 .panel-cancel-btn {
   min-width: 128px;
+  height: 42px;
+  justify-self: center;
+  align-self: end;
+  font-size: 12px;
+}
+
+.connect-back-btn {
+  width: calc(50% - 4px);
+  min-width: 0;
+  height: 76px !important;
+  min-height: 76px !important;
+  max-height: 76px !important;
+  font-size: 13px !important;
+  line-height: 1 !important;
+  padding: 0 8px !important;
+  justify-self: start;
+}
+
+@keyframes connect-link-step {
+  0%,
+  49.9% {
+    transform: translateX(-6px);
+  }
+  50%,
+  100% {
+    transform: translateX(6px);
+  }
 }
 
 .device-screen {

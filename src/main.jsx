@@ -3,7 +3,8 @@ import { createRoot } from "react-dom/client";
 import { Icon } from "@iconify/react";
 import {
   ArrowLeftSolid,
-  CogSolid
+  CogSolid,
+  LinkSolid
 } from "@2hoch1/pixel-icon-library-react/icons";
 import pixelIcons from "@iconify-json/pixel/icons.json";
 import pixelarticons from "@iconify-json/pixelarticons/icons.json";
@@ -303,7 +304,7 @@ function normalizeUsbDeviceInfo(payload) {
   return parseUsbDeviceInfo(payload?.matches);
 }
 
-function OsCard({ id, label, selected, onSelect, className = "", compact = false }) {
+function OsCard({ id, label, subtitle = "", selected, onSelect, className = "", compact = false }) {
   const iconConfig = iconMap[id];
   const iconClassName = `pixel-icon${id === "other" ? " pixel-icon-small" : ""}${compact ? " pixel-icon-compact" : ""}`;
   const iconElement = <Icon icon={iconConfig.icon} className={iconClassName} />;
@@ -319,6 +320,7 @@ function OsCard({ id, label, selected, onSelect, className = "", compact = false
           {iconElement}
           <div className="os-text">
             <h2>{label}</h2>
+            {subtitle ? <p>{subtitle}</p> : null}
           </div>
         </CardContent>
       </Card>
@@ -1570,19 +1572,6 @@ function App() {
         <VerticalMenu onHome={handleHome} onBack={handleBack} onSettings={handleSettingsOpen} />
 
         <section className={`select-os-screen${connectMode ? " is-connect-mode" : ""}`}>
-          {connectMode ? (
-            <div className="focus-slot-wrap is-visible">
-              <OsCard
-                id={selected}
-                label={selected === "android" ? "Android" : selected === "ios" ? "iOS" : "Other OS"}
-                selected={true}
-                onSelect={handleCardSelect}
-                className="focus-slot"
-                compact={true}
-              />
-            </div>
-          ) : null}
-
           {!connectMode ? (
             <>
               <header className="select-os-header">
@@ -1597,8 +1586,22 @@ function App() {
                 </Card>
 
                 <div className="select-right-grid">
-                  <OsCard id="android" label="Android" selected={selected === "android"} onSelect={handleCardSelect} className="select-os-card-main" />
-                  <OsCard id="ios" label="iOS" selected={selected === "ios"} onSelect={handleCardSelect} className="select-os-card-main" />
+                  <OsCard
+                    id="android"
+                    label="Android"
+                    subtitle="Android OS based devices"
+                    selected={selected === "android"}
+                    onSelect={handleCardSelect}
+                    className="select-os-card-main"
+                  />
+                  <OsCard
+                    id="ios"
+                    label="iOS"
+                    subtitle="Apple iPhone and iOS devices"
+                    selected={selected === "ios"}
+                    onSelect={handleCardSelect}
+                    className="select-os-card-main"
+                  />
                   <div className="select-small-row">
                     <OsCard id="other" label="Other OS" selected={selected === "other"} onSelect={handleCardSelect} className="select-os-card-small" />
                     <Button variant="destructive" className="select-back-small" onClick={handleBack}>
@@ -1616,59 +1619,77 @@ function App() {
               <CardContent className="connect-panel-content">
                 {connectStage === "choose" ? (
                   <>
-                    <h3 className="connect-via-title">Connect via</h3>
+                    <header className="select-os-header connect-stage-header">
+                      <h2>Connect via</h2>
+                    </header>
+                    <div className="connect-choose-layout">
+                      <div className="connect-choose-left">
+                        <button className="connect-option" onClick={() => setConnectStage("cable_wait")} aria-label="Connect via Cable">
+                          <Icon icon={connectCableIcon} className="connect-method-icon" />
+                          <h4>Cable</h4>
+                          <p className="connect-option-subtitle">USB data transport + direct device handshake</p>
+                        </button>
 
-                    <button className="connect-option" onClick={() => setConnectStage("cable_wait")} aria-label="Connect via Cable">
-                      <Icon icon={connectCableIcon} className="connect-method-icon" />
-                      <h4>Cable</h4>
-                    </button>
+                        <button className="connect-option" disabled aria-label="Wireless (coming soon)">
+                          <Icon icon={connectWirelessIcon} className="connect-method-icon" />
+                          <h4>Wireless</h4>
+                          <p className="connect-option-subtitle">Wi-Fi channel pairing + remote session bridge</p>
+                        </button>
 
-                    <div className="connect-option">
-                      <Icon icon={connectWirelessIcon} className="connect-method-icon" />
-                      <h4>Wireless</h4>
+                        <Button variant="destructive" className="select-back-small connect-back-btn" onClick={handleBack}>
+                          <ArrowLeftSolid className="cancel-icon" />
+                          Back
+                        </Button>
+                      </div>
+
+                      <div className="connect-choose-right">
+                        <div className="connect-link-anim-wrap" aria-hidden="true">
+                          <LinkSolid className="connect-link-anim-icon" />
+                        </div>
+                      </div>
                     </div>
                   </>
                 ) : (
-                  <div className="connect-waiting">
-                    {usbConnected ? (
-                      <div className="connected-details">
-                        <p className="connect-state-label">
-                          Status: <span className="connect-state is-connected">Connected</span>
-                        </p>
-                        <p className="device-info-line">Product Name: {usbDeviceInfo.productName}</p>
-                        <p className="device-info-line">Manufacturer: {usbDeviceInfo.manufacturer}</p>
-                        <div className="access-device-slot">
-                          {accessReady ? (
-                            <Button className="access-device-btn" onClick={() => setScreen("device-loading")}>
-                              Access Device
-                            </Button>
-                          ) : (
-                            <Spinner className="access-spinner" />
-                          )}
-                        </div>
+                  <>
+                    <header className="select-os-header connect-stage-header">
+                      <h2>Connect via = Cable</h2>
+                    </header>
+                    <div className="connect-waiting-layout">
+                      <div className="connect-waiting">
+                        {usbConnected ? (
+                          <div className="connected-details">
+                            <p className="connect-state-label">
+                              Status: <span className="connect-state is-connected">Connected</span>
+                            </p>
+                            <p className="device-info-line">Product Name: {usbDeviceInfo.productName}</p>
+                            <p className="device-info-line">Manufacturer: {usbDeviceInfo.manufacturer}</p>
+                            <div className="access-device-slot">
+                              {accessReady ? (
+                                <Button className="access-device-btn" onClick={() => setScreen("device-loading")}>
+                                  Access Device
+                                </Button>
+                              ) : (
+                                <Spinner className="access-spinner" />
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            <p>Please connect device through Cable.</p>
+                            <Icon icon={connectCableIcon} className="wait-cable-lib-icon" aria-hidden="true" />
+                            <p className="connect-state">Waiting...</p>
+                          </>
+                        )}
+                        {!usbBridgeOnline ? <p className="connect-state-note">USB bridge offline</p> : null}
                       </div>
-                    ) : (
-                      <>
-                        <p>Please connect device through Cable.</p>
-                        <Icon icon={connectCableIcon} className="wait-cable-lib-icon" aria-hidden="true" />
-                        <p className="connect-state">Waiting...</p>
-                      </>
-                    )}
-                    {!usbBridgeOnline ? <p className="connect-state-note">USB bridge offline</p> : null}
-                    <Button variant="destructive" className="panel-cancel-btn" onClick={() => setConnectStage("choose")}>
-                      Cancel
-                    </Button>
-                  </div>
+                      <Button variant="destructive" className="panel-cancel-btn" onClick={() => setConnectStage("choose")}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </>
                 )}
               </CardContent>
             </Card>
-          ) : null}
-
-          {connectMode && connectStage !== "cable_wait" ? (
-            <Button variant="destructive" className="cancel-btn" onClick={handleBack}>
-              <ArrowLeftSolid className="cancel-icon" />
-              Back
-            </Button>
           ) : null}
         </section>
       </section>

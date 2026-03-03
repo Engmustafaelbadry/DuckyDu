@@ -42,6 +42,9 @@
   - Android card (large)
   - iOS card (large)
   - Bottom row: `Other OS` + small `Back` button side by side.
+  - Main Android/iOS cards now include subtitle lines:
+    - Android: `Android OS based devices`
+    - iOS: `Apple iPhone and iOS devices`
 - Samurai animation behavior:
   - Horizontal only (left-right), hard step motion.
   - No vertical bounce.
@@ -49,9 +52,36 @@
 
 ### C) Connect mode (Cable path)
 - `Connect via` stage: Cable / Wireless.
+- Connect via UI now follows Select OS visual ratio:
+  - 2/3 left + 1/3 right.
+  - Stage headers added:
+    - `Connect via`
+    - `Connect via = Cable`
+  - Left stack: `Cable` (top), `Wireless` (middle), `Back` (bottom) with Select OS back-button sizing.
+  - Cable and Wireless options now include technical subtitle lines.
+  - Connect-via back button is left-aligned and half-width of card area.
+  - Right side: animated pixel-library connect icon.
+  - Connect icon animation size reduced.
+  - Cable/Wireless cards use 50% background opacity.
 - Cable wait stage polls:
   - `http://127.0.0.1:17373/usb/mobile-status`
   - `http://localhost:17373/usb/mobile-status`
+- Removed folded selected-OS slot from connect-mode pages.
+- Cable wait page is now full-screen panel with 50% transparent background and no folded OS card.
+- Cable wait page action button changed back to small left-aligned `Cancel` button.
+- Connect/cable stage headers use same visual sizing as Select OS header.
+- Connect/cable stage header sizing now uses the exact same shared CSS selector as Select OS header to prevent drift.
+- Connect/cable stage headers now also reuse `select-os-header` class in JSX for exact visual parity.
+- Connect/cable headers include local visual-size override to match Select OS appearance on device (optical parity, not only equal px).
+- Connect-via back button keeps half-width placement while matching Select OS back button height/font.
+- Connect-via back button now reuses `select-back-small` class directly and only overrides width/alignment.
+- Connect-via back button metrics are explicitly locked (`height/font/padding`) to ensure parity across both layouts.
+- Normalized connect-panel top padding so Select OS / Connect via / Connect via = Cable headers align to same top position.
+- Back/Cancel subtitles removed from connect/select navigation buttons (returned to single-line labels).
+- Select OS / Connect via / Connect via = Cable headers are now synchronized at larger display size for visual parity.
+- Main Select OS Android/iOS card label sizes now match Connect-via option label sizing.
+- Added larger icon-to-title spacing on Android/iOS main cards to match Connect-via option spacing style.
+- Cable-stage `Cancel` button is centered.
 - Connected state shows product/manufacturer and delayed Access button.
 - Access button opens loading screen then Device Management.
 
