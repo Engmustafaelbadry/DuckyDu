@@ -1615,25 +1615,25 @@ function App() {
           ) : null}
 
           {connectMode ? (
-            <Card className="connect-panel is-visible">
-              <CardContent className="connect-panel-content">
-                {connectStage === "choose" ? (
-                  <>
-                    <header className="select-os-header connect-stage-header">
-                      <h2>Connect via</h2>
-                    </header>
+            <>
+              <header className="select-os-header connect-stage-header">
+                <h2>{connectStage === "choose" ? "Connect via" : "Connect via = Cable"}</h2>
+              </header>
+              <div className="connect-panel is-visible">
+                <div className="connect-panel-content">
+                  {connectStage === "choose" ? (
                     <div className="connect-choose-layout">
                       <div className="connect-choose-left">
                         <button className="connect-option" onClick={() => setConnectStage("cable_wait")} aria-label="Connect via Cable">
                           <Icon icon={connectCableIcon} className="connect-method-icon" />
                           <h4>Cable</h4>
-                          <p className="connect-option-subtitle">USB data transport + direct device handshake</p>
+                          <p className="connect-option-subtitle">USB data transport direct device handshake</p>
                         </button>
 
                         <button className="connect-option" disabled aria-label="Wireless (coming soon)">
                           <Icon icon={connectWirelessIcon} className="connect-method-icon" />
                           <h4>Wireless</h4>
-                          <p className="connect-option-subtitle">Wi-Fi channel pairing + remote session bridge</p>
+                          <p className="connect-option-subtitle">Wi-Fi channel pairing remote session bridge</p>
                         </button>
 
                         <Button variant="destructive" className="select-back-small connect-back-btn" onClick={handleBack}>
@@ -1648,12 +1648,7 @@ function App() {
                         </div>
                       </div>
                     </div>
-                  </>
-                ) : (
-                  <>
-                    <header className="select-os-header connect-stage-header">
-                      <h2>Connect via = Cable</h2>
-                    </header>
+                  ) : (
                     <div className="connect-waiting-layout">
                       <div className="connect-waiting">
                         {usbConnected ? (
@@ -1686,10 +1681,10 @@ function App() {
                         Cancel
                       </Button>
                     </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
+                  )}
+                </div>
+              </div>
+            </>
           ) : null}
         </section>
       </section>

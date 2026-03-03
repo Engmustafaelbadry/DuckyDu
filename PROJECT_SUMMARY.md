@@ -58,7 +58,7 @@
     - `Connect via`
     - `Connect via = Cable`
   - Left stack: `Cable` (top), `Wireless` (middle), `Back` (bottom) with Select OS back-button sizing.
-  - Cable and Wireless options now include technical subtitle lines.
+  - Cable and Wireless options now include simplified technical subtitle lines (no `+` phrasing).
   - Connect-via back button is left-aligned and half-width of card area.
   - Right side: animated pixel-library connect icon.
   - Connect icon animation size reduced.
@@ -69,6 +69,10 @@
 - Removed folded selected-OS slot from connect-mode pages.
 - Cable wait page is now full-screen panel with 50% transparent background and no folded OS card.
 - Cable wait page action button changed back to small left-aligned `Cancel` button.
+- Connect-mode pages now use the same outer header row position as Select OS (header moved outside panel) for identical top/start alignment.
+- Connect panel content now starts/ends on the same rhythm as Select OS content area (matched row/gap/padding bounds).
+- Connect-mode wrapper no longer uses Pixel card container; it now renders as page-level layout container (no card frame/shadow/clip-path).
+- Connect-via inner content padding removed and left column top-packing removed so bottom Back-row alignment matches Select OS end gap.
 - Connect/cable stage headers use same visual sizing as Select OS header.
 - Connect/cable stage header sizing now uses the exact same shared CSS selector as Select OS header to prevent drift.
 - Connect/cable stage headers now also reuse `select-os-header` class in JSX for exact visual parity.
@@ -81,6 +85,7 @@
 - Select OS / Connect via / Connect via = Cable headers are now synchronized at larger display size for visual parity.
 - Main Select OS Android/iOS card label sizes now match Connect-via option label sizing.
 - Added larger icon-to-title spacing on Android/iOS main cards to match Connect-via option spacing style.
+- Android/iOS and Cable/Wireless cards now share unified typography/spacing tokens (title/subtitle/icon paddings) for connected visual flow.
 - Cable-stage `Cancel` button is centered.
 - Connected state shows product/manufacturer and delayed Access button.
 - Access button opens loading screen then Device Management.
