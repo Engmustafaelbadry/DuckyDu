@@ -234,6 +234,7 @@ File: `src/components/VerticalMenu.jsx`
 - Python bridge syntax checks pass.
 - Vite still warns for large chunk size (>500KB), non-blocking.
 - System control buttons require proper Pi installation/restart of services and sudoers setup from install scripts.
+- Connection/error text areas are now font-locked to Kongtext/Misaki (Wi-Fi bridge errors and cable status notes), and custom fonts use `font-display: block` to reduce fallback font switching.
 
 ## 12) Permanent Rules
 - Hard UI rule: never allow screen/page expansion that introduces scrolling.
