@@ -374,18 +374,25 @@ def stop_kiosk():
         logs.append(f"service state after retry: {status_after_stop['stdout'] or status_after_stop['stderr'] or 'unknown'}")
 
     desktop_started = False
-    for desktop_service in ("display-manager", "lightdm"):
+    for desktop_service in ("display-manager.service", "display-manager", "lightdm.service", "lightdm"):
         start_desktop = _run_cmd_capture([SUDO_BIN, SYSTEMCTL_BIN, "start", desktop_service], timeout=20)
         logs.append(f"start {desktop_service}: {start_desktop['output'] or 'ok'}")
         if start_desktop["ok"]:
             desktop_started = True
             break
 
-    if CHVT_BIN and Path(CHVT_BIN).exists():
-        chvt_result = _run_cmd_capture([SUDO_BIN, CHVT_BIN, "7"], timeout=6)
-        logs.append(f"switch vt7: {chvt_result['output'] or 'ok'}")
+    # Fallback: request graphical target if direct DM start is unavailable.
+    if not desktop_started:
+        graphical_result = _run_cmd_capture([SUDO_BIN, SYSTEMCTL_BIN, "start", "graphical.target"], timeout=20)
+        logs.append(f"start graphical.target: {graphical_result['output'] or 'ok'}")
+        desktop_started = graphical_result["ok"]
 
-    ok = stop_result["ok"] and not active_after_stop and desktop_started
+    if CHVT_BIN and Path(CHVT_BIN).exists():
+        for vt in ("7", "1", "2"):
+            chvt_result = _run_cmd_capture([SUDO_BIN, CHVT_BIN, vt], timeout=6)
+            logs.append(f"switch vt{vt}: {chvt_result['output'] or 'ok'}")
+
+    ok = stop_result["ok"] and not active_after_stop
     return {"ok": ok, "output": "\n".join(logs)}
 
 

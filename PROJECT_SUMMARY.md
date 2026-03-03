@@ -162,7 +162,8 @@
   - stops `raspi-kiosk.service`
   - verifies service state with `systemctl is-active`
   - applies process-kill fallback (`start-kiosk.sh` / kiosk chromium / xinit) if still active
-  - tries to start desktop session (`display-manager`, fallback `lightdm`) and switches to VT7 for desktop return flow
+  - tries desktop startup using multiple units (`display-manager.service`, `display-manager`, `lightdm.service`, `lightdm`) with fallback `graphical.target`
+  - switches virtual terminal sequence (`vt7`, `vt1`, `vt2`) to avoid remaining on kiosk TTY error/log page
   - returns detailed logs for troubleshooting from UI.
 - `POST /system/create-kiosk-desktop-app` now creates launcher in multiple user locations:
   - XDG desktop directory from `~/.config/user-dirs.dirs` when available
@@ -195,7 +196,7 @@
   - `scripts/pi/duckydu-bridge-sudoers`
   - includes both `/bin/systemctl` and `/usr/bin/systemctl` command paths (start/stop/restart) for compatibility.
   - fixed sudoers syntax issue by replacing problematic `chown user:group` rule with `chown -R user`.
-  - includes desktop return permissions for kiosk exit flow (`start display-manager` / `start lightdm` / `chvt 7`).
+  - includes desktop return permissions for kiosk exit flow (`display-manager(.service)`, `lightdm(.service)`, `graphical.target`, `chvt 7/1/2`).
   - includes kiosk service `start/stop` permissions for desktop launcher and exit action.
 - `raspi-kiosk.service` now includes `SuccessExitStatus=143 SIGTERM` so expected stop signals from Exit Kiosk are treated as normal exits.
 
