@@ -69,6 +69,7 @@
 - Removed folded selected-OS slot from connect-mode pages.
 - Cable wait page is now full-screen panel with 50% transparent background and no folded OS card.
 - Cable wait page action button changed back to small left-aligned `Cancel` button.
+- Cable stage now includes a `Test` bypass button that opens Quick Start/Device Management flow without requiring an actual connected device (for UI/testing).
 - Connect-mode pages now use the same outer header row position as Select OS (header moved outside panel) for identical top/start alignment.
 - Connect panel content now starts/ends on the same rhythm as Select OS content area (matched row/gap/padding bounds).
 - Connect-mode wrapper no longer uses Pixel card container; it now renders as page-level layout container (no card frame/shadow/clip-path).

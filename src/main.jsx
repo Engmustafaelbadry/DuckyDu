@@ -1866,9 +1866,14 @@ function App() {
                         )}
                         {!usbBridgeOnline ? <p className="connect-state-note">USB bridge offline</p> : null}
                       </div>
-                      <Button variant="destructive" className="panel-cancel-btn" onClick={() => setConnectStage("choose")}>
-                        Cancel
-                      </Button>
+                      <div className="connect-waiting-actions">
+                        <Button variant="destructive" className="panel-cancel-btn" onClick={() => setConnectStage("choose")}>
+                          Cancel
+                        </Button>
+                        <Button className="panel-test-btn" onClick={() => setScreen("device-quickstart")}>
+                          Test
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </div>
