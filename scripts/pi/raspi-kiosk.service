@@ -14,6 +14,7 @@ StandardInput=tty
 StandardOutput=journal
 StandardError=journal
 ExecStart=/usr/bin/xinit /usr/local/bin/start-kiosk.sh -- :0 vt1 -keeptty -nolisten tcp
+SuccessExitStatus=143 SIGTERM
 Restart=always
 RestartSec=2
 

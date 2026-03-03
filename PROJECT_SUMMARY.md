@@ -197,6 +197,7 @@
   - fixed sudoers syntax issue by replacing problematic `chown user:group` rule with `chown -R user`.
   - includes desktop return permissions for kiosk exit flow (`start display-manager` / `start lightdm` / `chvt 7`).
   - includes kiosk service `start/stop` permissions for desktop launcher and exit action.
+- `raspi-kiosk.service` now includes `SuccessExitStatus=143 SIGTERM` so expected stop signals from Exit Kiosk are treated as normal exits.
 
 ## 7) Vertical Menu Behavior
 File: `src/components/VerticalMenu.jsx`
