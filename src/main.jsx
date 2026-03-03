@@ -122,6 +122,71 @@ const DEVICE_GROUPS = [
   }
 ];
 
+const QUICK_START_ITEMS = [
+  {
+    id: "unlock",
+    area: "unlock",
+    title: "Unlock Device",
+    subtitle: "Unlock Device PIN Code",
+    icon: "unlock",
+    source: "art",
+    tone: "green",
+    action: "unlock-device",
+    startPage: 0
+  },
+  {
+    id: "copy",
+    area: "copy",
+    title: "Copy Files",
+    subtitle: "Copy all files to inserted drive",
+    icon: "database",
+    source: "art",
+    tone: "cyan",
+    startPage: 1
+  },
+  {
+    id: "install_cloud",
+    area: "install",
+    title: "Install Cloud Controllers",
+    subtitle: "Install permissions controllers",
+    icon: "shield",
+    source: "art",
+    tone: "lime",
+    startPage: 2
+  },
+  {
+    id: "mirror",
+    area: "mirror",
+    title: "Mirror Controller",
+    subtitle: "Access device mirror over the cloud",
+    icon: "cloud-server",
+    source: "art",
+    tone: "teal",
+    startPage: 2
+  },
+  {
+    id: "wipe",
+    area: "wipe",
+    title: "Wipe All Data",
+    subtitle: "Hard reset the device and delete all files",
+    icon: "delete",
+    source: "art",
+    tone: "red",
+    startPage: 3
+  },
+  {
+    id: "more",
+    area: "more",
+    title: "More Functions",
+    subtitle: "Access all features and controllers",
+    icon: "grid-3x3-sharp",
+    source: "art",
+    tone: "gray",
+    isMore: true,
+    startPage: 0
+  }
+];
+
 const iconMap = {
   android: { type: "iconify", icon: androidOsIcon },
   ios: { type: "iconify", icon: iosOsIcon },
@@ -326,6 +391,12 @@ function OsCard({ id, label, subtitle = "", selected, onSelect, className = "", 
       </Card>
     </button>
   );
+}
+
+function buildFeatureIcon(item) {
+  return item.source === "pixel"
+    ? { width: pixelIcons.width, height: pixelIcons.height, ...pixelIcons.icons[item.icon] }
+    : { ...statusIconDefaults, ...pixelarticons.icons[item.icon] };
 }
 
 async function requestBridgeJson(urls, options) {
@@ -732,9 +803,16 @@ function LaunchSubScreen({ title, children, onHome, onBack, onSettings }) {
   );
 }
 
-function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
-  const [pageIndex, setPageIndex] = useState(0);
-  const [activeTask, setActiveTask] = useState(null);
+function DeviceManagementScreen({
+  productName,
+  onHome,
+  onBack,
+  onSettings,
+  initialPageIndex = 0,
+  initialTask = null
+}) {
+  const [pageIndex, setPageIndex] = useState(Math.max(0, Math.min(DEVICE_GROUPS.length - 1, Number(initialPageIndex) || 0)));
+  const [activeTask, setActiveTask] = useState(initialTask);
   const [activeTaskTitle, setActiveTaskTitle] = useState("");
   const [visibleLines, setVisibleLines] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -744,6 +822,32 @@ function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
   const hasNext = pageIndex < DEVICE_GROUPS.length - 1;
   const prevGroupName = hasPrev ? DEVICE_GROUPS[pageIndex - 1].name : "";
   const nextGroupName = hasNext ? DEVICE_GROUPS[pageIndex + 1].name : "";
+
+  useEffect(() => {
+    const safePageIndex = Math.max(0, Math.min(DEVICE_GROUPS.length - 1, Number(initialPageIndex) || 0));
+    setPageIndex(safePageIndex);
+    setActiveTask(initialTask);
+    setTaskPhase("idle");
+    setVisibleLines(0);
+    setProgress(0);
+  }, [initialPageIndex, initialTask]);
+
+  useEffect(() => {
+    if (!activeTask) {
+      setActiveTaskTitle("");
+      return;
+    }
+
+    for (const group of DEVICE_GROUPS) {
+      const match = group.items.find((item) => item.action === activeTask);
+      if (match) {
+        setActiveTaskTitle(match.label);
+        return;
+      }
+    }
+
+    setActiveTaskTitle("Task");
+  }, [activeTask]);
 
   useEffect(() => {
     if (activeTask !== "unlock-device") {
@@ -897,10 +1001,7 @@ function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
             <>
               <div className="device-cards-grid">
                 {currentGroup.items.map((item) => {
-                  const itemIcon =
-                    item.source === "pixel"
-                      ? { width: pixelIcons.width, height: pixelIcons.height, ...pixelIcons.icons[item.icon] }
-                      : { ...statusIconDefaults, ...pixelarticons.icons[item.icon] };
+                  const itemIcon = buildFeatureIcon(item);
 
                   return (
                     <button key={item.label} className="device-card-btn" onClick={() => startTask(item)}>
@@ -951,6 +1052,61 @@ function DeviceManagementScreen({ productName, onHome, onBack, onSettings }) {
               </footer>
             </>
           )}
+        </section>
+      </section>
+    </main>
+  );
+}
+
+function DeviceQuickStartScreen({
+  productName,
+  onHome,
+  onBack,
+  onSettings,
+  onOpenMoreFunctions,
+  onOpenUnlockFlow,
+  onOpenGroup
+}) {
+  const handleQuickStartClick = (item) => {
+    if (item.isMore) {
+      onOpenMoreFunctions();
+      return;
+    }
+    if (item.action === "unlock-device") {
+      onOpenUnlockFlow();
+      return;
+    }
+    onOpenGroup(item.startPage ?? 0);
+  };
+
+  return (
+    <main className="select-os-root">
+      <section className="layout-shell">
+        <VerticalMenu onHome={onHome} onBack={onBack} onSettings={onSettings} />
+
+        <section className="device-screen">
+          <header className="device-header">
+            <h2>Quick Start</h2>
+            <div className="device-product-label">Device: {productName || "Unknown"}</div>
+          </header>
+
+          <div className="quickstart-grid">
+            {QUICK_START_ITEMS.map((item) => (
+              <button
+                key={item.id}
+                className={`device-card-btn quickstart-card-btn quickstart-area-${item.area}`}
+                onClick={() => handleQuickStartClick(item)}
+              >
+                <Card className={`device-card quickstart-card tone-${item.tone}`}>
+                  <CardContent className="quickstart-card-content">
+                    <Icon icon={buildFeatureIcon(item)} className="device-card-icon" />
+                    <p className="quickstart-title">{item.title}</p>
+                    <p className="quickstart-subtitle">{item.subtitle}</p>
+                  </CardContent>
+                </Card>
+              </button>
+            ))}
+          </div>
         </section>
       </section>
     </main>
@@ -1368,6 +1524,8 @@ function App() {
   const [usbBridgeOnline, setUsbBridgeOnline] = useState(true);
   const [usbDeviceInfo, setUsbDeviceInfo] = useState({ manufacturer: "Unknown", productName: "Unknown" });
   const [accessReady, setAccessReady] = useState(false);
+  const [deviceManagementStartPage, setDeviceManagementStartPage] = useState(0);
+  const [deviceManagementStartTask, setDeviceManagementStartTask] = useState(null);
 
   useEffect(() => {
     if (connectStage !== "cable_wait") {
@@ -1442,6 +1600,14 @@ function App() {
     setScreen("settings");
   };
   const handleDeviceLoadingDone = useCallback(() => {
+    setDeviceManagementStartPage(0);
+    setDeviceManagementStartTask(null);
+    setScreen("device-quickstart");
+  }, []);
+
+  const openDeviceManagement = useCallback((startPage = 0, startTask = null) => {
+    setDeviceManagementStartPage(startPage);
+    setDeviceManagementStartTask(startTask);
     setScreen("device-management");
   }, []);
 
@@ -1464,6 +1630,13 @@ function App() {
     }
 
     if (screen === "device-management") {
+      setScreen("select");
+      setConnectMode(true);
+      setConnectStage("cable_wait");
+      return;
+    }
+
+    if (screen === "device-quickstart") {
       setScreen("select");
       setConnectMode(true);
       setConnectStage("cable_wait");
@@ -1550,6 +1723,22 @@ function App() {
         onHome={handleHome}
         onBack={handleBack}
         onSettings={handleSettingsOpen}
+        initialPageIndex={deviceManagementStartPage}
+        initialTask={deviceManagementStartTask}
+      />
+    );
+  }
+
+  if (screen === "device-quickstart") {
+    return (
+      <DeviceQuickStartScreen
+        productName={usbDeviceInfo.productName}
+        onHome={handleHome}
+        onBack={handleBack}
+        onSettings={handleSettingsOpen}
+        onOpenMoreFunctions={() => openDeviceManagement(0, null)}
+        onOpenUnlockFlow={() => openDeviceManagement(0, "unlock-device")}
+        onOpenGroup={(pageIndex) => openDeviceManagement(pageIndex, null)}
       />
     );
   }

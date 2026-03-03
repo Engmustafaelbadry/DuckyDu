@@ -91,6 +91,19 @@
 - Access button opens loading screen then Device Management.
 
 ### D) Device Management screen
+- Added a new **Quick Start** stage before full Device Management (shown after Access Device loading).
+- Quick Start layout is a 3x3 card grid with custom spans:
+  - Row 1: `Unlock Device` spans 2 cells + `Copy Files` in the 3rd cell.
+  - Row 2: `Install Cloud Controllers`, `Mirror Controller`, `Wipe All Data`.
+  - Row 3: `More Functions` spans all 3 cells.
+- Quick Start cards and actions:
+  - `Unlock Device` -> enters existing Unlock Device flow directly.
+  - `Install Cloud Controllers` -> opens Device Management on relevant group page.
+  - `Copy Files` -> opens Device Management on relevant group page.
+  - `Mirror Controller` -> opens Device Management on relevant group page.
+  - `Wipe All Data` -> opens Device Management on relevant group page.
+  - `More Functions` -> opens full Device Management groups view.
+- Quick Start uses Pixel-style cards/icons and inherits the visual language of Device Management.
 - Uses grouped pages:
   1. Decrypt Data
   2. Data Management
