@@ -405,6 +405,8 @@ const SINGLE_PERMISSION_TASKS = {
   "install-files-permission": { key: "files", label: "Files Permission" }
 };
 
+const SINGLE_PERMISSION_INSTALL_MS = 4000;
+
 const PERMISSION_LINE_VARIANTS = {
   mirror: {
     stages: [
@@ -530,7 +532,7 @@ function buildPermissionInstallPlan(activeTask) {
     };
 
     for (const stageText of variant.stages) {
-      lines.push({ text: `[${permission.label}] ${stageText}` });
+      lines.push({ text: stageText });
     }
 
     lines.push({
@@ -548,6 +550,9 @@ function buildPermissionInstallPlan(activeTask) {
     lines,
     isAllTask,
     focusedPermission: selectedTask?.label || "",
+    targetDurationMs: isAllTask
+      ? SINGLE_PERMISSION_INSTALL_MS * CLOUD_PERMISSION_CHECKLIST.length
+      : SINGLE_PERMISSION_INSTALL_MS,
     finalizeLabel: isAllTask
       ? CLOUD_PERMISSION_CHECKLIST.map((permission) => permission.label).join(", ")
       : selectedTask.label
@@ -1151,7 +1156,7 @@ function DeviceManagementScreen({
       }, {})
     );
 
-    const totalMs = activeTask === "install-all-cloud-controllers" ? 11500 : 9800;
+    const totalMs = Number(plan.targetDurationMs) || SINGLE_PERMISSION_INSTALL_MS;
     const totalLines = plan.lines.length;
     const stepMs = Math.max(120, Math.round(totalMs / Math.max(1, totalLines)));
     const timeouts = [];
@@ -1265,14 +1270,14 @@ function DeviceManagementScreen({
 
           {activeTask ? (
             <Card className="unlock-task-card">
-              <CardContent className="unlock-task-content">
+              <CardContent className={`unlock-task-content${activeTask !== "unlock-device" ? " install-task-content" : ""}`}>
                 {taskPhase === "running" ? (
                   <>
-                    {activeTask !== "unlock-device" ? (
+                    {activeTask !== "unlock-device" && installChecklist.length > 0 ? (
                       <div className={`install-task-layout${installChecklist.length === 0 ? " no-checklist" : ""}`}>
-                        <div className="unlock-log-list">
+                        <div className="unlock-log-list install-log-list">
                           {taskLogLines
-                            .slice(Math.max(0, visibleLines - 13), visibleLines)
+                            .slice(Math.max(0, visibleLines - 12), visibleLines)
                             .map((line, idx) => (
                               <p key={`${line.text}-${idx}`} className={line.doneLine ? "unlock-log-line-done" : ""}>
                                 {line.text}
@@ -1291,6 +1296,16 @@ function DeviceManagementScreen({
                             ))}
                           </div>
                         ) : null}
+                      </div>
+                    ) : activeTask !== "unlock-device" ? (
+                      <div className="unlock-log-list install-log-list">
+                        {taskLogLines
+                          .slice(Math.max(0, visibleLines - 12), visibleLines)
+                          .map((line, idx) => (
+                            <p key={`${line.text}-${idx}`} className={line.doneLine ? "unlock-log-line-done" : ""}>
+                              {line.text}
+                            </p>
+                          ))}
                       </div>
                     ) : (
                       <div className="unlock-log-list">

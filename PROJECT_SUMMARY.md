@@ -142,6 +142,16 @@
     - single: `Installed`
     - all: `Installed all permissions`
   - Installed success visuals for permission tasks are reduced in size (smaller checkmark + smaller installed title font).
+  - Loader layout clipping fix is now scoped to permission loaders only (unlock loader kept separate behavior).
+  - Permission loader log containers now use strict full-height clipping so lines always end above the progress bar.
+  - Permission loader log rendering now reuses unlock log style directly (`unlock-log-list`) with same line windowing and font sizing.
+  - Permission log lines are forced to single-line clipped rendering (`ellipsis`, no wrap) so they never drop behind the progress bar while keeping unlock-equivalent font size/line-height.
+  - Removed bracketed permission prefixes (`[ ... ]`) from permission loader lines; lines now show only the descriptive action text.
+  - Permission loader timing is now fixed and proportional:
+    - single permission install: `4s`
+    - install all permissions: `4s × 6 = 24s` (matches sequential one-by-one total time).
+  - Finalizing text uses the same dispatch text sizing/line-height as the unlock `Sending request to device...` message.
+  - Installed `Back` button sizing is explicitly locked to the same metrics as unlock success back button.
 
 ## 10) Workflow Rule
 - After each completed feature/change, update `PROJECT_SUMMARY.md` in the same task turn: add new items and edit outdated entries so the summary stays current across chats.
